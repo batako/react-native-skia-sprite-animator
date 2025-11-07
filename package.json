@@ -30,7 +30,16 @@
     "sprite-animation",
     "animation"
   ],
-  "author": "",
+  "author": {
+    "name": "batako",
+    "url": "https://batako.net"
+  },
+  "contributors": [
+    {
+      "name": "Batako Studio",
+      "url": "https://github.com/BatakoStudio"
+    }
+  ],
   "license": "MIT",
   "peerDependencies": {
     "@shopify/react-native-skia": ">=2.3.0",
