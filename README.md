@@ -15,8 +15,8 @@ npx expo install react-native @shopify/react-native-skia expo-file-system
 ## Using SpriteAnimator
 
 ```tsx
-import { SpriteAnimator, type SpriteData } from "react-native-skia-sprite-animator";
-import heroSheet from "../assets/hero.png";
+import { SpriteAnimator, type SpriteData } from 'react-native-skia-sprite-animator';
+import heroSheet from '../assets/hero.png';
 
 const heroData: SpriteData = {
   frames: [
@@ -29,7 +29,7 @@ const heroData: SpriteData = {
     blink: [2],
   },
   meta: {
-    displayName: "Hero Sprite",
+    displayName: 'Hero Sprite',
     origin: { x: 0.5, y: 1 },
   },
 };
@@ -49,7 +49,7 @@ export function HeroPreview() {
       flipY={false}
       spriteScale={1}
       style={{ width: 64, height: 64 }}
-      onEnd={() => console.log("animation finished")}
+      onEnd={() => console.log('animation finished')}
     />
   );
 }
@@ -74,15 +74,18 @@ export function HeroPreview() {
 `SpriteAnimator` exposes an imperative handle so you can drive playback from buttons, editors, or gesture handlers:
 
 ```tsx
-import { SpriteAnimator, type SpriteAnimatorHandle } from "react-native-skia-sprite-animator";
+import { SpriteAnimator, type SpriteAnimatorHandle } from 'react-native-skia-sprite-animator';
 
 const animatorRef = useRef<SpriteAnimatorHandle>(null);
 
 return (
   <>
     <SpriteAnimator ref={animatorRef} data={heroData} image={heroSheet} autoplay={false} />
-    <Button title="Play Idle" onPress={() => animatorRef.current?.play("idle")} />
-    <Button title="Blink Once" onPress={() => animatorRef.current?.play("blink", { speedScale: 1.5 })} />
+    <Button title="Play Idle" onPress={() => animatorRef.current?.play('idle')} />
+    <Button
+      title="Blink Once"
+      onPress={() => animatorRef.current?.play('blink', { speedScale: 1.5 })}
+    />
     <Button title="Pause" onPress={() => animatorRef.current?.pause()} />
     <Button title="Resume" onPress={() => animatorRef.current?.resume()} />
   </>
@@ -116,8 +119,8 @@ const data: SpriteData = {
     blink: { loop: false },
   },
   meta: {
-    displayName: "Hero Walk",
-    imageUri: "file:///sprites/images/img_hero.png",
+    displayName: 'Hero Walk',
+    imageUri: 'file:///sprites/images/img_hero.png',
     origin: { x: 0.5, y: 1 },
     version: 2,
   },
@@ -149,12 +152,12 @@ import {
   listSprites,
   deleteSprite,
   type SpriteSavePayload,
-} from "react-native-skia-sprite-animator";
+} from 'react-native-skia-sprite-animator';
 
 const payload: SpriteSavePayload = {
   frames,
   meta: {
-    displayName: "Hero Walk",
+    displayName: 'Hero Walk',
     version: 1,
   },
   animations: {

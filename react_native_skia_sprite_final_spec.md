@@ -44,11 +44,16 @@ Skia Canvas 上で画像を切り出し、指定フレームで再生する基�
 
 ```tsx
 <SpriteAnimator
-  image={require("./sprite.png")}
-  data={{ frames: [{x:0,y:0,w:64,h:64},{x:64,y:0,w:64,h:64}] }}
+  image={require('./sprite.png')}
+  data={{
+    frames: [
+      { x: 0, y: 0, w: 64, h: 64 },
+      { x: 64, y: 0, w: 64, h: 64 },
+    ],
+  }}
   fps={12}
   loop
-  onEnd={() => console.log("done")}
+  onEnd={() => console.log('done')}
 />
 ```
 
@@ -57,15 +62,8 @@ Skia Canvas 上で画像を切り出し、指定フレームで再生する基�
 UIなしで、編集状態やフレーム操作を管理する Hook。
 
 ```tsx
-const {
-  frames,
-  selectedIndex,
-  selectFrame,
-  addFrame,
-  updateFrame,
-  deleteFrame,
-  exportJSON
-} = useSpriteEditor(template);
+const { frames, selectedIndex, selectFrame, addFrame, updateFrame, deleteFrame, exportJSON } =
+  useSpriteEditor(template);
 ```
 
 ### 3. SpriteEditUtils
@@ -81,10 +79,10 @@ const {
 
 ```ts
 const customTemplate: SpriteTemplate = {
-  name: "withAnimations",
+  name: 'withAnimations',
   build: ({ displayName, imageUri, frames, extra }) => ({
     id: crypto.randomUUID(),
-    meta: { displayName, imageUri, category: extra?.category ?? "default" },
+    meta: { displayName, imageUri, category: extra?.category ?? 'default' },
     frames,
     animations: extra?.animations ?? {},
   }),
@@ -137,9 +135,9 @@ const sprite = await loadSprite(spriteId);
 const editor = useSpriteEditor(customTemplate);
 
 const json = editor.exportJSON({
-  displayName: "Enemy Run",
+  displayName: 'Enemy Run',
   imageUri: spriteImageUri,
-  extra: { animations: { run: [0,1,2] } }
+  extra: { animations: { run: [0, 1, 2] } },
 });
 ```
 
@@ -155,12 +153,12 @@ const json = editor.exportJSON({
 
 ## 🔹 今後のロードマップ
 
-| バージョン | 主要機能                              |
-| ----- | --------------------------------- |
-| v0.1  | SpriteAnimator + spriteStorage    |
-| v0.2  | useSpriteEditor + SpriteEditUtils |
-| v0.3  | SpriteTemplate API 実装 (テンプレート可変更) |
-| v0.4  | npm公開 + デモUI(サンプルエディタ)            |
+| バージョン | 主要機能                                     |
+| ---------- | -------------------------------------------- |
+| v0.1       | SpriteAnimator + spriteStorage               |
+| v0.2       | useSpriteEditor + SpriteEditUtils            |
+| v0.3       | SpriteTemplate API 実装 (テンプレート可変更) |
+| v0.4       | npm公開 + デモUI(サンプルエディタ)           |
 
 ---
 

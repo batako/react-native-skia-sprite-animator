@@ -56,11 +56,11 @@ Godot の `AnimatedSprite2D` に近い操作性を `react-native-skia-sprite-ani
 
 ## マイルストン目安
 
-| フェーズ | 内容 | 担当/期限 |
-| --- | --- | --- |
-| Phase 1 | データモデル拡張 & props 整理 | TBA |
-| Phase 2 | 再生制御ロジック | TBA |
-| Phase 3 | Imperative handle / イベント | TBA |
-| Phase 4 | テスト、サンプル更新、README整備 | TBA |
+| フェーズ | 内容                             | 担当/期限 |
+| -------- | -------------------------------- | --------- |
+| Phase 1  | データモデル拡張 & props 整理    | TBA       |
+| Phase 2  | 再生制御ロジック                 | TBA       |
+| Phase 3  | Imperative handle / イベント     | TBA       |
+| Phase 4  | テスト、サンプル更新、README整備 | TBA       |
 
 このドキュメントは進捗に合わせて更新し、GitHub Issues や PR にリンクする想定。
