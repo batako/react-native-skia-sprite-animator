@@ -1,5 +1,5 @@
 {
-  "name": "react-native-skia-sprite",
+  "name": "react-native-skia-sprite-animator",
   "version": "0.1.0",
   "description": "Sprite animation primitives for React Native Skia with Expo-friendly storage helpers.",
   "type": "module",
