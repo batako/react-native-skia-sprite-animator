@@ -193,7 +193,7 @@ UI を持たないエディター用ツール群も `src/editor/` で提供し�
 - `SpriteEditUtils`: `snapToGrid`、`normalizeRect`、`pointInFrame`、`mergeFrames` など、エディターで使い回せるジオメトリ系のヘルパー群。
 - `SpriteTemplate` / `DefaultSpriteTemplate`: エディター状態を `spriteStorage` と同じ JSON へ変換するためのインターフェースと標準テンプレート。独自テンプレートの実装も可能です。
 
-詳しいサンプルやオプションの一覧は [docs/editor_api.md](docs/editor_api.md) を参照してください。
+詳しいサンプルやオプションの一覧は [docs/editor_api.ja.md](docs/editor_api.ja.md) を参照してください。
 
 ## 開発
 
