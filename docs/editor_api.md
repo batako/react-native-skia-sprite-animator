@@ -31,12 +31,12 @@ const EditorScreen = () => {
 
 ### Options
 
-| Option | Description |
-| --- | --- |
-| `initialState` | Seeds frames/animations/meta when the hook mounts. |
-| `historyLimit` | Maximum undo depth (defaults to 50). |
-| `template` | Overrides the template used by `exportJSON` / `importJSON`. |
-| `trackSelectionInHistory` | When `true`, selection changes create undo snapshots. |
+| Option                    | Description                                                 |
+| ------------------------- | ----------------------------------------------------------- |
+| `initialState`            | Seeds frames/animations/meta when the hook mounts.          |
+| `historyLimit`            | Maximum undo depth (defaults to 50).                        |
+| `template`                | Overrides the template used by `exportJSON` / `importJSON`. |
+| `trackSelectionInHistory` | When `true`, selection changes create undo snapshots.       |
 
 ### Returned API
 
@@ -101,12 +101,12 @@ You can implement custom templates for cloud sync or proprietary schemas by prov
 
 ## Geometry helpers (`SpriteEditUtils`)
 
-| Helper | Description |
-| --- | --- |
-| `snapToGrid(value, gridSize, origin?)` | Snaps scalar values to a grid (origin defaults to `0`). |
-| `normalizeRect(rect)` | Ensures width/height are positive by adjusting `x/y` when needed. |
-| `pointInFrame(point, rect)` | Hit-test helper (inclusive start, exclusive end). |
-| `mergeFrames(frames)` | Returns the bounding rectangle that covers every frame (or `null` when empty). |
+| Helper                                 | Description                                                                    |
+| -------------------------------------- | ------------------------------------------------------------------------------ |
+| `snapToGrid(value, gridSize, origin?)` | Snaps scalar values to a grid (origin defaults to `0`).                        |
+| `normalizeRect(rect)`                  | Ensures width/height are positive by adjusting `x/y` when needed.              |
+| `pointInFrame(point, rect)`            | Hit-test helper (inclusive start, exclusive end).                              |
+| `mergeFrames(frames)`                  | Returns the bounding rectangle that covers every frame (or `null` when empty). |
 
 Geometry helpers are UI-agnostic utilities intended for marquee tools, selection overlays, and drag handlers.
 

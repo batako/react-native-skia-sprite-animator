@@ -31,12 +31,12 @@ const EditorScreen = () => {
 
 ### オプション
 
-| オプション | 説明 |
-| --- | --- |
-| `initialState` | マウント時の初期フレーム/アニメーション/メタ情報を指定します。 |
-| `historyLimit` | Undo スタックの最大保持数 (デフォルト 50)。 |
-| `template` | `exportJSON` / `importJSON` に使用するテンプレートを上書きします。 |
-| `trackSelectionInHistory` | `true` の場合、選択の変化も Undo 対象になります。 |
+| オプション                | 説明                                                               |
+| ------------------------- | ------------------------------------------------------------------ |
+| `initialState`            | マウント時の初期フレーム/アニメーション/メタ情報を指定します。     |
+| `historyLimit`            | Undo スタックの最大保持数 (デフォルト 50)。                        |
+| `template`                | `exportJSON` / `importJSON` に使用するテンプレートを上書きします。 |
+| `trackSelectionInHistory` | `true` の場合、選択の変化も Undo 対象になります。                  |
 
 ### 返される API
 
@@ -101,12 +101,12 @@ editor.importJSON(json); // Undo 可能
 
 ## ジオメトリヘルパー (`SpriteEditUtils`)
 
-| ヘルパー | 説明 |
-| --- | --- |
-| `snapToGrid(value, gridSize, origin?)` | 指定グリッドへ値をスナップさせます (origin 既定値は `0`)。 |
-| `normalizeRect(rect)` | 幅/高さが負数でも正規化し、`x/y` を補正します。 |
-| `pointInFrame(point, rect)` | ポイントが矩形内にあるか判定します (始点含む・終点除外)。 |
-| `mergeFrames(frames)` | 与えられた矩形すべてを含むバウンディングボックスを返します。 |
+| ヘルパー                               | 説明                                                         |
+| -------------------------------------- | ------------------------------------------------------------ |
+| `snapToGrid(value, gridSize, origin?)` | 指定グリッドへ値をスナップさせます (origin 既定値は `0`)。   |
+| `normalizeRect(rect)`                  | 幅/高さが負数でも正規化し、`x/y` を補正します。              |
+| `pointInFrame(point, rect)`            | ポイントが矩形内にあるか判定します (始点含む・終点除外)。    |
+| `mergeFrames(frames)`                  | 与えられた矩形すべてを含むバウンディングボックスを返します。 |
 
 これらのヘルパーはマーキー選択やハンドル描画など、UI 実装でよく使う下支えロジックとして活用できます。
 

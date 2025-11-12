@@ -14,6 +14,5 @@ export interface SpriteTemplate<TData = unknown> {
    * Optional import hook allowing editor state to be reconstructed
    * from template-specific payloads.
    */
-  fromJSON?: (data: TData) => Partial<SpriteEditorSnapshot> | null |
-    undefined;
+  fromJSON?: (data: TData) => Partial<SpriteEditorSnapshot> | null | undefined;
 }

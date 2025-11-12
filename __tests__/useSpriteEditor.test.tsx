@@ -6,17 +6,17 @@ import { DefaultSpriteTemplate } from '../src/editor/templates/DefaultSpriteTemp
 
 const renderEditor = (options?: UseSpriteEditorOptions) => {
   const ref = React.createRef<SpriteEditorApi>();
-  const Harness = forwardRef<SpriteEditorApi, {}>((_props, forwardedRef) => {
+  const Harness = forwardRef<SpriteEditorApi, { testId?: string }>((_props, forwardedRef) => {
     const api = useSpriteEditor(options);
     useImperativeHandle(forwardedRef, () => api, [api]);
     return null;
   });
+  Harness.displayName = 'SpriteEditorTestHarness';
 
   let root: ReactTestRenderer | null = null;
   act(() => {
     root = TestRenderer.create(<Harness ref={ref} />);
   });
-
   return {
     get api() {
       if (!ref.current) {

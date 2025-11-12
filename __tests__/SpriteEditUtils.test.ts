@@ -1,4 +1,9 @@
-import { mergeFrames, normalizeRect, pointInFrame, snapToGrid } from '../src/editor/utils/SpriteEditUtils';
+import {
+  mergeFrames,
+  normalizeRect,
+  pointInFrame,
+  snapToGrid,
+} from '../src/editor/utils/SpriteEditUtils';
 
 describe('SpriteEditUtils', () => {
   it('snaps values to the nearest grid unit', () => {

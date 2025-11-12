@@ -1,12 +1,24 @@
+/**
+ * Minimal rectangle shape used by editor helpers.
+ */
 export interface RectLike {
+  /** X coordinate measured in pixels. */
   x: number;
+  /** Y coordinate measured in pixels. */
   y: number;
+  /** Rect width in pixels. */
   w: number;
+  /** Rect height in pixels. */
   h: number;
 }
 
+/**
+ * Basic point representation.
+ */
 export interface PointLike {
+  /** Point x coordinate. */
   x: number;
+  /** Point y coordinate. */
   y: number;
 }
 
@@ -47,10 +59,7 @@ export const normalizeRect = (rect: RectLike): RectLike => {
 export const pointInFrame = (point: PointLike, frame: RectLike) => {
   const rect = normalizeRect(frame);
   return (
-    point.x >= rect.x &&
-    point.x < rect.x + rect.w &&
-    point.y >= rect.y &&
-    point.y < rect.y + rect.h
+    point.x >= rect.x && point.x < rect.x + rect.w && point.y >= rect.y && point.y < rect.y + rect.h
   );
 };
 
@@ -72,7 +81,12 @@ export const mergeFrames = (frames: RectLike[]): RectLike | null => {
     maxX = Math.max(maxX, rect.x + rect.w);
     maxY = Math.max(maxY, rect.y + rect.h);
   });
-  if (!Number.isFinite(minX) || !Number.isFinite(minY) || !Number.isFinite(maxX) || !Number.isFinite(maxY)) {
+  if (
+    !Number.isFinite(minX) ||
+    !Number.isFinite(minY) ||
+    !Number.isFinite(maxX) ||
+    !Number.isFinite(maxY)
+  ) {
     return null;
   }
   return {
