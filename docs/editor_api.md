@@ -1,4 +1,4 @@
-# Editor APIs (v0.3)
+# Editor API Reference
 
 v0.3 introduces headless editor primitives so you can build custom sprite editors without relying on prebuilt UI. The API surface consists of three pieces:
 
