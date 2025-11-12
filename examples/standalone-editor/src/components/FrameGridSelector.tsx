@@ -1,0 +1,680 @@
+import React, { useEffect, useMemo, useState } from 'react';
+import { Image, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import type { DataSourceParam } from '@shopify/react-native-skia';
+import type { ImageSourcePropType } from 'react-native';
+import { IconButton } from './IconButton';
+const SAMPLE_IMAGE = require('../../assets/sample-sprite.png');
+
+export interface FrameGridCell {
+  id: string;
+  row: number;
+  column: number;
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+}
+
+export interface FrameGridSelectorProps {
+  image?: DataSourceParam;
+  onAddFrames: (cells: FrameGridCell[]) => void;
+  defaultCellWidth?: number;
+  defaultCellHeight?: number;
+}
+
+export const FrameGridSelector = ({
+  image,
+  onAddFrames,
+  defaultCellWidth = 32,
+  defaultCellHeight = 32,
+}: FrameGridSelectorProps) => {
+  const resolvedImage = image ?? SAMPLE_IMAGE;
+  const rnImageSource: ImageSourcePropType = useMemo(() => {
+    if (typeof resolvedImage === 'number') {
+      return resolvedImage;
+    }
+    if (typeof resolvedImage === 'string') {
+      return { uri: resolvedImage };
+    }
+    if ('uri' in (resolvedImage as Record<string, unknown>)) {
+      const uriValue = (resolvedImage as { uri?: string }).uri;
+      if (uriValue) {
+        return { uri: uriValue };
+      }
+    }
+    return resolvedImage as ImageSourcePropType;
+  }, [resolvedImage]);
+  const [horizontal, setHorizontal] = useState(4);
+  const [vertical, setVertical] = useState(1);
+  const [cellWidth, setCellWidth] = useState(defaultCellWidth);
+  const [cellHeight, setCellHeight] = useState(defaultCellHeight);
+  const [separationX, setSeparationX] = useState(0);
+  const [separationY, setSeparationY] = useState(0);
+  const [offsetX, setOffsetXInternal] = useState(0);
+  const [offsetY, setOffsetYInternal] = useState(0);
+  const [scale, setScale] = useState(1);
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const [horizontalOrder, setHorizontalOrder] = useState<'ltr' | 'rtl'>('ltr');
+  const [verticalOrder, setVerticalOrder] = useState<'ttb' | 'btt'>('ttb');
+  const [primaryAxis, setPrimaryAxis] = useState<'horizontal' | 'vertical'>('horizontal');
+  const [imageWidth, setImageWidth] = useState(defaultCellWidth * horizontal);
+  const [imageHeight, setImageHeight] = useState(defaultCellHeight * vertical);
+  const [viewportSize, setViewportSize] = useState({ width: 0, height: 0 });
+  const [autoScaled, setAutoScaled] = useState(false);
+
+  useEffect(() => {
+    if (typeof resolvedImage === 'number') {
+      const source = Image.resolveAssetSource(resolvedImage);
+      if (source?.width && source?.height) {
+        setImageWidth(source.width);
+        setImageHeight(source.height);
+      }
+    } else if (typeof resolvedImage === 'string') {
+      Image.getSize(
+        resolvedImage,
+        (width, height) => {
+          setImageWidth(width);
+          setImageHeight(height);
+        },
+        () => {
+          // ignore errors
+        },
+      );
+    } else if (resolvedImage && typeof resolvedImage === 'object' && 'uri' in resolvedImage && resolvedImage.uri) {
+      Image.getSize(
+        resolvedImage.uri,
+        (width, height) => {
+          setImageWidth(width);
+          setImageHeight(height);
+        },
+        () => {
+          // ignore errors
+        },
+      );
+    }
+  }, [resolvedImage]);
+
+  useEffect(() => {
+    setAutoScaled(false);
+  }, [resolvedImage]);
+
+  useEffect(() => {
+    if (
+      autoScaled ||
+      viewportSize.width <= 0 ||
+      viewportSize.height <= 0 ||
+      imageWidth <= 0 ||
+      imageHeight <= 0
+    ) {
+      return;
+    }
+    const fitScale = viewportSize.width > 0 && viewportSize.height > 0
+      ? Math.min(viewportSize.width / imageWidth, viewportSize.height / imageHeight)
+      : 1;
+    if (fitScale > 1) {
+      const adjusted = fitScale * 0.9;
+      setScale(parseFloat(adjusted.toFixed(2)));
+    }
+    setAutoScaled(true);
+  }, [autoScaled, viewportSize, imageWidth, imageHeight]);
+
+  const cells = useMemo<FrameGridCell[]>(() => {
+    const list: FrameGridCell[] = [];
+    for (let row = 0; row < vertical; row += 1) {
+      for (let col = 0; col < horizontal; col += 1) {
+        const x = offsetX + col * (cellWidth + separationX);
+        const y = offsetY + row * (cellHeight + separationY);
+        list.push({
+          id: `${row}-${col}`,
+          row,
+          column: col,
+          x,
+          y,
+          width: cellWidth,
+          height: cellHeight,
+        });
+      }
+    }
+    return list;
+  }, [cellWidth, cellHeight, horizontal, offsetX, offsetY, separationX, separationY, vertical]);
+
+  const gridWidth = horizontal * cellWidth + separationX * Math.max(0, horizontal - 1);
+  const gridHeight = vertical * cellHeight + separationY * Math.max(0, vertical - 1);
+  const canvasWidth = imageWidth * scale;
+  const canvasHeight = imageHeight * scale;
+
+  const setOffsetX = (val: number) => {
+    setOffsetXInternal(val);
+    setSelectedIds([]);
+  };
+
+  const setOffsetY = (val: number) => {
+    setOffsetYInternal(val);
+    setSelectedIds([]);
+  };
+
+  const toggleSelection = (id: string) => {
+    setSelectedIds((prev) => {
+      if (prev.includes(id)) {
+        return prev.filter((value) => value !== id);
+      }
+      return [...prev, id];
+    });
+  };
+
+  const handleAddFrames = () => {
+    const selectedCells = cells.filter((cell) => selectedIds.includes(cell.id));
+    onAddFrames(selectedCells);
+    setSelectedIds([]);
+  };
+
+  const selectedCount = selectedIds.length;
+
+  const changeScale = (delta: number) => {
+    setScale((prev) => Math.max(0.5, parseFloat((prev + delta).toFixed(2))));
+  };
+
+  const resetScale = () => setScale(1);
+
+  const selectAllCells = () => {
+    const ordered = [...cells]
+      .filter(
+        (cell) =>
+          cell.x >= 0 &&
+          cell.y >= 0 &&
+          cell.x + cell.width <= imageWidth &&
+          cell.y + cell.height <= imageHeight,
+      )
+      .sort((a, b) => {
+        const primaryIsRow = primaryAxis === 'horizontal';
+        const primaryDirection = primaryIsRow ? verticalOrder : horizontalOrder;
+        const secondaryDirection = primaryIsRow ? horizontalOrder : verticalOrder;
+
+        if (primaryDirection === 'ttb' || primaryDirection === 'btt') {
+          const rowOrder = primaryDirection === 'ttb' ? a.row - b.row : b.row - a.row;
+          if (rowOrder !== 0) {
+            return rowOrder;
+          }
+          return secondaryDirection === 'ltr' ? a.column - b.column : b.column - a.column;
+        }
+        const colOrder = primaryDirection === 'ltr' ? a.column - b.column : b.column - a.column;
+        if (colOrder !== 0) {
+          return colOrder;
+        }
+        return secondaryDirection === 'ttb' ? a.row - b.row : b.row - a.row;
+      });
+    setSelectedIds(ordered.map((cell) => cell.id));
+  };
+
+  return (
+    <View style={styles.wrapper}>
+      <View style={styles.selectorRow}>
+        <View style={styles.previewColumn}>
+          <View style={styles.orderRow}>
+            <View style={styles.orderField}>
+              <Text style={styles.orderLabel}>優先軸</Text>
+              <View style={styles.orderButtons}>
+                <TouchableOpacity
+                  style={[styles.orderButton, primaryAxis === 'horizontal' && styles.orderButtonActive]}
+                  onPress={() => setPrimaryAxis('horizontal')}
+                >
+                  <Text style={styles.orderButtonText}>水平優先</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={[styles.orderButton, primaryAxis === 'vertical' && styles.orderButtonActive]}
+                  onPress={() => setPrimaryAxis('vertical')}
+                >
+                  <Text style={styles.orderButtonText}>垂直優先</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+            <View style={styles.orderField}>
+              <Text style={styles.orderLabel}>水平</Text>
+              <View style={styles.orderButtons}>
+                <TouchableOpacity
+                  style={[styles.orderButton, horizontalOrder === 'ltr' && styles.orderButtonActive]}
+                  onPress={() => setHorizontalOrder('ltr')}
+                >
+                  <Text style={styles.orderButtonText}>左→右</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={[styles.orderButton, horizontalOrder === 'rtl' && styles.orderButtonActive]}
+                  onPress={() => setHorizontalOrder('rtl')}
+                >
+                  <Text style={styles.orderButtonText}>右→左</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+            <View style={styles.orderField}>
+              <Text style={styles.orderLabel}>垂直</Text>
+              <View style={styles.orderButtons}>
+                <TouchableOpacity
+                  style={[styles.orderButton, verticalOrder === 'ttb' && styles.orderButtonActive]}
+                  onPress={() => setVerticalOrder('ttb')}
+                >
+                  <Text style={styles.orderButtonText}>上→下</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={[styles.orderButton, verticalOrder === 'btt' && styles.orderButtonActive]}
+                  onPress={() => setVerticalOrder('btt')}
+                >
+                  <Text style={styles.orderButtonText}>下→上</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+            <View style={styles.orderActions}>
+              <TouchableOpacity style={styles.autoSelectButton} onPress={selectAllCells}>
+                <Text style={styles.autoSelectText}>全て選択</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={[styles.autoSelectButton, styles.clearButton]} onPress={() => setSelectedIds([])}>
+                <Text style={styles.autoSelectText}>選択解除</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+          <View
+            style={styles.scrollWrapper}
+            onLayout={(event) => {
+              const { width, height } = event.nativeEvent.layout;
+              setViewportSize({ width, height });
+            }}
+          >
+            <View pointerEvents="box-none" style={styles.zoomOverlay}>
+              <View style={styles.zoomControls}>
+                <IconButton
+                  name="zoom-out"
+                  onPress={() => changeScale(-0.25)}
+                  accessibilityLabel="Zoom out"
+                  style={styles.zoomButton}
+                />
+                <IconButton
+                  name="maximize"
+                  onPress={resetScale}
+                  accessibilityLabel="Actual size"
+                  style={styles.zoomButton}
+                />
+                <IconButton
+                  name="zoom-in"
+                  onPress={() => changeScale(0.25)}
+                  accessibilityLabel="Zoom in"
+                  style={styles.zoomButton}
+                />
+              </View>
+            </View>
+            <ScrollView
+              horizontal
+              style={styles.imageScroll}
+              contentContainerStyle={styles.imageScrollContent}
+              showsHorizontalScrollIndicator
+              persistentScrollbar
+            >
+              <ScrollView
+                style={styles.imageScrollVertical}
+                contentContainerStyle={styles.imageScrollContent}
+                showsVerticalScrollIndicator
+                persistentScrollbar
+              >
+                <View style={styles.imageFrameContainer}>
+                  <View style={[styles.imageFrame, { width: canvasWidth, height: canvasHeight }] }>
+                    <Image
+                      source={rnImageSource}
+                      style={{
+                        position: 'absolute',
+                        left: 0,
+                      top: 0,
+                      width: imageWidth * scale,
+                      height: imageHeight * scale,
+                    }}
+                  />
+                  {cells.map((cell) => {
+                    const fitsWithinImage =
+                      cell.x >= 0 &&
+                      cell.y >= 0 &&
+                      cell.x + cell.width <= imageWidth &&
+                      cell.y + cell.height <= imageHeight;
+                    if (!fitsWithinImage) {
+                      return null;
+                    }
+                    const left = cell.x * scale;
+                    const top = cell.y * scale;
+                    const width = cell.width * scale;
+                    const height = cell.height * scale;
+                    const isSelected = selectedIds.includes(cell.id);
+                    const order = isSelected ? selectedIds.indexOf(cell.id) : -1;
+                    return (
+                      <TouchableOpacity
+                        key={cell.id}
+                        style={[
+                          styles.cell,
+                          {
+                            left,
+                            top,
+                            width,
+                            height,
+                            borderColor: isSelected ? '#4f8dff' : 'rgba(255,255,255,0.35)',
+                            backgroundColor: isSelected ? 'rgba(79,141,255,0.15)' : 'transparent',
+                          },
+                        ]}
+                        onPress={() => toggleSelection(cell.id)}
+                        activeOpacity={0.7}
+                      >
+                        {isSelected && <Text style={styles.orderText}>{order}</Text>}
+                      </TouchableOpacity>
+                    );
+                  })}
+                  </View>
+                </View>
+              </ScrollView>
+            </ScrollView>
+          </View>
+        </View>
+        <View style={styles.controlsColumn}>
+          <NumericInputField
+            label="水平（分割数）"
+            value={horizontal}
+            onCommit={setHorizontal}
+            sanitize={(val) => Math.max(1, Math.floor(val))}
+          />
+          <NumericInputField
+            label="垂直（分割数）"
+            value={vertical}
+            onCommit={setVertical}
+            sanitize={(val) => Math.max(1, Math.floor(val))}
+          />
+          <NumericInputField
+            label="サイズ x (px)"
+            value={cellWidth}
+            onCommit={setCellWidth}
+            sanitize={(val) => Math.max(1, val)}
+          />
+          <NumericInputField
+            label="サイズ y (px)"
+            value={cellHeight}
+            onCommit={setCellHeight}
+            sanitize={(val) => Math.max(1, val)}
+          />
+          <NumericInputField
+            label="分離 x (px)"
+            value={separationX}
+            onCommit={setSeparationX}
+            sanitize={(val) => Math.max(0, val)}
+          />
+          <NumericInputField
+            label="分離 y (px)"
+            value={separationY}
+            onCommit={setSeparationY}
+            sanitize={(val) => Math.max(0, val)}
+          />
+          <NumericInputField
+            label="オフセット x (px)"
+            value={offsetX}
+            onCommit={setOffsetX}
+            allowNegative
+          />
+          <NumericInputField
+            label="オフセット y (px)"
+            value={offsetY}
+            onCommit={setOffsetY}
+            allowNegative
+          />
+        </View>
+      </View>
+      <TouchableOpacity
+        style={[styles.addButton, !selectedCount && styles.addButtonDisabled]}
+        disabled={!selectedCount}
+        onPress={handleAddFrames}
+      >
+        <Text style={styles.addButtonText}>{selectedCount}フレームを追加</Text>
+      </TouchableOpacity>
+    </View>
+  );
+};
+
+const styles = StyleSheet.create({
+  wrapper: {
+    marginBottom: 20,
+    padding: 16,
+    borderRadius: 12,
+    backgroundColor: '#11141c',
+    borderWidth: 1,
+    borderColor: '#1d2331',
+  },
+  selectorRow: {
+    flexDirection: 'row',
+    alignItems: 'stretch',
+  },
+  previewColumn: {
+    flex: 1,
+    marginRight: 12,
+    minHeight: 280,
+  },
+  controlsColumn: {
+    width: 210,
+    paddingLeft: 12,
+  },
+  zoomOverlay: {
+    position: 'absolute',
+    top: 8,
+    left: 8,
+    zIndex: 5,
+    pointerEvents: 'box-none',
+  },
+  zoomControls: {
+    flexDirection: 'row',
+    borderRadius: 10,
+    paddingHorizontal: 0,
+    paddingVertical: 0,
+    height: 36,
+    alignItems: 'center',
+    gap: 0,
+  },
+  zoomButton: {
+    marginRight: 4,
+    marginBottom: 0,
+  },
+  orderRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  orderField: {
+    marginRight: 12,
+  },
+  orderLabel: {
+    color: '#c7d3f3',
+    fontSize: 12,
+    marginBottom: 4,
+  },
+  orderButtons: {
+    flexDirection: 'row',
+  },
+  orderButton: {
+    paddingVertical: 4,
+    paddingHorizontal: 8,
+    borderRadius: 6,
+    borderWidth: 1,
+    borderColor: '#2a3142',
+    marginRight: 6,
+  },
+  orderButtonActive: {
+    backgroundColor: '#4f8dff33',
+    borderColor: '#4f8dff',
+  },
+  orderButtonText: {
+    color: '#e3eaff',
+    fontSize: 12,
+  },
+  orderActions: {
+    flexDirection: 'row',
+    gap: 8,
+  },
+  autoSelectButton: {
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    borderRadius: 6,
+    backgroundColor: '#4f8dff',
+  },
+  clearButton: {
+    backgroundColor: '#2a3142',
+  },
+  autoSelectText: {
+    color: '#fff',
+    fontSize: 12,
+    fontWeight: '600',
+  },
+  scrollWrapper: {
+    flex: 1,
+    width: '100%',
+    height: 420,
+    marginBottom: 12,
+    position: 'relative',
+  },
+  imageScroll: {
+    flex: 1,
+    width: '100%',
+    height: '100%',
+  },
+  imageScrollVertical: {
+    width: '100%',
+    height: '100%',
+  },
+  imageScrollContent: {
+    flexGrow: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  imageFrameContainer: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#fff',
+    width: '100%',
+    height: '100%',
+  },
+  imageFrame: {
+    borderWidth: 1,
+    borderColor: '#2a3142',
+    overflow: 'hidden',
+    alignSelf: 'center',
+    position: 'relative',
+  },
+  cell: {
+    position: 'absolute',
+    borderWidth: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'transparent',
+  },
+  orderText: {
+    color: '#fff',
+    fontSize: 12,
+  },
+  fieldRow: {
+    marginBottom: 10,
+  },
+  fieldLabel: {
+    color: '#9fa9c2',
+    fontSize: 12,
+    marginBottom: 4,
+  },
+  fieldInput: {
+    backgroundColor: '#1c2130',
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#30384a',
+    color: '#fff',
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+  },
+  addButton: {
+    marginTop: 8,
+    paddingVertical: 10,
+    paddingHorizontal: 24,
+    borderRadius: 8,
+    backgroundColor: '#4f8dff',
+    alignItems: 'center',
+    alignSelf: 'center',
+  },
+  addButtonDisabled: {
+    backgroundColor: '#2a3142',
+  },
+  addButtonText: {
+    color: '#fff',
+    fontWeight: '600',
+  },
+});
+
+interface NumericInputFieldProps {
+  label: string;
+  value: number;
+  onCommit: (value: number) => void;
+  sanitize?: (value: number) => number;
+  allowNegative?: boolean;
+}
+
+const NumericInputField: React.FC<NumericInputFieldProps> = ({
+  label,
+  value,
+  onCommit,
+  sanitize,
+  allowNegative = false,
+}) => {
+  const [text, setText] = useState(String(value));
+  const [isFocused, setIsFocused] = useState(false);
+
+  useEffect(() => {
+    if (!isFocused) {
+      setText(String(value));
+    }
+  }, [value, isFocused]);
+
+  const applySanitize = (next: number) => (sanitize ? sanitize(next) : next);
+
+  const commitValue = (next: number) => {
+    const sanitized = applySanitize(next);
+    onCommit(sanitized);
+    setText(String(sanitized));
+  };
+
+  const handleChangeText = (next: string) => {
+    const pattern = allowNegative ? /^-?\d*$/ : /^\d*$/;
+    if (!pattern.test(next)) {
+      return;
+    }
+    setText(next);
+    if (next === '' || next === '-' || next === '-0') {
+      return;
+    }
+    const numericValue = Number(next);
+    if (!Number.isNaN(numericValue)) {
+      commitValue(numericValue);
+    }
+  };
+
+  const handleBlur = () => {
+    setIsFocused(false);
+    if (text === '' || text === '-' || text === '-0') {
+      setText(String(value));
+      return;
+    }
+    const numericValue = Number(text);
+    if (Number.isNaN(numericValue)) {
+      setText(String(value));
+      return;
+    }
+    commitValue(numericValue);
+  };
+
+  return (
+    <View style={styles.fieldRow}>
+      <Text style={styles.fieldLabel}>{label}</Text>
+      <TextInput
+        value={text}
+        onChangeText={handleChangeText}
+        onFocus={() => setIsFocused(true)}
+        onBlur={handleBlur}
+        style={styles.fieldInput}
+        keyboardType="numeric"
+      />
+    </View>
+  );
+};

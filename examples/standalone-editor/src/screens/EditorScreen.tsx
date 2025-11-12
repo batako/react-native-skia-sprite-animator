@@ -16,6 +16,7 @@ import { TemplatePanel } from '../components/TemplatePanel';
 import { StoragePanel } from '../components/StoragePanel';
 import { MetaEditor } from '../components/MetaEditor';
 import { useEditorIntegration } from '../hooks/useEditorIntegration';
+import { FrameGridSelector, type FrameGridCell } from '../components/FrameGridSelector';
 
 const SAMPLE_SPRITE = require('../../assets/sample-sprite.png');
 
@@ -91,6 +92,15 @@ export const EditorScreen = () => {
     [],
   );
 
+  const handleGridAddFrames = React.useCallback(
+    (cells: FrameGridCell[]) => {
+      cells.forEach((cell) => {
+        editor.addFrame({ x: cell.x, y: cell.y, w: cell.width, h: cell.height });
+      });
+    },
+    [editor],
+  );
+
   return (
     <SafeAreaView style={styles.safeArea}>
       <StatusBar barStyle="light-content" />
@@ -99,6 +109,7 @@ export const EditorScreen = () => {
         <Text style={styles.subtitle}>
           Edit frames, play animations, switch templates, and persist sprites to disk with a single screen.
         </Text>
+        <FrameGridSelector image={imageSource} onAddFrames={handleGridAddFrames} />
         <View style={styles.canvasSection}>
           <View style={styles.canvasColumn}>
             <SpriteCanvasView editor={editor} image={imageSource} />
