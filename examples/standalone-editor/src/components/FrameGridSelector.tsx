@@ -3,7 +3,6 @@ import { Image, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View 
 import type { DataSourceParam } from '@shopify/react-native-skia';
 import type { ImageSourcePropType } from 'react-native';
 import { IconButton } from './IconButton';
-const SAMPLE_IMAGE = require('../../assets/sample-sprite.png');
 
 export interface FrameGridCell {
   id: string;
@@ -15,21 +14,59 @@ export interface FrameGridCell {
   height: number;
 }
 
+export interface FrameGridImageDescriptor {
+  source: DataSourceParam;
+  width?: number;
+  height?: number;
+  name?: string;
+  id?: string;
+}
+
+export type FrameGridImageProp = DataSourceParam | FrameGridImageDescriptor;
+
+const isImageDescriptor = (value: FrameGridImageProp): value is FrameGridImageDescriptor => {
+  return typeof value === 'object' && value !== null && 'source' in value;
+};
+
 export interface FrameGridSelectorProps {
-  image?: DataSourceParam;
+  image?: FrameGridImageProp;
+  fallbackImage?: FrameGridImageProp;
   onAddFrames: (cells: FrameGridCell[]) => void;
   defaultCellWidth?: number;
   defaultCellHeight?: number;
+  emptyMessage?: string;
 }
+
+const normalizeImage = (value?: FrameGridImageProp): FrameGridImageDescriptor | undefined => {
+  if (!value) {
+    return undefined;
+  }
+  if (isImageDescriptor(value)) {
+    return value;
+  }
+  return { source: value as DataSourceParam };
+};
 
 export const FrameGridSelector = ({
   image,
+  fallbackImage,
   onAddFrames,
   defaultCellWidth = 32,
   defaultCellHeight = 32,
+  emptyMessage = 'スプライト画像を選択すると、ここにプレビューが表示されます。',
 }: FrameGridSelectorProps) => {
-  const resolvedImage = image ?? SAMPLE_IMAGE;
-  const rnImageSource: ImageSourcePropType = useMemo(() => {
+  const normalizedImage = useMemo(() => {
+    const primary = normalizeImage(image);
+    if (primary) {
+      return primary;
+    }
+    return normalizeImage(fallbackImage);
+  }, [image, fallbackImage]);
+  const resolvedImage = normalizedImage?.source ?? null;
+  const rnImageSource: ImageSourcePropType | null = useMemo(() => {
+    if (!resolvedImage) {
+      return null;
+    }
     if (typeof resolvedImage === 'number') {
       return resolvedImage;
     }
@@ -57,48 +94,64 @@ export const FrameGridSelector = ({
   const [horizontalOrder, setHorizontalOrder] = useState<'ltr' | 'rtl'>('ltr');
   const [verticalOrder, setVerticalOrder] = useState<'ttb' | 'btt'>('ttb');
   const [primaryAxis, setPrimaryAxis] = useState<'horizontal' | 'vertical'>('horizontal');
-  const [imageWidth, setImageWidth] = useState(defaultCellWidth * horizontal);
-  const [imageHeight, setImageHeight] = useState(defaultCellHeight * vertical);
+  const [imageWidth, setImageWidth] = useState(normalizedImage?.width ?? defaultCellWidth * horizontal);
+  const [imageHeight, setImageHeight] = useState(normalizedImage?.height ?? defaultCellHeight * vertical);
   const [viewportSize, setViewportSize] = useState({ width: 0, height: 0 });
   const [autoScaled, setAutoScaled] = useState(false);
 
   useEffect(() => {
+    if (normalizedImage?.width && normalizedImage?.height) {
+      setImageWidth(normalizedImage.width);
+      setImageHeight(normalizedImage.height);
+      return;
+    }
+    if (!resolvedImage) {
+      setImageWidth(0);
+      setImageHeight(0);
+      return;
+    }
     if (typeof resolvedImage === 'number') {
       const source = Image.resolveAssetSource(resolvedImage);
       if (source?.width && source?.height) {
         setImageWidth(source.width);
         setImageHeight(source.height);
       }
-    } else if (typeof resolvedImage === 'string') {
-      Image.getSize(
-        resolvedImage,
-        (width, height) => {
-          setImageWidth(width);
-          setImageHeight(height);
-        },
-        () => {
-          // ignore errors
-        },
-      );
-    } else if (resolvedImage && typeof resolvedImage === 'object' && 'uri' in resolvedImage && resolvedImage.uri) {
-      Image.getSize(
-        resolvedImage.uri,
-        (width, height) => {
-          setImageWidth(width);
-          setImageHeight(height);
-        },
-        () => {
-          // ignore errors
-        },
-      );
+      return;
     }
-  }, [resolvedImage]);
+    const uri =
+      typeof resolvedImage === 'string'
+        ? resolvedImage
+        : (resolvedImage as { uri?: string }).uri;
+    if (!uri) {
+      return;
+    }
+    let cancelled = false;
+    Image.getSize(
+      uri,
+      (width, height) => {
+        if (cancelled) {
+          return;
+        }
+        setImageWidth(width);
+        setImageHeight(height);
+      },
+      () => {
+        // ignore errors
+      },
+    );
+    return () => {
+      cancelled = true;
+    };
+  }, [normalizedImage, resolvedImage]);
 
   useEffect(() => {
     setAutoScaled(false);
-  }, [resolvedImage]);
+  }, [rnImageSource, normalizedImage?.width, normalizedImage?.height]);
 
   useEffect(() => {
+    if (!rnImageSource) {
+      return;
+    }
     if (
       autoScaled ||
       viewportSize.width <= 0 ||
@@ -116,7 +169,7 @@ export const FrameGridSelector = ({
       setScale(parseFloat(adjusted.toFixed(2)));
     }
     setAutoScaled(true);
-  }, [autoScaled, viewportSize, imageWidth, imageHeight]);
+  }, [autoScaled, viewportSize, imageWidth, imageHeight, rnImageSource]);
 
   const cells = useMemo<FrameGridCell[]>(() => {
     const list: FrameGridCell[] = [];
@@ -138,10 +191,9 @@ export const FrameGridSelector = ({
     return list;
   }, [cellWidth, cellHeight, horizontal, offsetX, offsetY, separationX, separationY, vertical]);
 
-  const gridWidth = horizontal * cellWidth + separationX * Math.max(0, horizontal - 1);
-  const gridHeight = vertical * cellHeight + separationY * Math.max(0, vertical - 1);
   const canvasWidth = imageWidth * scale;
   const canvasHeight = imageHeight * scale;
+  const isImageReady = Boolean(rnImageSource && imageWidth > 0 && imageHeight > 0);
 
   const setOffsetX = (val: number) => {
     setOffsetXInternal(val);
@@ -177,6 +229,9 @@ export const FrameGridSelector = ({
   const resetScale = () => setScale(1);
 
   const selectAllCells = () => {
+    if (!rnImageSource || imageWidth <= 0 || imageHeight <= 0) {
+      return;
+    }
     const ordered = [...cells]
       .filter(
         (cell) =>
@@ -314,54 +369,61 @@ export const FrameGridSelector = ({
                 persistentScrollbar
               >
                 <View style={styles.imageFrameContainer}>
-                  <View style={[styles.imageFrame, { width: canvasWidth, height: canvasHeight }] }>
-                    <Image
-                      source={rnImageSource}
-                      style={{
-                        position: 'absolute',
-                        left: 0,
-                      top: 0,
-                      width: imageWidth * scale,
-                      height: imageHeight * scale,
-                    }}
-                  />
-                  {cells.map((cell) => {
-                    const fitsWithinImage =
-                      cell.x >= 0 &&
-                      cell.y >= 0 &&
-                      cell.x + cell.width <= imageWidth &&
-                      cell.y + cell.height <= imageHeight;
-                    if (!fitsWithinImage) {
-                      return null;
-                    }
-                    const left = cell.x * scale;
-                    const top = cell.y * scale;
-                    const width = cell.width * scale;
-                    const height = cell.height * scale;
-                    const isSelected = selectedIds.includes(cell.id);
-                    const order = isSelected ? selectedIds.indexOf(cell.id) : -1;
-                    return (
-                      <TouchableOpacity
-                        key={cell.id}
-                        style={[
-                          styles.cell,
-                          {
-                            left,
-                            top,
-                            width,
-                            height,
-                            borderColor: isSelected ? '#4f8dff' : 'rgba(255,255,255,0.35)',
-                            backgroundColor: isSelected ? 'rgba(79,141,255,0.15)' : 'transparent',
-                          },
-                        ]}
-                        onPress={() => toggleSelection(cell.id)}
-                        activeOpacity={0.7}
-                      >
-                        {isSelected && <Text style={styles.orderText}>{order}</Text>}
-                      </TouchableOpacity>
-                    );
-                  })}
-                  </View>
+                  {isImageReady && rnImageSource ? (
+                    <View style={[styles.imageFrame, { width: canvasWidth, height: canvasHeight }]}>
+                      <Image
+                        source={rnImageSource}
+                        style={{
+                          position: 'absolute',
+                          left: 0,
+                          top: 0,
+                          width: imageWidth * scale,
+                          height: imageHeight * scale,
+                        }}
+                      />
+                      {cells.map((cell) => {
+                        const fitsWithinImage =
+                          cell.x >= 0 &&
+                          cell.y >= 0 &&
+                          cell.x + cell.width <= imageWidth &&
+                          cell.y + cell.height <= imageHeight;
+                        if (!fitsWithinImage) {
+                          return null;
+                        }
+                        const left = cell.x * scale;
+                        const top = cell.y * scale;
+                        const width = cell.width * scale;
+                        const height = cell.height * scale;
+                        const isSelected = selectedIds.includes(cell.id);
+                        const order = isSelected ? selectedIds.indexOf(cell.id) : -1;
+                        return (
+                          <TouchableOpacity
+                            key={cell.id}
+                            style={[
+                              styles.cell,
+                              {
+                                left,
+                                top,
+                                width,
+                                height,
+                                borderColor: isSelected ? '#4f8dff' : 'rgba(255,255,255,0.35)',
+                                backgroundColor: isSelected ? 'rgba(79,141,255,0.15)' : 'transparent',
+                              },
+                            ]}
+                            onPress={() => toggleSelection(cell.id)}
+                            activeOpacity={0.7}
+                          >
+                            {isSelected && <Text style={styles.orderText}>{order}</Text>}
+                          </TouchableOpacity>
+                        );
+                      })}
+                    </View>
+                  ) : (
+                    <View style={styles.emptyState}>
+                      <Text style={styles.emptyStateTitle}>画像が未選択です</Text>
+                      <Text style={styles.emptyStateText}>{emptyMessage}</Text>
+                    </View>
+                  )}
                 </View>
               </ScrollView>
             </ScrollView>
@@ -556,6 +618,30 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
     alignSelf: 'center',
     position: 'relative',
+  },
+  emptyState: {
+    borderWidth: 1,
+    borderColor: '#d4dae8',
+    borderStyle: 'dashed',
+    borderRadius: 12,
+    padding: 24,
+    justifyContent: 'center',
+    alignItems: 'center',
+    width: '100%',
+    height: '100%',
+    backgroundColor: '#fff',
+  },
+  emptyStateTitle: {
+    color: '#11141c',
+    fontWeight: '600',
+    marginBottom: 6,
+    fontSize: 14,
+  },
+  emptyStateText: {
+    color: '#555c70',
+    fontSize: 12,
+    textAlign: 'center',
+    lineHeight: 18,
   },
   cell: {
     position: 'absolute',

@@ -109,7 +109,7 @@ export const EditorScreen = () => {
         <Text style={styles.subtitle}>
           Edit frames, play animations, switch templates, and persist sprites to disk with a single screen.
         </Text>
-        <FrameGridSelector image={imageSource} onAddFrames={handleGridAddFrames} />
+        <FrameGridSelector image={{ source: imageSource }} onAddFrames={handleGridAddFrames} />
         <View style={styles.canvasSection}>
           <View style={styles.canvasColumn}>
             <SpriteCanvasView editor={editor} image={imageSource} />
