@@ -7,7 +7,6 @@
 
 - [`f8bc978`](https://github.com/batako/react-native-skia-sprite-animator/commit/f8bc978850beaf53df8dc9600d772d9786f1857f) `useSpriteEditor` Hook、`SpriteEditUtils`、テンプレート API、README 更新、Jest テストをまとめて実装。
 - [`443a8cf`](https://github.com/batako/react-native-skia-sprite-animator/commit/443a8cfdd0c9c3b9c46461578329c8009c4961da) Editor API ドキュメントの日本語版を追加。
-- [`44e3228`](https://github.com/batako/react-native-skia-sprite-animator/commit/44e322863e43d356f6fcd3789ffc23e9bfbac8e3) 英語版 Editor API ドキュメントを “Editor API Reference” に改名。
 
 ## 🐞 バグ修正
 

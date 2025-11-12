@@ -19,7 +19,6 @@
 
 - [`f8bc978`](https://github.com/batako/react-native-skia-sprite-animator/commit/f8bc978850beaf53df8dc9600d772d9786f1857f) Added editor modules (`useSpriteEditor`, `SpriteEditUtils`, template exports), README updates, and comprehensive tests.
 - [`443a8cf`](https://github.com/batako/react-native-skia-sprite-animator/commit/443a8cfdd0c9c3b9c46461578329c8009c4961da) Shipped the Japanese editor API reference to keep docs bilingual.
-- [`44e3228`](https://github.com/batako/react-native-skia-sprite-animator/commit/44e322863e43d356f6fcd3789ffc23e9bfbac8e3) Renamed the English editor API guide to “Editor API Reference” for consistency.
 
 <!-- Section: Bug Fixes -->
 
