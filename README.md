@@ -2,6 +2,13 @@
 
 `react-native-skia-sprite-animator` is a UI-agnostic helper built for React Native/Expo projects that rely on [@shopify/react-native-skia](https://shopify.github.io/react-native-skia/). It focuses on two things: playing sprite-sheet animations (`SpriteAnimator`) and persisting sprite JSON + images to `expo-file-system` (`spriteStorage`).
 
+## Feature Overview
+
+- **SpriteAnimator** – declarative + imperative animation playback with Skia rendering, frame events, directional flips, speed controls, and animation metadata overrides.
+- **spriteStorage** – `saveSprite`, `loadSprite`, `listSprites`, `deleteSprite`, and storage configuration helpers so sprites plus metadata persist on device using Expo File System.
+- **Editor APIs** – `useSpriteEditor` (frame CRUD, selection, clipboard, undo/redo, metadata updates), `SpriteTemplate` / `DefaultSpriteTemplate` (import/export pipelines), and `SpriteEditUtils` (grid snapping, rect merging, hit-testing).
+- **Standalone Expo editor** – an example app under `examples/standalone-editor/` that combines every API (canvas editing, real-time playback, storage, templates, metadata) to serve as the canonical feature showcase.
+
 ## Installation
 
 ```bash
@@ -193,6 +200,20 @@ Editor primitives live under `src/editor/` so you can build custom sprite toolin
 - `SpriteTemplate` + `DefaultSpriteTemplate`: Serialize editor state to the same JSON shape expected by `spriteStorage`, or provide your own template for custom pipelines.
 
 See [docs/editor_api.md](docs/editor_api.md) for usage examples and option tables.
+
+## Standalone Editor (Expo example)
+
+A **complete Expo demo** lives under `examples/standalone-editor/`, exposing every public API in one screen so you can study the integration patterns before building your own tools.
+
+What it demonstrates:
+
+- `useSpriteEditor` powering frame CRUD, selection, clipboard, undo/redo, metadata editing, and template-aware import/export.
+- Real-time playback by piping live editor state into `SpriteAnimator`, including seek, pause/resume, and speed scaling.
+- Template workflows (`DefaultSpriteTemplate` plus a compact custom template) with JSON preview/import text areas.
+- Local persistence backed by `spriteStorage` (`saveSprite`, `loadSprite`, `listSprites`, `deleteSprite`) and metadata version bumps.
+- `SpriteEditUtils` on the Skia canvas (grid overlays, hit-testing, selection bounds) so geometry helpers are shown in context.
+
+Run it locally with `npm install` followed by `npm run start` inside `examples/standalone-editor`. The project links back to the library via `link:../../`, so editing the main package instantly updates the demo.
 
 ## Development
 

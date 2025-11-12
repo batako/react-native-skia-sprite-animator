@@ -1,0 +1,12 @@
+{
+  "extends": "@tsconfig/react-native/tsconfig.json",
+  "compilerOptions": {
+    "strict": true,
+    "noEmit": true,
+    "baseUrl": "./",
+    "paths": {
+      "react-native-skia-sprite-animator": ["../../src"]
+    }
+  },
+  "include": ["./App.tsx", "src"]
+}

@@ -1,6 +1,13 @@
 # react-native-skia-sprite-animator
 
-`react-native-skia-sprite-animator` は React Native/Expo 上の [@shopify/react-native-skia](https://shopify.github.io/react-native-skia/) を利用してスプライトアニメーションを再生し、`expo-file-system` に JSON/画像を保存するための UI非依存ライブラリです。「再生 (SpriteAnimator)」と「保存 (spriteStorage)」の 2 機能を提供します。
+`react-native-skia-sprite-animator` は React Native/Expo 上の [@shopify/react-native-skia](https://shopify.github.io/react-native-skia/) を利用してスプライトアニメーションを再生し、`expo-file-system` に JSON/画像を保存するための UI非依存ライブラリです。「再生 (SpriteAnimator)」「保存 (spriteStorage)」「エディター API」をまとめて提供します。
+
+## 機能一覧
+
+- **SpriteAnimator**: Skia Canvas 上での宣言的/命令的な再生、フレームイベント、反転描画、速度スケール、アニメーション別のメタデータなどをサポート。
+- **spriteStorage**: `saveSprite` / `loadSprite` / `listSprites` / `deleteSprite` および保存先設定ヘルパーにより、JSON と画像を Expo File System に永続化。
+- **エディター API**: `useSpriteEditor`（フレーム CRUD・選択・クリップボード・Undo/Redo・メタ編集・テンプレート import/export）、`SpriteTemplate` / `DefaultSpriteTemplate`、`SpriteEditUtils`（スナップ・矩形マージ・ヒットテスト）。
+- **Expo スタンドアロンエディタ**: `examples/standalone-editor/` に、上記すべての機能を 1 画面で体験できるデモアプリを同梱。
 
 ## インストール
 
@@ -194,6 +201,27 @@ UI を持たないエディター用ツール群も `src/editor/` で提供し�
 - `SpriteTemplate` / `DefaultSpriteTemplate`: エディター状態を `spriteStorage` と同じ JSON へ変換するためのインターフェースと標準テンプレート。独自テンプレートの実装も可能です。
 
 詳しいサンプルやオプションの一覧は [docs/editor_api.ja.md](docs/editor_api.ja.md) を参照してください。
+
+## スタンドアロンエディタ (Expo サンプル)
+
+`examples/standalone-editor/` には、ライブラリの全機能を組み合わせた Expo アプリを用意しています。エディタの各パネルや `SpriteAnimator` プレビューが連動するため、導入前の確認や実装の参考に利用できます。
+
+含まれる主な要素:
+
+- `useSpriteEditor` によるフレーム CRUD／選択／クリップボード／Undo/Redo／メタデータ編集／テンプレート import/export。
+- `SpriteAnimator` と同期する再生パネル（再生/停止/シーク/速度調整/選択フレームへのジャンプ）。
+- `DefaultSpriteTemplate` とカスタムテンプレートの切り替え、エクスポート JSON プレビュー、インポートテキストエリア。
+- `spriteStorage` 連携の保存・読み込み・削除・レジストリ更新、メタデータのバージョン管理。
+- `SpriteEditUtils` を使ったグリッド、ヒットテスト、選択境界の描画。
+
+利用手順 (`examples/standalone-editor/` ディレクトリで実行):
+
+```bash
+npm install
+npm run start
+```
+
+パッケージは `link:../../` で参照しているため、ライブラリ本体のコードを編集すると即座にサンプルにも反映されます。
 
 ## 開発
 
