@@ -101,7 +101,7 @@ return (
 
 利用できるメソッド:
 
-- `play(name?: string, opts?: { fromFrame?: number; speedScale?: number })`: 指定アニメーションを最初または任意のフレームから再生開始。
+- `play(name?: string, opts?: { fromFrame?: number; speedScale?: number })`: 指定アニメーションを最初または任意のフレームから再生開始。非ループのアニメが最後で停止した後でも `{ fromFrame: 0 }` を渡せば再度冒頭から再生できます。
 - `stop()`: 再生を止め、現在のアニメーションをフレーム `0` に戻す。
 - `pause()` / `resume()`: 現在位置を維持したままタイマーを一時停止／再開。
 - `setFrame(frameIndex: number)`: 再生状態に関わらず、アクティブなアニメーション内の任意フレームへジャンプ。

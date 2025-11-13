@@ -7,94 +7,110 @@ interface MetaEditorProps {
   editor: SpriteEditorApi;
 }
 
-const toNumber = (value: string, fallback: number) => {
-  const parsed = Number(value);
-  return Number.isFinite(parsed) ? parsed : fallback;
-};
+interface MetaEntry {
+  id: string;
+  key: string;
+  value: string;
+}
 
 export const MetaEditor = ({ editor }: MetaEditorProps) => {
   const meta = editor.state.meta;
-  const origin = (meta.origin as { x?: number; y?: number } | undefined) ?? { x: 0, y: 0 };
-  const [displayName, setDisplayName] = React.useState(meta.displayName ?? '');
-  const [version, setVersion] = React.useState(String(meta.version ?? 1));
-  const [originX, setOriginX] = React.useState(String(origin.x ?? 0));
-  const [originY, setOriginY] = React.useState(String(origin.y ?? 0));
+  const [entries, setEntries] = React.useState<MetaEntry[]>([]);
+
+  const createEntry = React.useCallback(
+    (key = '', value = ''): MetaEntry => ({
+      id: `${Date.now()}-${Math.random().toString(16).slice(2)}`,
+      key,
+      value,
+    }),
+    [],
+  );
 
   React.useEffect(() => {
-    setDisplayName(meta.displayName ?? '');
-    setVersion(String(meta.version ?? 1));
-    const latestOrigin = (meta.origin as { x?: number; y?: number } | undefined) ?? { x: 0, y: 0 };
-    setOriginX(String(latestOrigin.x ?? 0));
-    setOriginY(String(latestOrigin.y ?? 0));
-  }, [meta]);
+    const primitiveEntries = Object.entries(meta)
+      .filter(([, value]) => {
+        const valueType = typeof value;
+        return value !== null && (valueType === 'string' || valueType === 'number' || valueType === 'boolean');
+      })
+      .map(([key, value]) => createEntry(key, String(value)));
+    setEntries(primitiveEntries);
+  }, [createEntry, meta]);
 
-  const handleApply = () => {
-    editor.updateMeta({
-      displayName: displayName || undefined,
-      version: toNumber(version, 1),
-      origin: {
-        x: toNumber(originX, 0),
-        y: toNumber(originY, 0),
-      },
-    });
+  const handleChange = (id: string, field: 'key' | 'value', text: string) => {
+    setEntries((prev) =>
+      prev.map((entry) => (entry.id === id ? { ...entry, [field]: text } : entry)),
+    );
   };
 
-  const incrementVersion = () => {
-    const next = (meta.version ?? 0) + 1;
-    editor.updateMeta({ version: next });
-    setVersion(String(next));
+  const handleRemove = (id: string) => {
+    setEntries((prev) => prev.filter((entry) => entry.id !== id));
+  };
+
+  const handleAddEntry = () => {
+    setEntries((prev) => [...prev, createEntry()]);
+  };
+
+  const handleApply = () => {
+    const payload: Record<string, unknown> = {};
+    const seenKeys = new Set<string>();
+
+    entries.forEach(({ key, value }) => {
+      const trimmedKey = key.trim();
+      if (!trimmedKey) {
+        return;
+      }
+      seenKeys.add(trimmedKey);
+      payload[trimmedKey] = value;
+    });
+
+    const primitiveKeys = Object.entries(meta)
+      .filter(([, value]) => {
+        const type = typeof value;
+        return value !== null && (type === 'string' || type === 'number' || type === 'boolean');
+      })
+      .map(([key]) => key);
+
+    primitiveKeys.forEach((key) => {
+      if (!seenKeys.has(key)) {
+        payload[key] = undefined;
+      }
+    });
+
+    editor.updateMeta(payload);
   };
 
   return (
     <View style={styles.container}>
       <Text style={styles.heading}>Metadata</Text>
-      <View style={styles.row}>
-        <View style={styles.field}>
-          <Text style={styles.label}>Display Name</Text>
-          <TextInput
-            value={displayName}
-            onChangeText={setDisplayName}
-            style={styles.input}
-            placeholder="Sprite name"
-          />
-        </View>
-        <View style={styles.field}>
-          <Text style={styles.label}>Version</Text>
-          <TextInput
-            value={version}
-            onChangeText={setVersion}
-            style={styles.input}
-            keyboardType="numeric"
-          />
-        </View>
+      <View style={styles.addRow}>
+        <IconButton name="plus" onPress={handleAddEntry} accessibilityLabel="Add metadata entry" />
+        <Text style={styles.addHint}>項目を追加</Text>
       </View>
-      <View style={styles.row}>
-        <View style={styles.field}>
-          <Text style={styles.label}>Origin X</Text>
-          <TextInput
-            value={originX}
-            onChangeText={setOriginX}
-            style={styles.input}
-            keyboardType="numeric"
-          />
+      {entries.map((entry) => (
+        <View key={entry.id} style={styles.row}>
+          <View style={styles.field}>
+            <Text style={styles.label}>Key</Text>
+            <TextInput
+              value={entry.key}
+              onChangeText={(text) => handleChange(entry.id, 'key', text)}
+              style={styles.input}
+              placeholder="metadata key"
+            />
+          </View>
+          <View style={styles.field}>
+            <Text style={styles.label}>Value</Text>
+            <TextInput
+              value={entry.value}
+              onChangeText={(text) => handleChange(entry.id, 'value', text)}
+              style={styles.input}
+              placeholder="value"
+            />
+          </View>
+          <IconButton name="trash" onPress={() => handleRemove(entry.id)} accessibilityLabel="Remove entry" />
         </View>
-        <View style={styles.field}>
-          <Text style={styles.label}>Origin Y</Text>
-          <TextInput
-            value={originY}
-            onChangeText={setOriginY}
-            style={styles.input}
-            keyboardType="numeric"
-          />
-        </View>
-      </View>
+      ))}
       <View style={styles.buttonRow}>
-        <IconButton name="check" onPress={handleApply} accessibilityLabel="Apply metadata" />
-        <IconButton
-          name="plus-circle"
-          onPress={incrementVersion}
-          accessibilityLabel="Increment version"
-        />
+        <IconButton name="save" onPress={handleApply} accessibilityLabel="Apply metadata" />
       </View>
       <Text style={styles.metaSummary}>
         Active template exports this metadata via `editor.exportJSON` and persists through
@@ -121,6 +137,7 @@ const styles = StyleSheet.create({
   row: {
     flexDirection: 'row',
     marginBottom: 10,
+    alignItems: 'flex-end',
   },
   field: {
     flex: 1,
@@ -139,6 +156,16 @@ const styles = StyleSheet.create({
     paddingVertical: 6,
     borderWidth: 1,
     borderColor: '#232a3c',
+  },
+  addRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginBottom: 8,
+  },
+  addHint: {
+    color: '#9ba5c2',
+    fontSize: 12,
   },
   buttonRow: {
     flexDirection: 'row',

@@ -226,7 +226,9 @@ export const FrameGridSelector = ({
   };
 
   const handleAddFrames = () => {
-    const selectedCells = cells.filter((cell) => selectedIds.includes(cell.id));
+    const selectedCells = selectedIds
+      .map((id) => cells.find((cell) => cell.id === id))
+      .filter((cell): cell is FrameGridCell => Boolean(cell));
     onAddFrames(selectedCells);
     setSelectedIds([]);
   };
@@ -513,7 +515,9 @@ export const FrameGridSelector = ({
         disabled={!selectedCount}
         onPress={handleAddFrames}
       >
-        <Text style={styles.addButtonText}>{selectedCount}フレームを追加</Text>
+      <Text style={styles.addButtonText}>
+        {selectedCount ? `${selectedCount}フレームを追加` : 'フレームが選択されていません'}
+      </Text>
       </TouchableOpacity>
     </View>
   );
@@ -522,11 +526,6 @@ export const FrameGridSelector = ({
 const styles = StyleSheet.create({
   wrapper: {
     marginBottom: 20,
-    padding: 16,
-    borderRadius: 12,
-    backgroundColor: '#11141c',
-    borderWidth: 1,
-    borderColor: '#1d2331',
   },
   selectorRow: {
     flexDirection: 'row',
@@ -550,7 +549,6 @@ const styles = StyleSheet.create({
   },
   zoomControls: {
     flexDirection: 'row',
-    borderRadius: 10,
     paddingHorizontal: 0,
     paddingVertical: 0,
     height: 36,
@@ -581,13 +579,11 @@ const styles = StyleSheet.create({
   orderButton: {
     paddingVertical: 4,
     paddingHorizontal: 8,
-    borderRadius: 6,
     borderWidth: 1,
     borderColor: '#2a3142',
     marginRight: 6,
   },
   orderButtonActive: {
-    backgroundColor: '#4f8dff33',
     borderColor: '#4f8dff',
   },
   orderButtonText: {
@@ -601,12 +597,8 @@ const styles = StyleSheet.create({
   autoSelectButton: {
     paddingVertical: 6,
     paddingHorizontal: 12,
-    borderRadius: 6,
-    backgroundColor: '#4f8dff',
   },
-  clearButton: {
-    backgroundColor: '#2a3142',
-  },
+  clearButton: {},
   autoSelectText: {
     color: '#fff',
     fontSize: 12,
@@ -618,6 +610,7 @@ const styles = StyleSheet.create({
     height: 420,
     marginBottom: 12,
     position: 'relative',
+    backgroundColor: '#1c2130',
   },
   imageScroll: {
     flex: 1,
@@ -636,7 +629,6 @@ const styles = StyleSheet.create({
   imageFrameContainer: {
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#1c2130',
     width: '100%',
     height: '100%',
   },
@@ -657,7 +649,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     width: '100%',
     height: '100%',
-    backgroundColor: '#1c2130',
   },
   emptyStateTitle: {
     color: '#e5ebff',

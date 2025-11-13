@@ -109,6 +109,14 @@ export interface SpriteAnimatorFrameChangeEvent {
 }
 
 /**
+ * Options for forcing the animation context when seeking to a frame.
+ */
+export interface SpriteAnimatorSetFrameOptions {
+  /** Name of the animation the cursor should be relative to. */
+  animationName?: string | null;
+}
+
+/**
  * Public methods exposed via the `SpriteAnimator` imperative handle.
  */
 export interface SpriteAnimatorHandle {
@@ -121,7 +129,7 @@ export interface SpriteAnimatorHandle {
   /** Resumes playback if it was previously paused. */
   resume: () => void;
   /** Moves the cursor to a specific frame. */
-  setFrame: (frameIndex: number) => void;
+  setFrame: (frameIndex: number, options?: SpriteAnimatorSetFrameOptions) => void;
   /** Returns whether an animation is actively playing. */
   isPlaying: () => boolean;
   /** Returns the name of the animation that is currently active. */
@@ -551,20 +559,24 @@ const SpriteAnimatorComponent = (
   }, [resolveSequence]);
 
   const setFrame = useCallback(
-    (frameIndex: number) => {
+    (frameIndex: number, options?: SpriteAnimatorSetFrameOptions) => {
       setAnimState((prev) => {
-        const sequence = resolveSequence(prev.name);
+        const targetName =
+          options && 'animationName' in options
+            ? ensureAnimationName(options.animationName ?? null)
+            : prev.name;
+        const sequence = resolveSequence(targetName);
         if (!sequence.length) {
           return prev;
         }
         const nextCursor = clamp(Math.floor(frameIndex), 0, sequence.length - 1);
-        if (nextCursor === prev.frameCursor) {
+        if (nextCursor === prev.frameCursor && targetName === prev.name) {
           return prev;
         }
-        return { ...prev, frameCursor: nextCursor };
+        return { ...prev, name: targetName ?? null, frameCursor: nextCursor };
       });
     },
-    [resolveSequence],
+    [ensureAnimationName, resolveSequence],
   );
 
   useImperativeHandle(

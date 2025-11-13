@@ -1,6 +1,6 @@
 import React from 'react';
 import { Asset } from 'expo-asset';
-import { SafeAreaView, ScrollView, StatusBar, StyleSheet, Text, View } from 'react-native';
+import { SafeAreaView, ScrollView, StatusBar, StyleSheet, Text } from 'react-native';
 import {
   DefaultSpriteTemplate,
   type SpriteEditorFrame,
@@ -9,14 +9,11 @@ import {
   useSpriteEditor,
 } from 'react-native-skia-sprite-animator';
 import type { DataSourceParam } from '@shopify/react-native-skia';
-import { SpriteCanvasView } from '../components/SpriteCanvasView';
-import { FrameList } from '../components/FrameList';
-import { PlaybackControls } from '../components/PlaybackControls';
+import { AnimationStudio } from '../components/AnimationStudio';
 import { TemplatePanel } from '../components/TemplatePanel';
 import { StoragePanel } from '../components/StoragePanel';
 import { MetaEditor } from '../components/MetaEditor';
 import { useEditorIntegration } from '../hooks/useEditorIntegration';
-import { FrameGridSelector, type FrameGridCell } from '../components/FrameGridSelector';
 
 const SAMPLE_SPRITE = require('../../assets/sample-sprite.png');
 
@@ -38,7 +35,7 @@ const SAMPLE_INITIAL_STATE: Partial<SpriteEditorState> = {
     blink: { loop: false },
   },
   selected: [SAMPLE_FRAMES[0].id],
-  meta: { displayName: 'Sample Sprite', version: 1 },
+  meta: {},
 };
 
 export const EditorScreen = () => {
@@ -89,15 +86,6 @@ export const EditorScreen = () => {
     }
   }, []);
 
-  const handleGridAddFrames = React.useCallback(
-    (cells: FrameGridCell[]) => {
-      cells.forEach((cell) => {
-        editor.addFrame({ x: cell.x, y: cell.y, w: cell.width, h: cell.height });
-      });
-    },
-    [editor],
-  );
-
   return (
     <SafeAreaView style={styles.safeArea}>
       <StatusBar barStyle="light-content" />
@@ -107,16 +95,7 @@ export const EditorScreen = () => {
           Edit frames, play animations, switch templates, and persist sprites to disk with a single
           screen.
         </Text>
-        <FrameGridSelector image={{ source: imageSource }} onAddFrames={handleGridAddFrames} />
-        <View style={styles.canvasSection}>
-          <View style={styles.canvasColumn}>
-            <SpriteCanvasView editor={editor} image={imageSource} />
-          </View>
-          <View style={styles.canvasColumn}>
-            <PlaybackControls integration={integration} image={imageSource} />
-          </View>
-        </View>
-        <FrameList editor={editor} />
+        <AnimationStudio editor={editor} integration={integration} image={imageSource} />
         <MetaEditor editor={editor} />
         <TemplatePanel editor={editor} template={template} onTemplateChange={setTemplate} />
         <StoragePanel editor={editor} imageUri={imageUri} onImageUriChange={handleImageUriChange} />
@@ -142,17 +121,6 @@ const styles = StyleSheet.create({
   subtitle: {
     color: '#9ba5bf',
     marginTop: 4,
-    marginBottom: 16,
-  },
-  canvasSection: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    marginHorizontal: -8,
-  },
-  canvasColumn: {
-    flex: 1,
-    minWidth: 320,
-    paddingHorizontal: 8,
     marginBottom: 16,
   },
 });

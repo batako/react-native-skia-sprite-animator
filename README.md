@@ -101,7 +101,7 @@ return (
 
 Available methods:
 
-- `play(name?: string, opts?: { fromFrame?: number; speedScale?: number })`: Switch animations (or restart the current one) and begin playback when the sequence has at least two frames.
+- `play(name?: string, opts?: { fromFrame?: number; speedScale?: number })`: Switch animations (or restart the current one) and begin playback when the sequence has at least two frames. Pass `fromFrame` to force playback to resume from a specific frame (e.g. `0` to restart a non-looping animation that has already finished).
 - `stop()`: Halt playback and reset the current animation to frame `0`.
 - `pause()` / `resume()`: Suspend or restart the internal timer without changing the current frame index.
 - `setFrame(frameIndex: number)`: Jump to any frame within the active animation, regardless of playing state.
