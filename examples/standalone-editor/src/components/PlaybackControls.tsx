@@ -71,7 +71,7 @@ export const PlaybackControls = ({ integration, image }: PlaybackControlsProps) 
           accessibilityLabel="Stop"
         />
         <IconButton
-          name="target"
+          name="gps-fixed"
           onPress={() => selectedFrameIndex !== null && seekFrame(selectedFrameIndex)}
           disabled={selectedFrameIndex === null}
           accessibilityLabel="Seek selected frame"
@@ -79,11 +79,11 @@ export const PlaybackControls = ({ integration, image }: PlaybackControlsProps) 
       </View>
       <View style={styles.buttonRow}>
         <IconButton
-          name="minus"
+          name="remove"
           onPress={() => adjustSpeed(-0.25)}
           accessibilityLabel="Slow down"
         />
-        <IconButton name="plus" onPress={() => adjustSpeed(0.25)} accessibilityLabel="Speed up" />
+        <IconButton name="add" onPress={() => adjustSpeed(0.25)} accessibilityLabel="Speed up" />
         <Text style={styles.speedLabel}>Speed ×{speedScale.toFixed(2)}</Text>
       </View>
       <Text style={styles.subheading}>Animations</Text>

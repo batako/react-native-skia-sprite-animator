@@ -589,7 +589,7 @@ export const AnimationStudio = ({ editor, integration, image }: AnimationStudioP
             onPress={handleRenameConfirm}
             accessibilityLabel="Confirm rename"
           />
-          <IconButton name="x" onPress={handleRenameCancel} accessibilityLabel="Cancel rename" />
+          <IconButton name="close" onPress={handleRenameCancel} accessibilityLabel="Cancel rename" />
         </View>
       )}
       {renameError && <Text style={styles.renameError}>{renameError}</Text>}
@@ -601,14 +601,14 @@ export const AnimationStudio = ({ editor, integration, image }: AnimationStudioP
           <Text style={styles.sectionTitle}>Animations</Text>
           <View style={styles.animationToolbar}>
             <IconButton
-              name="edit-2"
+              name="edit"
               onPress={handleStartRename}
               disabled={!currentAnimationName}
               accessibilityLabel="Rename animation"
             />
-            <IconButton name="plus" onPress={handleAddAnimation} accessibilityLabel="Add animation" />
+            <IconButton name="add" onPress={handleAddAnimation} accessibilityLabel="Add animation" />
             <IconButton
-              name="trash"
+              name="delete"
               onPress={() => currentAnimationName && confirmDeleteAnimation(currentAnimationName)}
               disabled={
                 !currentAnimationName
@@ -707,38 +707,38 @@ export const AnimationStudio = ({ editor, integration, image }: AnimationStudioP
               />
               <View style={styles.timelineDivider} />
               <IconButton
-                name="grid"
+                name="grid-on"
                 onPress={() => setFramePickerVisible(true)}
                 accessibilityLabel="Open frame picker modal"
               />
               <View style={styles.timelineDivider} />
               <IconButton
-                name="copy"
+                name="content-copy"
                 onPress={handleCopyTimelineFrame}
                 disabled={selectedTimelineIndex === null}
                 accessibilityLabel="Copy timeline frame"
               />
               <IconButton
-                name="clipboard"
+                name="content-paste"
                 onPress={handlePasteTimelineFrame}
                 disabled={!timelineClipboard?.length}
                 accessibilityLabel="Paste timeline frame"
               />
               <View style={styles.timelineDivider} />
               <IconButton
-                name="trash-2"
+                name="delete-forever"
                 onPress={handleRemoveTimelineFrame}
                 disabled={selectedTimelineIndex === null}
                 accessibilityLabel="Remove timeline frame"
               />
               <IconButton
-                name="skip-back"
+                name="skip-previous"
                 onPress={() => handleMoveTimelineFrame(-1)}
                 disabled={selectedTimelineIndex === null || selectedTimelineIndex === 0}
                 accessibilityLabel="Move frame left"
               />
               <IconButton
-                name="skip-forward"
+                name="skip-next"
                 onPress={() => handleMoveTimelineFrame(1)}
                 disabled={
                   selectedTimelineIndex === null ||
@@ -748,7 +748,7 @@ export const AnimationStudio = ({ editor, integration, image }: AnimationStudioP
                 accessibilityLabel="Move frame right"
               />
               <IconButton
-                name="plus"
+                name="add"
                 onPress={handleDuplicateTimelineFrame}
                 disabled={selectedTimelineIndex === null}
                 accessibilityLabel="Duplicate frame"
@@ -867,7 +867,7 @@ export const AnimationStudio = ({ editor, integration, image }: AnimationStudioP
           <View style={styles.modalCard}>
             <View style={styles.modalHeader}>
               <Text style={styles.modalTitle}>Frame Picker</Text>
-              <IconButton name="x" onPress={() => setFramePickerVisible(false)} accessibilityLabel="Close frame picker" />
+              <IconButton name="close" onPress={() => setFramePickerVisible(false)} accessibilityLabel="Close frame picker" />
             </View>
             <FrameGridSelector
               image={{ source: image }}

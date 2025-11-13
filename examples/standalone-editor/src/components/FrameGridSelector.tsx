@@ -370,7 +370,7 @@ export const FrameGridSelector = ({
                   style={styles.zoomButton}
                 />
                 <IconButton
-                  name="maximize"
+                  name="fullscreen"
                   onPress={resetScale}
                   accessibilityLabel="Actual size"
                   style={styles.zoomButton}

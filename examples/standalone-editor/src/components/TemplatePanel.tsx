@@ -104,9 +104,13 @@ export const TemplatePanel = ({ editor, template, onTemplateChange }: TemplatePa
         })}
       </View>
       <View style={styles.buttonRow}>
-        <IconButton name="download" onPress={handleExport} accessibilityLabel="Export template" />
         <IconButton
-          name="upload"
+          name="file-download"
+          onPress={handleExport}
+          accessibilityLabel="Export template"
+        />
+        <IconButton
+          name="file-upload"
           onPress={handleImport}
           disabled={!importText.trim()}
           accessibilityLabel="Import template"

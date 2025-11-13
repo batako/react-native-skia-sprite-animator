@@ -115,7 +115,7 @@ export const StoragePanel = ({ editor, imageUri, onImageUriChange }: StoragePane
           accessibilityLabel="Save sprite"
         />
         <IconButton
-          name="refresh-ccw"
+          name="refresh"
           onPress={refresh}
           disabled={isBusy}
           accessibilityLabel="Refresh list"
@@ -131,13 +131,13 @@ export const StoragePanel = ({ editor, imageUri, onImageUriChange }: StoragePane
             </View>
             <View style={styles.rowButtons}>
               <IconButton
-                name="download"
+                name="file-download"
                 onPress={() => handleLoad(sprite.id)}
                 disabled={isBusy}
                 accessibilityLabel="Load sprite"
               />
               <IconButton
-                name="trash"
+                name="delete"
                 onPress={() => handleDelete(sprite.id)}
                 disabled={isBusy}
                 accessibilityLabel="Delete sprite"

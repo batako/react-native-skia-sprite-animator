@@ -39,7 +39,7 @@ export const IconButton: React.FC<IconButtonProps> = ({
   style,
   accessibilityLabel,
   iconStyle,
-  iconFamily = 'feather',
+  iconFamily = 'material',
   renderIcon,
 }) => {
   const iconColor = disabled ? '#6b7280' : color;

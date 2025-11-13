@@ -83,7 +83,7 @@ export const MetaEditor = ({ editor }: MetaEditorProps) => {
     <View style={styles.container}>
       <Text style={styles.heading}>Metadata</Text>
       <View style={styles.addRow}>
-        <IconButton name="plus" onPress={handleAddEntry} accessibilityLabel="Add metadata entry" />
+        <IconButton name="add" onPress={handleAddEntry} accessibilityLabel="Add metadata entry" />
         <Text style={styles.addHint}>項目を追加</Text>
       </View>
       {entries.map((entry) => (
@@ -106,7 +106,7 @@ export const MetaEditor = ({ editor }: MetaEditorProps) => {
               placeholder="value"
             />
           </View>
-          <IconButton name="trash" onPress={() => handleRemove(entry.id)} accessibilityLabel="Remove entry" />
+          <IconButton name="delete" onPress={() => handleRemove(entry.id)} accessibilityLabel="Remove entry" />
         </View>
       ))}
       <View style={styles.buttonRow}>

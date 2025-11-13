@@ -40,55 +40,55 @@ export const FrameList = ({ editor }: FrameListProps) => {
     <View style={styles.container}>
       <Text style={styles.heading}>Frames ({frames.length})</Text>
       <View style={styles.toolbar}>
-        <IconButton name="plus-square" onPress={handleAddFrame} accessibilityLabel="Add frame" />
+        <IconButton name="add-box" onPress={handleAddFrame} accessibilityLabel="Add frame" />
         <IconButton
-          name="copy"
+          name="content-copy"
           onPress={handleDuplicate}
           disabled={!selected.length}
           accessibilityLabel="Duplicate selected frames"
         />
         <IconButton
-          name="trash-2"
+          name="delete-forever"
           onPress={handleDeleteSelected}
           disabled={!selected.length}
           accessibilityLabel="Delete selected frames"
         />
         <IconButton
-          name="clipboard"
+          name="content-paste"
           onPress={editor.copySelected}
           disabled={!selected.length}
           accessibilityLabel="Copy selected frames"
         />
         <IconButton
-          name="scissors"
+          name="content-cut"
           onPress={editor.cutSelected}
           disabled={!selected.length}
           accessibilityLabel="Cut selected frames"
         />
         <IconButton
-          name="clipboard"
+          name="content-paste"
           onPress={() => editor.pasteClipboard()}
           accessibilityLabel="Paste frames"
         />
         <IconButton
-          name="rotate-ccw"
+          name="rotate-left"
           onPress={editor.undo}
           disabled={!editor.canUndo}
           accessibilityLabel="Undo"
         />
         <IconButton
-          name="rotate-cw"
+          name="rotate-right"
           onPress={editor.redo}
           disabled={!editor.canRedo}
           accessibilityLabel="Redo"
         />
         <IconButton
-          name="check-square"
+          name="check-box"
           onPress={editor.selectAll}
           accessibilityLabel="Select all"
         />
         <IconButton
-          name="x-square"
+          name="close"
           onPress={editor.clearSelection}
           accessibilityLabel="Clear selection"
         />
@@ -103,18 +103,18 @@ export const FrameList = ({ editor }: FrameListProps) => {
               <Text style={styles.frameTitle}>Frame #{index + 1}</Text>
               <View style={styles.frameActions}>
                 <IconButton
-                  name="mouse-pointer"
+                  name="mouse"
                   onPress={() => editor.selectFrame(frame.id, { toggle: true })}
                   accessibilityLabel="Toggle frame selection"
                 />
                 <IconButton
-                  name="arrow-up"
+                  name="arrow-upward"
                   onPress={() => editor.reorderFrames(index, Math.max(0, index - 1))}
                   disabled={index === 0}
                   accessibilityLabel="Move frame up"
                 />
                 <IconButton
-                  name="arrow-down"
+                  name="arrow-downward"
                   onPress={() =>
                     editor.reorderFrames(index, Math.min(frames.length - 1, index + 1))
                   }
