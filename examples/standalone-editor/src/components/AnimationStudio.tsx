@@ -88,7 +88,8 @@ export const AnimationStudio = ({ editor, integration, image }: AnimationStudioP
   const {
     activeAnimation,
     setActiveAnimation,
-    play,
+    playForward,
+    playReverse,
     pause,
     stop,
     seekFrame,
@@ -634,14 +635,21 @@ export const AnimationStudio = ({ editor, integration, image }: AnimationStudioP
           <View style={styles.timelineToolbar}>
             <View style={styles.timelineButtons}>
               <IconButton
+                name="play"
+                onPress={() => playReverse(currentAnimationName)}
+                disabled={isPlaying || currentSequence.length === 0}
+                accessibilityLabel="Play animation in reverse"
+                iconStyle={styles.reverseIcon}
+              />
+              <IconButton
                 name={isPlaying ? 'pause' : 'square'}
                 onPress={() => (isPlaying ? pause() : stop())}
                 accessibilityLabel={isPlaying ? 'Pause animation preview' : 'Stop animation preview'}
               />
               <IconButton
                 name="play"
-                onPress={() => play(currentAnimationName)}
-                disabled={isPlaying}
+                onPress={() => playForward(currentAnimationName)}
+                disabled={isPlaying || currentSequence.length === 0}
                 accessibilityLabel="Play animation preview"
               />
               <View style={styles.timelineDivider} />
@@ -1114,6 +1122,9 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     flexWrap: 'wrap',
     columnGap: 4,
+  },
+  reverseIcon: {
+    transform: [{ scaleX: -1 }],
   },
   timelineDivider: {
     width: 1,

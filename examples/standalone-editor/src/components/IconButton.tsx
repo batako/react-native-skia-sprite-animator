@@ -1,5 +1,5 @@
 import React from 'react';
-import { StyleSheet, TouchableOpacity, ViewStyle } from 'react-native';
+import { StyleSheet, TouchableOpacity, ViewStyle, type StyleProp, type TextStyle } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 
 type FeatherName = React.ComponentProps<typeof Feather>['name'];
@@ -12,6 +12,7 @@ export interface IconButtonProps {
   color?: string;
   style?: ViewStyle;
   accessibilityLabel?: string;
+  iconStyle?: StyleProp<TextStyle>;
 }
 
 export const IconButton: React.FC<IconButtonProps> = ({
@@ -22,6 +23,7 @@ export const IconButton: React.FC<IconButtonProps> = ({
   color = '#f4f7ff',
   style,
   accessibilityLabel,
+  iconStyle,
 }) => {
   return (
     <TouchableOpacity
@@ -31,7 +33,7 @@ export const IconButton: React.FC<IconButtonProps> = ({
       disabled={disabled}
       style={[styles.button, disabled && styles.disabled, style]}
     >
-      <Feather name={name} size={size} color={disabled ? '#6b7280' : color} />
+      <Feather name={name} size={size} color={disabled ? '#6b7280' : color} style={iconStyle} />
     </TouchableOpacity>
   );
 };

@@ -17,7 +17,7 @@ export const PlaybackControls = ({ integration, image }: PlaybackControlsProps) 
     availableAnimations,
     activeAnimation,
     setActiveAnimation,
-    play,
+    playForward,
     pause,
     stop,
     seekFrame,
@@ -31,14 +31,14 @@ export const PlaybackControls = ({ integration, image }: PlaybackControlsProps) 
 
   const handleSelectAnimation = (name: string | null) => {
     setActiveAnimation(name);
-    play(name);
+    playForward(name);
   };
 
   const adjustSpeed = (delta: number) => {
     const next = Math.min(4, Math.max(0.25, Number((speedScale + delta).toFixed(2))));
     setSpeedScale(next);
     if (isPlaying) {
-      play(activeAnimation);
+      playForward(activeAnimation);
     }
   };
 
@@ -60,7 +60,7 @@ export const PlaybackControls = ({ integration, image }: PlaybackControlsProps) 
       <View style={styles.buttonRow}>
         <IconButton
           name={isPlaying ? 'pause' : 'play'}
-          onPress={() => (isPlaying ? pause() : play(activeAnimation))}
+          onPress={() => (isPlaying ? pause() : playForward(activeAnimation))}
           accessibilityLabel={isPlaying ? 'Pause' : 'Play'}
         />
         <IconButton name="square" onPress={stop} accessibilityLabel="Stop" />
