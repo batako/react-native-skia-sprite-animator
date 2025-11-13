@@ -74,13 +74,35 @@ const fpsToDuration = (fps: number) => {
   return 1000 / safeFps;
 };
 
+const renameRecordKey = <T,>(
+  record: Record<string, T> | undefined,
+  from: string,
+  to: string,
+): Record<string, T> => {
+  if (!record) {
+    return {};
+  }
+  let renamed = false;
+  const entries = Object.entries(record);
+  const next: Record<string, T> = {};
+  entries.forEach(([key, value]) => {
+    if (key === from) {
+      next[to] = value;
+      renamed = true;
+    } else {
+      next[key] = value;
+    }
+  });
+  return renamed ? next : { ...record };
+};
+
 export const AnimationStudio = ({ editor, integration, image }: AnimationStudioProps) => {
   const frames = editor.state.frames;
-  const animations = editor.state.animations;
+  const animations = editor.state.animations ?? {};
   const [thumbnailScale, setThumbnailScale] = useState(1);
   const [timelineClipboard, setTimelineClipboard] = useState<number[] | null>(null);
   const [selectedTimelineIndex, setSelectedTimelineIndex] = useState<number | null>(null);
-  const [isRenaming, setIsRenaming] = useState(false);
+  const [renamingAnimation, setRenamingAnimation] = useState<string | null>(null);
   const [renameDraft, setRenameDraft] = useState('');
   const [renameError, setRenameError] = useState<string | null>(null);
   const [timelineMeasuredHeight, setTimelineMeasuredHeight] = useState(0);
@@ -138,6 +160,58 @@ export const AnimationStudio = ({ editor, integration, image }: AnimationStudioP
     [],
   );
 
+  const cancelRename = useCallback(() => {
+    setRenamingAnimation(null);
+    setRenameDraft('');
+    setRenameError(null);
+  }, []);
+
+  const handleRenameSubmit = useCallback(() => {
+    if (!renamingAnimation) {
+      return;
+    }
+    const nextName = renameDraft.trim();
+    if (!nextName.length) {
+      setRenameError('名前を入力してください');
+      return;
+    }
+    if (nextName !== renamingAnimation && animations[nextName]) {
+      setRenameError('同名のアニメーションが存在します');
+      return;
+    }
+    if (nextName !== renamingAnimation) {
+      const sourceSequence = animations[renamingAnimation] ?? [];
+      const nextAnimations = renameRecordKey(animations, renamingAnimation, nextName);
+      if (!Object.prototype.hasOwnProperty.call(nextAnimations, nextName)) {
+        nextAnimations[nextName] = sourceSequence;
+      }
+      editor.setAnimations(nextAnimations);
+
+      const settings = getAnimationSettings(editor.state.meta);
+      const nextFps = renameRecordKey(settings.fps, renamingAnimation, nextName);
+      const nextMultipliers = renameRecordKey(settings.multipliers, renamingAnimation, nextName);
+      editor.updateMeta({
+        animationSettings: {
+          ...settings,
+          fps: Object.keys(nextFps).length ? nextFps : undefined,
+          multipliers: Object.keys(nextMultipliers).length ? nextMultipliers : undefined,
+        },
+      });
+      const nextAnimationsMeta = renameRecordKey(animationsMeta, renamingAnimation, nextName);
+      editor.setAnimationsMeta(nextAnimationsMeta);
+      setActiveAnimation(nextName);
+    }
+    cancelRename();
+  }, [
+    animations,
+    animationsMeta,
+    cancelRename,
+    editor,
+    renamingAnimation,
+    renameDraft,
+    setActiveAnimation,
+  ]);
+
   const handleSelectAnimationItem = useCallback(
     (name: string) => {
       if (!name || name === currentAnimationName) {
@@ -166,17 +240,55 @@ export const AnimationStudio = ({ editor, integration, image }: AnimationStudioP
     ],
   );
 
+  const handleAnimationListPress = useCallback(
+    (name: string) => {
+      if (renamingAnimation && renamingAnimation !== name) {
+        handleRenameSubmit();
+      }
+      if (currentAnimationName === name) {
+        if (renamingAnimation !== name) {
+          setRenamingAnimation(name);
+          setRenameDraft(name);
+          setRenameError(null);
+        }
+        return;
+      }
+      cancelRename();
+      handleSelectAnimationItem(name);
+    },
+    [
+      cancelRename,
+      currentAnimationName,
+      handleRenameSubmit,
+      handleSelectAnimationItem,
+      renamingAnimation,
+      setRenamingAnimation,
+      setRenameDraft,
+      setRenameError,
+    ],
+  );
+
   const animationNames = useMemo(() => Object.keys(animations), [animations]);
   const animationsMeta = editor.state.animationsMeta;
 
   useEffect(() => {
+    if (renamingAnimation && renamingAnimation !== currentAnimationName) {
+      cancelRename();
+    }
     if (!animationNames.length) {
       return;
     }
     if (!activeAnimation || !animationNames.includes(activeAnimation)) {
       setActiveAnimation(animationNames[0]);
     }
-  }, [activeAnimation, animationNames, setActiveAnimation]);
+  }, [
+    activeAnimation,
+    animationNames,
+    cancelRename,
+    currentAnimationName,
+    renamingAnimation,
+    setActiveAnimation,
+  ]);
 
   const currentAnimationName = activeAnimation ?? animationNames[0];
   const currentSequence = useMemo(
@@ -335,46 +447,6 @@ export const AnimationStudio = ({ editor, integration, image }: AnimationStudioP
       [name]: [],
     });
     setActiveAnimation(name);
-  };
-
-  const handleStartRename = () => {
-    if (!currentAnimationName) {
-      return;
-    }
-    setRenameDraft(currentAnimationName);
-    setRenameError(null);
-    setIsRenaming(true);
-  };
-
-  const handleRenameConfirm = () => {
-    if (!currentAnimationName) {
-      return;
-    }
-    const nextName = renameDraft.trim();
-    if (!nextName.length) {
-      setRenameError('名前を入力してください');
-      return;
-    }
-    if (nextName !== currentAnimationName && animations[nextName]) {
-      setRenameError('同名のアニメーションが存在します');
-      return;
-    }
-    if (nextName === currentAnimationName) {
-      setIsRenaming(false);
-      setRenameError(null);
-      return;
-    }
-    const nextAnimations = { ...animations, [nextName]: animations[currentAnimationName] };
-    delete nextAnimations[currentAnimationName];
-    editor.setAnimations(nextAnimations);
-    setActiveAnimation(nextName);
-    setIsRenaming(false);
-    setRenameError(null);
-  };
-
-  const handleRenameCancel = () => {
-    setIsRenaming(false);
-    setRenameError(null);
   };
 
   const handleDeleteAnimation = useCallback(
@@ -632,25 +704,6 @@ export const AnimationStudio = ({ editor, integration, image }: AnimationStudioP
       <View style={styles.header}>
         <Text style={styles.title}>Animation Studio</Text>
       </View>
-      {isRenaming && currentAnimationName && (
-        <View style={styles.renameRow}>
-          <Text style={styles.renameLabel}>名称変更</Text>
-          <TextInput
-            style={styles.renameInput}
-            value={renameDraft}
-            onChangeText={setRenameDraft}
-            autoFocus
-            onSubmitEditing={handleRenameConfirm}
-          />
-          <IconButton
-            name="check"
-            onPress={handleRenameConfirm}
-            accessibilityLabel="Confirm rename"
-          />
-          <IconButton name="close" onPress={handleRenameCancel} accessibilityLabel="Cancel rename" />
-        </View>
-      )}
-      {renameError && <Text style={styles.renameError}>{renameError}</Text>}
       <View style={styles.previewSection}>
         <PreviewPlayer integration={integration} image={image} />
       </View>
@@ -658,12 +711,6 @@ export const AnimationStudio = ({ editor, integration, image }: AnimationStudioP
         <View style={animationColumnStyle}>
           <Text style={styles.sectionTitle}>Animations</Text>
           <View style={styles.animationToolbar}>
-            <IconButton
-              name="edit"
-              onPress={handleStartRename}
-              disabled={!currentAnimationName}
-              accessibilityLabel="Rename animation"
-            />
             <IconButton name="add" onPress={handleAddAnimation} accessibilityLabel="Add animation" />
             <IconButton
               name="delete"
@@ -697,9 +744,27 @@ export const AnimationStudio = ({ editor, integration, image }: AnimationStudioP
                   styles.animationListItem,
                   currentAnimationName === name && styles.animationListItemActive,
                 ]}
-                onPress={() => handleSelectAnimationItem(name)}
+                onPress={() => handleAnimationListPress(name)}
               >
-                <Text style={styles.animationListItemText}>{name}</Text>
+                <View style={styles.animationListItemInner}>
+                  {renamingAnimation === name ? (
+                    <>
+                      <TextInput
+                        style={styles.animationRenameInput}
+                        value={renameDraft}
+                        onChangeText={setRenameDraft}
+                        autoFocus
+                        onBlur={handleRenameSubmit}
+                        onSubmitEditing={handleRenameSubmit}
+                      />
+                      {renameError && (
+                        <Text style={styles.renameErrorInline}>{renameError}</Text>
+                      )}
+                    </>
+                  ) : (
+                    <Text style={styles.animationListItemText}>{name}</Text>
+                  )}
+                </View>
               </TouchableOpacity>
             ))}
           </ScrollView>
@@ -1116,30 +1181,25 @@ const styles = StyleSheet.create({
   headerActions: {
     flexDirection: 'row',
   },
-  renameRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginTop: 12,
-    gap: 8,
+  animationRenameContainer: {
+    width: '100%',
+    flexDirection: 'column',
+    gap: 2,
   },
-  renameLabel: {
-    color: '#cfd7f3',
-    fontSize: 12,
-  },
-  renameInput: {
-    flex: 1,
-    paddingHorizontal: 10,
-    paddingVertical: 6,
-    borderRadius: 8,
+  animationRenameInput: {
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 4,
     borderWidth: 1,
     borderColor: '#2f3850',
     color: '#fff',
     backgroundColor: '#191f2d',
+    height: 32,
   },
-  renameError: {
-    marginTop: 4,
+  renameErrorInline: {
     color: '#ff6b6b',
     fontSize: 11,
+    lineHeight: 12,
   },
   previewSection: {
     marginTop: 12,
@@ -1210,10 +1270,14 @@ const styles = StyleSheet.create({
     paddingVertical: 4,
   },
   animationListItem: {
-    paddingVertical: 10,
-    paddingHorizontal: 12,
+    minHeight: 40,
+    paddingHorizontal: 10,
     borderBottomWidth: 1,
     borderBottomColor: 'rgba(255,255,255,0.05)',
+  },
+  animationListItemInner: {
+    flex: 1,
+    justifyContent: 'center',
   },
   animationListItemActive: {
     backgroundColor: '#28304b',
