@@ -13,7 +13,8 @@ import {
 import type { ImageSourcePropType } from 'react-native';
 import type { SpriteEditorApi, SpriteEditorFrame } from 'react-native-skia-sprite-animator';
 import type { DataSourceParam } from '@shopify/react-native-skia';
-import { IconButton } from './IconButton';
+import { MaterialIcons } from '@expo/vector-icons';
+import { IconButton, type IconButtonRenderIconProps } from './IconButton';
 import { PreviewPlayer } from './PreviewPlayer';
 import { FrameGridSelector, type FrameGridCell } from './FrameGridSelector';
 import type { EditorIntegration } from '../hooks/useEditorIntegration';
@@ -98,6 +99,31 @@ export const AnimationStudio = ({ editor, integration, image }: AnimationStudioP
     setSpeedScale,
     frameCursor,
   } = integration;
+
+  const renderResumeForwardIcon = useCallback(
+    ({ color, size }: IconButtonRenderIconProps) => (
+      <View style={styles.resumeIcon}>
+        <View style={[styles.resumeIconBar, { backgroundColor: color, height: size }]} />
+        <MaterialIcons name="play-arrow" size={size} color={color} />
+      </View>
+    ),
+    [],
+  );
+
+  const renderResumeReverseIcon = useCallback(
+    ({ color, size }: IconButtonRenderIconProps) => (
+      <View style={[styles.resumeIcon, styles.resumeIconReverse]}>
+        <View style={[styles.resumeIconBar, { backgroundColor: color, height: size }]} />
+        <MaterialIcons
+          name="play-arrow"
+          size={size}
+          color={color}
+          style={styles.reverseIcon}
+        />
+      </View>
+    ),
+    [],
+  );
 
   const animationNames = useMemo(() => Object.keys(animations), [animations]);
   const animationsMeta = editor.state.animationsMeta;
@@ -635,19 +661,46 @@ export const AnimationStudio = ({ editor, integration, image }: AnimationStudioP
           <View style={styles.timelineToolbar}>
             <View style={styles.timelineButtons}>
               <IconButton
-                name="play"
+                iconFamily="material"
+                name="play-arrow"
                 onPress={() => playReverse(currentAnimationName)}
                 disabled={isPlaying || currentSequence.length === 0}
                 accessibilityLabel="Play animation in reverse"
                 iconStyle={styles.reverseIcon}
               />
               <IconButton
-                name={isPlaying ? 'pause' : 'square'}
+                renderIcon={renderResumeReverseIcon}
+                onPress={() => {
+                  if (!currentSequence.length) {
+                    return;
+                  }
+                  stop();
+                  playReverse(currentAnimationName);
+                }}
+                disabled={currentSequence.length === 0}
+                accessibilityLabel="Restart animation in reverse from beginning"
+              />
+              <IconButton
+                iconFamily="material"
+                name={isPlaying ? 'pause' : 'stop'}
                 onPress={() => (isPlaying ? pause() : stop())}
                 accessibilityLabel={isPlaying ? 'Pause animation preview' : 'Stop animation preview'}
               />
               <IconButton
-                name="play"
+                renderIcon={renderResumeForwardIcon}
+                onPress={() => {
+                  if (!currentSequence.length) {
+                    return;
+                  }
+                  stop();
+                  playForward(currentAnimationName);
+                }}
+                disabled={currentSequence.length === 0}
+                accessibilityLabel="Restart animation from beginning"
+              />
+              <IconButton
+                iconFamily="material"
+                name="play-arrow"
                 onPress={() => playForward(currentAnimationName)}
                 disabled={isPlaying || currentSequence.length === 0}
                 accessibilityLabel="Play animation preview"
@@ -1122,6 +1175,18 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     flexWrap: 'wrap',
     columnGap: 4,
+  },
+  resumeIcon: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 2,
+  },
+  resumeIconReverse: {
+    flexDirection: 'row-reverse',
+  },
+  resumeIconBar: {
+    width: 2,
+    borderRadius: 1,
   },
   reverseIcon: {
     transform: [{ scaleX: -1 }],

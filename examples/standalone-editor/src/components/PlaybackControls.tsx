@@ -59,11 +59,17 @@ export const PlaybackControls = ({ integration, image }: PlaybackControlsProps) 
       </View>
       <View style={styles.buttonRow}>
         <IconButton
-          name={isPlaying ? 'pause' : 'play'}
+          iconFamily="material"
+          name={isPlaying ? 'pause' : 'play-arrow'}
           onPress={() => (isPlaying ? pause() : playForward(activeAnimation))}
           accessibilityLabel={isPlaying ? 'Pause' : 'Play'}
         />
-        <IconButton name="square" onPress={stop} accessibilityLabel="Stop" />
+        <IconButton
+          iconFamily="material"
+          name="stop"
+          onPress={stop}
+          accessibilityLabel="Stop"
+        />
         <IconButton
           name="target"
           onPress={() => selectedFrameIndex !== null && seekFrame(selectedFrameIndex)}
