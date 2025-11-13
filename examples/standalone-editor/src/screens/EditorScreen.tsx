@@ -90,7 +90,7 @@ export const EditorScreen = () => {
     <SafeAreaView style={styles.safeArea}>
       <StatusBar barStyle="light-content" />
       <ScrollView contentContainerStyle={styles.scroll}>
-        <Text style={styles.title}>Sprite Editor v0.4 Preview</Text>
+        <Text style={styles.title}>Sprite Editor</Text>
         <Text style={styles.subtitle}>
           Edit frames, play animations, switch templates, and persist sprites to disk with a single
           screen.
