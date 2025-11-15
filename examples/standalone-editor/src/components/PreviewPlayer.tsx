@@ -20,8 +20,15 @@ export const PreviewPlayer = ({
   width,
   height,
 }: PreviewPlayerProps) => {
-  const { animatorRef, runtimeData, animationsMeta, speedScale, onFrameChange, onAnimationEnd } =
-    integration;
+  const {
+    animatorRef,
+    runtimeData,
+    animationsMeta,
+    speedScale,
+    onFrameChange,
+    onAnimationEnd,
+    activeAnimation,
+  } = integration;
   const { width: imageWidth, height: imageHeight } = useImageDimensions(image);
   const [viewportWidth, setViewportWidth] = React.useState<number | null>(null);
   const [zoom, setZoom] = React.useState(1);
@@ -56,6 +63,13 @@ export const PreviewPlayer = ({
   const baseHeight = frameBounds.height || 64;
   const aspectRatio = baseHeight > 0 ? baseWidth / baseHeight : 1;
   const maxWidth = viewportWidth ? Math.max(200, viewportWidth - 16) : null;
+  const activeSequenceLength =
+    activeAnimation && runtimeData.animations
+      ? runtimeData.animations[activeAnimation]?.length ?? 0
+      : null;
+  const hasFramesToRender = activeAnimation
+    ? (activeSequenceLength ?? 0) > 0
+    : (runtimeData.frames?.length ?? 0) > 0;
 
   let targetWidth = width ?? baseWidth;
   let targetHeight = height ?? baseHeight;
@@ -160,18 +174,22 @@ export const PreviewPlayer = ({
           <View style={[styles.canvasInner, { height: displayHeight }]}>
             <View style={[styles.canvasViewport, { width: zoomedWidth, height: zoomedHeight }]}>
               <View style={{ width: targetWidth, height: targetHeight, transform: [{ scale: zoom }] }}>
-                <SpriteAnimator
-                  ref={animatorRef}
-                  image={image}
-                  data={runtimeData}
-                  fps={12}
-                  loop
-                  animationsMeta={animationsMeta}
-                  speedScale={speedScale}
-                  onFrameChange={onFrameChange}
-                  onAnimationEnd={onAnimationEnd}
-                  style={[styles.canvas, { width: targetWidth, height: targetHeight }]}
-                />
+                {hasFramesToRender ? (
+                  <SpriteAnimator
+                    ref={animatorRef}
+                    image={image}
+                    data={runtimeData}
+                    fps={12}
+                    loop
+                    animationsMeta={animationsMeta}
+                    speedScale={speedScale}
+                    onFrameChange={onFrameChange}
+                    onAnimationEnd={onAnimationEnd}
+                    style={[styles.canvas, { width: targetWidth, height: targetHeight }]}
+                  />
+                ) : (
+                  <View style={{ width: targetWidth, height: targetHeight }} />
+                )}
               </View>
             </View>
           </View>
