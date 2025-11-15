@@ -72,5 +72,11 @@ module.exports = defineConfig([
       ],
     },
   },
+  {
+    files: ['examples/standalone-editor/**/*.{ts,tsx,js}'],
+    rules: {
+      'import/no-unresolved': 'off',
+    },
+  },
   eslintConfigPrettier,
 ]);
