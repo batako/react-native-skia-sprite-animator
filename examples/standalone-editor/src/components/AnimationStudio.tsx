@@ -124,6 +124,7 @@ export const AnimationStudio = ({ editor, integration, image, onSelectImage }: A
     speedScale,
     setSpeedScale,
     frameCursor,
+    timelineCursor,
   } = integration;
   const multiplierFieldRef = useRef<MultiplierFieldHandle>(null);
   const commitPendingMultiplier = useCallback(() => {
@@ -341,6 +342,81 @@ export const AnimationStudio = ({ editor, integration, image, onSelectImage }: A
     animations,
     currentAnimationName,
     setTimelineSelection,
+  ]);
+
+  useEffect(() => {
+    if (timelineCursor === null) {
+      return;
+    }
+    if (timelineCursor < 0 || timelineCursor >= currentSequence.length) {
+      return;
+    }
+    setTimelineSelection((prev) => {
+      if (prev === timelineCursor) {
+        return prev;
+      }
+      return timelineCursor;
+    });
+  }, [currentSequence.length, setTimelineSelection, timelineCursor]);
+
+  const resolvePlaybackStartCursor = useCallback(
+    (direction: 'forward' | 'reverse' = 'forward') => {
+      if (!currentSequence.length) {
+        return null;
+      }
+      const lastCursor = currentSequence.length - 1;
+      let start =
+      selectedTimelineIndex !== null &&
+      selectedTimelineIndex >= 0 &&
+      selectedTimelineIndex < currentSequence.length
+        ? selectedTimelineIndex
+        : timelineCursor !== null &&
+            timelineCursor >= 0 &&
+            timelineCursor < currentSequence.length
+          ? timelineCursor
+          : 0;
+      if (!currentAnimationLoop) {
+        if (direction === 'forward' && start === lastCursor) {
+          start = 0;
+        } else if (direction === 'reverse' && start === 0) {
+          start = lastCursor;
+        }
+      }
+      return start;
+    },
+    [currentAnimationLoop, currentSequence.length, selectedTimelineIndex, timelineCursor],
+  );
+
+  const handlePlayFromSelection = useCallback(() => {
+    if (!currentAnimationName || !currentSequence.length) {
+      return;
+    }
+    const startCursor = resolvePlaybackStartCursor();
+    if (startCursor === null) {
+      return;
+    }
+    playForward(currentAnimationName, { fromFrame: startCursor });
+  }, [
+    currentAnimationName,
+    currentSequence.length,
+    playForward,
+    resolvePlaybackStartCursor,
+  ]);
+
+  const handleReverseFromSelection = useCallback(() => {
+    if (!currentAnimationName || !currentSequence.length) {
+      return;
+    }
+    const startCursor = resolvePlaybackStartCursor('reverse');
+    if (startCursor === null) {
+      return;
+    }
+    playReverse(currentAnimationName, { fromFrame: startCursor });
+  }, [
+    currentAnimationName,
+    currentSequence.length,
+    playReverse,
+    resolvePlaybackStartCursor,
   ]);
 
   const imageInfo = useImageDimensions(image);
@@ -865,11 +941,11 @@ export const AnimationStudio = ({ editor, integration, image, onSelectImage }: A
                 <IconButton
                   iconFamily="material"
                   name="play-arrow"
-                onPress={() => playReverse(currentAnimationName)}
-                disabled={isPlaying || currentSequence.length === 0}
-                accessibilityLabel="Play animation in reverse"
-                iconStyle={styles.reverseIcon}
-              />
+                  onPress={handleReverseFromSelection}
+                  disabled={isPlaying || currentSequence.length === 0}
+                  accessibilityLabel="Play animation in reverse"
+                  iconStyle={styles.reverseIcon}
+                />
               <IconButton
                 renderIcon={renderResumeReverseIcon}
                 onPress={() => {
@@ -877,7 +953,7 @@ export const AnimationStudio = ({ editor, integration, image, onSelectImage }: A
                     return;
                   }
                   stop();
-                  playReverse(currentAnimationName);
+                  playReverse(currentAnimationName, { fromFrame: currentSequence.length - 1 });
                 }}
                 disabled={currentSequence.length === 0}
                 accessibilityLabel="Restart animation in reverse from beginning"
@@ -896,18 +972,18 @@ export const AnimationStudio = ({ editor, integration, image, onSelectImage }: A
                     return;
                   }
                   stop();
-                  playForward(currentAnimationName);
+                  playForward(currentAnimationName, { fromFrame: 0 });
                 }}
                 disabled={currentSequence.length === 0}
                 accessibilityLabel="Restart animation from beginning"
               />
-              <IconButton
-                iconFamily="material"
-                name="play-arrow"
-                onPress={() => playForward(currentAnimationName)}
-                disabled={isPlaying || currentSequence.length === 0}
-                accessibilityLabel="Play animation preview"
-              />
+                <IconButton
+                  iconFamily="material"
+                  name="play-arrow"
+                  onPress={handlePlayFromSelection}
+                  disabled={isPlaying || currentSequence.length === 0}
+                  accessibilityLabel="Play animation preview"
+                />
               <View style={styles.timelineDivider} />
               <IconButton
                 name="grid-on"

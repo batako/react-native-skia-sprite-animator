@@ -28,6 +28,7 @@ export const useEditorIntegration = ({ editor }: UseEditorIntegrationOptions) =>
   const [activeAnimation, setActiveAnimation] = useState<string | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [frameCursor, setFrameCursor] = useState(0);
+  const [timelineCursor, setTimelineCursor] = useState<number | null>(null);
   const [playDirection, setPlayDirection] = useState<SpriteAnimatorDirection>('forward');
   const endedAnimationRef = useRef<string | null>(null);
 
@@ -46,19 +47,35 @@ export const useEditorIntegration = ({ editor }: UseEditorIntegrationOptions) =>
     endedAnimationRef.current = null;
     setIsPlaying(false);
     setFrameCursor((prev) => {
-      if (!editor.state.frames.length) {
+      if (!runtimeData.frames.length) {
         return 0;
       }
       if (!Number.isFinite(prev) || prev < 0) {
         return 0;
       }
-      const maxFrame = editor.state.frames.length - 1;
+      const maxFrame = runtimeData.frames.length - 1;
       if (prev > maxFrame) {
         return maxFrame;
       }
       return prev;
     });
-  }, [editor.state.frames.length, runtimeData.frames, runtimeData.animations]);
+    setTimelineCursor((prev) => {
+      const activeName = animator?.getCurrentAnimation?.() ?? null;
+      const sequence =
+        activeName && runtimeData.animations ? runtimeData.animations[activeName] ?? [] : [];
+      if (!sequence.length) {
+        return null;
+      }
+      if (prev === null || !Number.isFinite(prev) || prev < 0) {
+        return 0;
+      }
+      const maxCursor = sequence.length - 1;
+      if (prev > maxCursor) {
+        return maxCursor;
+      }
+      return prev;
+    });
+  }, [runtimeData.animations, runtimeData.frames]);
 
   const play = useCallback(
     (name?: string | null, opts?: PlayOptions) => {
@@ -191,6 +208,7 @@ export const useEditorIntegration = ({ editor }: UseEditorIntegrationOptions) =>
           });
         }
         setFrameCursor(fallbackFrameIndex);
+        setTimelineCursor(null);
         return;
       }
 
@@ -209,12 +227,14 @@ export const useEditorIntegration = ({ editor }: UseEditorIntegrationOptions) =>
       }
       const resolvedFrameIndex = sequence[resolvedCursor] ?? fallbackFrameIndex;
       setFrameCursor(resolvedFrameIndex);
+      setTimelineCursor(resolvedCursor);
     },
     [activeAnimation, getSequence],
   );
 
   const onFrameChange = useCallback((event: SpriteAnimatorFrameChangeEvent) => {
     setFrameCursor(event.frameIndex);
+    setTimelineCursor(event.frameCursor);
   }, []);
 
   const getSequence = useCallback(
@@ -236,11 +256,13 @@ export const useEditorIntegration = ({ editor }: UseEditorIntegrationOptions) =>
       if (!sequence.length) {
         return;
       }
-      const lastCursor = Math.max(0, sequence.length - 1);
-      const lastFrameIndex = sequence[lastCursor];
-      setFrameCursor(lastFrameIndex);
+      const cursor =
+        playDirection === 'reverse' ? 0 : Math.max(0, sequence.length - 1);
+      const frameIndex = sequence[cursor];
+      setFrameCursor(frameIndex);
+      setTimelineCursor(cursor);
     },
-    [getSequence],
+    [getSequence, playDirection],
   );
 
   const availableAnimations = useMemo(
@@ -284,6 +306,7 @@ export const useEditorIntegration = ({ editor }: UseEditorIntegrationOptions) =>
     seekFrame,
     isPlaying,
     frameCursor,
+    timelineCursor,
     onFrameChange,
     onAnimationEnd,
     selectedFrameIndex,
