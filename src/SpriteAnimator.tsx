@@ -50,6 +50,8 @@ export type SpriteAnimations = Record<string, number[]>;
 export interface SpriteAnimationMeta {
   /** Indicates whether the animation should loop when it reaches the end. */
   loop?: boolean;
+  /** When true, editor previews may automatically start playback. */
+  autoPlay?: boolean;
 }
 
 /**

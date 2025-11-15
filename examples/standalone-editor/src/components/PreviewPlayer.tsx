@@ -181,6 +181,7 @@ export const PreviewPlayer = ({
                     data={runtimeData}
                     fps={12}
                     loop
+                    autoplay={false}
                     animationsMeta={animationsMeta}
                     speedScale={speedScale}
                     onFrameChange={onFrameChange}

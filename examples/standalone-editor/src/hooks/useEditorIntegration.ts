@@ -33,6 +33,10 @@ export const useEditorIntegration = ({ editor }: UseEditorIntegrationOptions) =>
   const endedAnimationRef = useRef<string | null>(null);
 
   const animationsState = editor.state.animations ?? {};
+  const animationsMetaState = useMemo(
+    () => editor.state.animationsMeta ?? {},
+    [editor.state.animationsMeta],
+  );
   const runtimeData = useMemo<SpriteData>(() => {
     return {
       frames: editor.state.frames.map(({ id: _id, ...frame }) => ({ ...frame })),
@@ -40,6 +44,13 @@ export const useEditorIntegration = ({ editor }: UseEditorIntegrationOptions) =>
       meta: editor.state.meta ?? {},
     } satisfies SpriteData;
   }, [animationsState, editor.state.frames, editor.state.meta]);
+
+  const autoPlayActiveAnimation = useMemo(() => {
+    if (!activeAnimation) {
+      return false;
+    }
+    return animationsMetaState[activeAnimation]?.autoPlay === true;
+  }, [activeAnimation, animationsMetaState]);
 
   useEffect(() => {
     const animator = animatorRef.current;
@@ -271,6 +282,17 @@ export const useEditorIntegration = ({ editor }: UseEditorIntegrationOptions) =>
   );
 
   useEffect(() => {
+    if (!autoPlayActiveAnimation || !activeAnimation) {
+      return;
+    }
+    const sequence = getSequence(activeAnimation);
+    if (!sequence.length) {
+      return;
+    }
+    playForward(activeAnimation);
+  }, [activeAnimation, autoPlayActiveAnimation, getSequence, playForward]);
+
+  useEffect(() => {
     if (activeAnimation && !availableAnimations.includes(activeAnimation)) {
       setActiveAnimation(null);
     }
@@ -288,7 +310,7 @@ export const useEditorIntegration = ({ editor }: UseEditorIntegrationOptions) =>
   return {
     animatorRef,
     runtimeData,
-    animationsMeta: editor.state.animationsMeta,
+    animationsMeta: animationsMetaState,
     speedScale,
     setSpeedScale,
     playDirection,
