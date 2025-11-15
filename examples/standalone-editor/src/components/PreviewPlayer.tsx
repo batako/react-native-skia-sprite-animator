@@ -168,12 +168,15 @@ export const PreviewPlayer = ({
               accessibilityLabel="Zoom out"
               style={styles.zoomButton}
             />
-            <IconButton
-              name="fullscreen"
-              onPress={resetZoom}
-              accessibilityLabel="Actual size"
-              style={styles.zoomButton}
-            />
+            <View style={styles.zoomLabelButton}>
+              <IconButton
+                name="fullscreen"
+                onPress={resetZoom}
+                accessibilityLabel="Reset zoom to 100%"
+                style={styles.zoomButton}
+              />
+              <Text style={styles.zoomLabel}>{Math.round(zoom * 100)}%</Text>
+            </View>
             <IconButton
               name="zoom-in"
               onPress={() => adjustZoom(0.25)}
@@ -237,6 +240,19 @@ const styles = StyleSheet.create({
   zoomButton: {
     marginRight: 4,
     marginBottom: 0,
+  },
+  zoomLabelButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginRight: 4,
+  },
+  zoomLabel: {
+    color: '#dfe7ff',
+    fontWeight: '600',
+    fontSize: 12,
+    marginLeft: 2,
+    minWidth: 40,
+    textAlign: 'center',
   },
   canvasCard: {
     backgroundColor: 'transparent',
