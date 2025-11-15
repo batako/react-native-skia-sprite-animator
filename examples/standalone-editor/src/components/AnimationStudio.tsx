@@ -988,33 +988,38 @@ export const AnimationStudio = ({ editor, integration, image, onSelectImage }: A
               <IconButton
                 name="grid-on"
                 onPress={() => setFramePickerVisible(true)}
-                disabled={!hasActiveAnimation}
+                disabled={!hasActiveAnimation || isPlaying}
                 accessibilityLabel="Open frame picker modal"
               />
               <View style={styles.timelineDivider} />
               <IconButton
                 name="content-copy"
                 onPress={handleCopyTimelineFrame}
-                disabled={selectedTimelineIndex === null}
+                disabled={isPlaying || selectedTimelineIndex === null}
                 accessibilityLabel="Copy timeline frame"
               />
               <IconButton
                 name="content-paste"
                 onPress={handlePasteTimelineFrame}
-                disabled={!timelineClipboard?.length}
+                disabled={isPlaying || !timelineClipboard?.length}
                 accessibilityLabel="Paste timeline frame"
               />
               <View style={styles.timelineDivider} />
               <IconButton
                 name="skip-previous"
                 onPress={() => handleMoveTimelineFrame(-1)}
-                disabled={selectedTimelineIndex === null || selectedTimelineIndex === 0}
+                disabled={
+                  isPlaying ||
+                  selectedTimelineIndex === null ||
+                  selectedTimelineIndex === 0
+                }
                 accessibilityLabel="Move frame left"
               />
               <IconButton
                 name="skip-next"
                 onPress={() => handleMoveTimelineFrame(1)}
                 disabled={
+                  isPlaying ||
                   selectedTimelineIndex === null ||
                   selectedTimelineIndex === currentSequence.length - 1 ||
                   currentSequence.length === 0
@@ -1024,7 +1029,7 @@ export const AnimationStudio = ({ editor, integration, image, onSelectImage }: A
               <IconButton
                 name="delete-forever"
                 onPress={handleRemoveTimelineFrame}
-                disabled={selectedTimelineIndex === null}
+                disabled={isPlaying || selectedTimelineIndex === null}
                 accessibilityLabel="Remove timeline frame"
               />
               </View>
@@ -1032,7 +1037,7 @@ export const AnimationStudio = ({ editor, integration, image, onSelectImage }: A
               <MultiplierField
                 ref={multiplierFieldRef}
                 value={selectedMultiplier}
-                disabled={!selectedFrame}
+                disabled={isPlaying || !selectedFrame}
                 onSubmit={handleMultiplierSubmit}
               />
             </View>
