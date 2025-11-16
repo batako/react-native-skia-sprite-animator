@@ -52,8 +52,6 @@ export type SpriteAnimations = Record<string, number[]>;
 export interface SpriteAnimationMeta {
   /** Indicates whether the animation should loop when it reaches the end. */
   loop?: boolean;
-  /** When true, editor previews may automatically start playback. */
-  autoPlay?: boolean;
   /** Optional FPS override for this animation (used when frame duration is not provided). */
   fps?: number;
   /** Optional per-timeline multipliers to stretch individual keyframes. */
@@ -88,6 +86,8 @@ export interface SpriteData {
   animationsMeta?: SpriteAnimationsMeta;
   /** Free-form metadata attached to the sprite. */
   meta?: SpriteDataMeta;
+  /** Animation that should auto-play when the sprite is loaded. */
+  autoPlayAnimation?: string | null;
 }
 
 /**

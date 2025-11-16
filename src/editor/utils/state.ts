@@ -54,6 +54,7 @@ export const cloneSnapshot = (snapshot: SpriteEditorSnapshot): SpriteEditorSnaps
   animations: cloneAnimations(snapshot.animations),
   animationsMeta: cloneAnimationsMeta(snapshot.animationsMeta),
   selected: [...snapshot.selected],
+  autoPlayAnimation: snapshot.autoPlayAnimation ?? null,
   meta: { ...snapshot.meta },
 });
 
@@ -65,5 +66,6 @@ export const snapshotFromState = (state: SpriteEditorState): SpriteEditorSnapsho
   animations: cloneAnimations(state.animations),
   animationsMeta: cloneAnimationsMeta(state.animationsMeta),
   selected: [...state.selected],
+  autoPlayAnimation: state.autoPlayAnimation ?? null,
   meta: { ...state.meta },
 });

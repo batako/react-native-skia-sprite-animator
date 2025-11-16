@@ -223,15 +223,23 @@ export const cleanSpriteData = <TFrame extends SpriteFrame>(
     }
   }
 
+  let autoPlayAnimation =
+    typeof data.autoPlayAnimation === 'string'
+      ? data.autoPlayAnimation
+      : typeof data.meta?.autoPlayAnimation === 'string'
+        ? data.meta.autoPlayAnimation
+        : null;
   const finalAnimationsMeta: SpriteAnimationsMeta = {};
   Object.entries(cleanedAnimations).forEach(([name, sequence]) => {
-    const baseEntry = animationsMeta?.[name] ?? {};
+    const baseEntry = (animationsMeta?.[name] ?? {}) as SpriteAnimationMeta & {
+      autoPlay?: boolean;
+    };
+    if (baseEntry.autoPlay && !autoPlayAnimation) {
+      autoPlayAnimation = name;
+    }
     const finalEntry: SpriteAnimationMeta = {};
     if (typeof baseEntry.loop === 'boolean') {
       finalEntry.loop = baseEntry.loop;
-    }
-    if (typeof baseEntry.autoPlay === 'boolean') {
-      finalEntry.autoPlay = baseEntry.autoPlay;
     }
     const fps = clampLegacyFps(baseEntry.fps ?? DEFAULT_ANIMATION_FPS);
     finalEntry.fps = fps;
@@ -249,6 +257,15 @@ export const cleanSpriteData = <TFrame extends SpriteFrame>(
   });
 
   let meta = data.meta ? { ...data.meta } : undefined;
+  if (autoPlayAnimation && !cleanedAnimations[autoPlayAnimation]) {
+    autoPlayAnimation = null;
+  }
+  if (meta && 'autoPlayAnimation' in meta) {
+    const { autoPlayAnimation: _ignored, ...rest } = meta as Record<string, unknown> & {
+      autoPlayAnimation?: unknown;
+    };
+    meta = rest;
+  }
   if (meta && 'animationSettings' in meta) {
     const { animationSettings, ...rest } = meta as Record<string, unknown> & {
       animationSettings?: LegacyAnimationSettings;
@@ -262,6 +279,7 @@ export const cleanSpriteData = <TFrame extends SpriteFrame>(
     frames,
     animations: cleanedAnimations,
     animationsMeta: finalAnimationsMeta,
+    autoPlayAnimation: autoPlayAnimation ?? undefined,
     frameIndexMap,
   };
 };

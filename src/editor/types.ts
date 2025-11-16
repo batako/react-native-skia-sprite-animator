@@ -36,6 +36,8 @@ export interface SpriteEditorSnapshot {
   animations: SpriteAnimations;
   /** Optional per-animation metadata overrides. */
   animationsMeta?: SpriteAnimationsMeta;
+  /** Animation selected for autoplay when exported. */
+  autoPlayAnimation?: string | null;
   /** Frame ids currently selected inside the editor UI. */
   selected: SpriteEditorSelection;
   /** Arbitrary metadata persisted alongside the sprite. */

@@ -114,6 +114,8 @@ export interface SpriteEditorApi {
   setAnimations: (animations: SpriteAnimations) => void;
   /** Replaces the animation meta map. */
   setAnimationsMeta: (meta?: SpriteAnimationsMeta) => void;
+  /** Sets the animation that should auto-play when exported. */
+  setAutoPlayAnimation: (name: string | null) => void;
   /** Partially updates sprite metadata. */
   updateMeta: (meta: Partial<SpriteEditorMeta>) => void;
   /** Resets the editor with a partial state. */
@@ -154,6 +156,7 @@ const createInitialState = (input?: Partial<SpriteEditorState>): SpriteEditorSta
     clipboard: cloneFrames(input?.clipboard ?? []),
     history: [],
     future: [],
+    autoPlayAnimation: input?.autoPlayAnimation ?? null,
     meta: { ...(input?.meta ?? {}) },
   };
 };
@@ -629,6 +632,7 @@ export const useSpriteEditor = (options: UseSpriteEditorOptions = {}): SpriteEdi
           animationsMeta: cloneAnimationsMeta(snapshot.animationsMeta),
           selected,
           clipboard: [],
+          autoPlayAnimation: snapshot.autoPlayAnimation ?? null,
           meta: { ...(snapshot.meta ?? {}) },
         };
       });
@@ -662,13 +666,41 @@ export const useSpriteEditor = (options: UseSpriteEditorOptions = {}): SpriteEdi
     [apply],
   );
 
+  /** Sets the animation that should auto-play when exported. */
+  const setAutoPlayAnimation = useCallback<SpriteEditorApi['setAutoPlayAnimation']>(
+    (animationName) => {
+      apply((prev) => {
+        const nextName =
+          animationName && prev.animations[animationName] ? animationName : null;
+        if (nextName === (prev.autoPlayAnimation ?? null)) {
+          return prev;
+        }
+        return {
+          ...prev,
+          autoPlayAnimation: nextName,
+        };
+      });
+    },
+    [apply],
+  );
+
   /** Merges the provided metadata into the existing object. */
   const updateMeta = useCallback<SpriteEditorApi['updateMeta']>(
     (meta) => {
-      apply((prev) => ({
-        ...prev,
-        meta: { ...prev.meta, ...meta },
-      }));
+      apply((prev) => {
+        const nextMeta: SpriteEditorMeta = { ...prev.meta };
+        Object.entries(meta).forEach(([key, value]) => {
+          if (value === undefined) {
+            delete nextMeta[key];
+          } else {
+            (nextMeta as Record<string, unknown>)[key] = value;
+          }
+        });
+        return {
+          ...prev,
+          meta: nextMeta,
+        };
+      });
     },
     [apply],
   );
@@ -701,6 +733,7 @@ export const useSpriteEditor = (options: UseSpriteEditorOptions = {}): SpriteEdi
       importJSON,
       setAnimations,
       setAnimationsMeta,
+      setAutoPlayAnimation,
       updateMeta,
       reset,
     }),
@@ -724,6 +757,7 @@ export const useSpriteEditor = (options: UseSpriteEditorOptions = {}): SpriteEdi
       importJSON,
       setAnimations,
       setAnimationsMeta,
+      setAutoPlayAnimation,
       updateMeta,
       reset,
     ],

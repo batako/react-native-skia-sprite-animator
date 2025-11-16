@@ -62,7 +62,8 @@ export function HeroPreview() {
 - `image`: Accepts both `require()` assets and `SkImage` values.
 - `data.frames`: Array of `{ x, y, w, h, duration?, imageUri? }`. `duration` remains for backwards compatibility, while `imageUri` lets you override the global sprite sheet per frame (falling back to the `image` prop when omitted).
 - `data.animations` / `animations`: Map animation names to frame indexes (e.g. `{ walk: [0, 1, 2] }`). Pass an explicit `animations` prop when you need runtime overrides.
-- `data.animationsMeta` / `animationsMeta`: Optional per-animation overrides (`loop`, `autoPlay`, `fps`, and `multipliers` to stretch individual frames).
+- `data.animationsMeta` / `animationsMeta`: Optional per-animation overrides (`loop`, `fps`, and `multipliers` to stretch individual frames).
+- `data.autoPlayAnimation`: Optional animation name that should auto-play once when the sprite mounts.
 - `initialAnimation`: Name of the animation that should play first. Falls back to the first available animation or raw frame order.
 - `speedScale`: Multiplier applied to frame timing (`2` renders twice as fast, `0.5` slows down).
 - `flipX` / `flipY`: Mirror the rendered sprite horizontally or vertically without changing the source image.
@@ -116,8 +117,9 @@ const data: SpriteData = {
   },
   animationsMeta: {
     walk: { loop: true, fps: 8, multipliers: [1, 0.75] },
-    blink: { loop: false, autoPlay: false, fps: 5, multipliers: [1] },
+    blink: { loop: false, fps: 5, multipliers: [1] },
   },
+  autoPlayAnimation: 'walk',
   meta: {
     displayName: 'Hero Walk',
     origin: { x: 0.5, y: 1 },

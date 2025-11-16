@@ -62,7 +62,8 @@ export function HeroPreview() {
 - `image`: `require()` や `SkImage` をそのまま渡せます。
 - `data.frames`: `{ x, y, w, h, duration?, imageUri? }` の配列。`duration` は後方互換のために残しつつ、`imageUri` を指定するとフレーム単位で別画像を参照できます（未指定時は `image` prop を使用）。
 - `data.animations` / `animations`: `{ walk: [0, 1, 2] }` のようにアニメーション名とフレーム番号を紐づけます。ランタイムで差し替えたい場合は props の `animations` を渡してください。
-- `data.animationsMeta` / `animationsMeta`: 各アニメーションごとに `loop` / `autoPlay` / `fps` / `multipliers`（フレーム倍率）を設定するためのメタデータです。
+- `data.animationsMeta` / `animationsMeta`: 各アニメーションごとに `loop` / `fps` / `multipliers`（フレーム倍率）を設定するためのメタデータです。
+- `data.autoPlayAnimation`: 初期表示時に自動再生させたいアニメーション名（任意）。
 - `initialAnimation`: 再生開始時に選択するアニメーション名。指定が無い場合は最初のアニメーション、または素のフレーム順を使います。
 - `speedScale`: 再生速度の倍率。`2` で 2 倍速、`0.5` で半分の速度になります。
 - `flipX` / `flipY`: 画像を左右・上下に反転して描画します (フレームデータの編集は不要)。
@@ -116,8 +117,9 @@ const data: SpriteData = {
   },
   animationsMeta: {
     walk: { loop: true, fps: 8, multipliers: [1, 0.75] },
-    blink: { loop: false, autoPlay: false, fps: 5, multipliers: [1] },
+    blink: { loop: false, fps: 5, multipliers: [1] },
   },
+  autoPlayAnimation: "walk",
   meta: {
     displayName: "Hero Walk",
     origin: { x: 0.5, y: 1 },

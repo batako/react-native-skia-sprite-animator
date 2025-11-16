@@ -26,6 +26,7 @@ export const DefaultSpriteTemplate = {
       frames: stripFrameIds(snapshot.frames),
       animations: snapshot.animations,
       animationsMeta: snapshot.animationsMeta,
+      autoPlayAnimation: snapshot.autoPlayAnimation ?? undefined,
       meta: snapshot.meta,
     };
   },
@@ -37,6 +38,7 @@ export const DefaultSpriteTemplate = {
       frames: withFrameIds(data.frames),
       animations: data.animations ?? {},
       animationsMeta: data.animationsMeta,
+      autoPlayAnimation: typeof data.autoPlayAnimation === 'string' ? data.autoPlayAnimation : null,
       selected: [],
       meta: data.meta ?? {},
     };

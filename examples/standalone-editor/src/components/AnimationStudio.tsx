@@ -132,7 +132,6 @@ const animationMetaEquals = (a?: SpriteAnimationMeta, b?: SpriteAnimationMeta) =
   }
   if (
     a.loop !== b.loop ||
-    a.autoPlay !== b.autoPlay ||
     clampFps(a.fps ?? DEFAULT_ANIMATION_FPS) !== clampFps(b.fps ?? DEFAULT_ANIMATION_FPS)
   ) {
     return false;
@@ -147,9 +146,6 @@ const normalizeAnimationMetaEntry = (
   const normalized: SpriteAnimationMeta = {};
   if (typeof entry?.loop === 'boolean') {
     normalized.loop = entry.loop;
-  }
-  if (typeof entry?.autoPlay === 'boolean') {
-    normalized.autoPlay = entry.autoPlay;
   }
   normalized.fps = clampFps(entry?.fps ?? DEFAULT_ANIMATION_FPS);
   normalized.multipliers = normalizeMultipliersArray(
@@ -386,6 +382,9 @@ export const AnimationStudio = ({ editor, integration, image }: AnimationStudioP
       editor.setAnimations(nextAnimations);
       const nextAnimationsMeta = renameRecordKey(animationsMeta, renamingAnimation, nextName);
       editor.setAnimationsMeta(nextAnimationsMeta);
+      if (editor.state.autoPlayAnimation === renamingAnimation) {
+        editor.setAutoPlayAnimation(nextName);
+      }
       setActiveAnimation(nextName);
     }
     cancelRename();
@@ -397,6 +396,7 @@ export const AnimationStudio = ({ editor, integration, image }: AnimationStudioP
     renamingAnimation,
     renameDraft,
     setActiveAnimation,
+    editor.state.autoPlayAnimation,
   ]);
 
   const handleSelectAnimationItem = useCallback(
@@ -515,15 +515,7 @@ export const AnimationStudio = ({ editor, integration, image }: AnimationStudioP
   const currentAnimationLoop = currentAnimationName
     ? (animationsMeta[currentAnimationName]?.loop ?? true)
     : true;
-  const autoPlayAnimationName = useMemo(() => {
-    for (let i = 0; i < animationNames.length; i += 1) {
-      const name = animationNames[i];
-      if (animationsMeta[name]?.autoPlay) {
-        return name;
-      }
-    }
-    return null;
-  }, [animationNames, animationsMeta]);
+  const autoPlayAnimationName = editor.state.autoPlayAnimation ?? null;
 
   const lastAnimationRef = useRef<string | null>(null);
   useEffect(() => {
@@ -824,12 +816,15 @@ export const AnimationStudio = ({ editor, integration, image }: AnimationStudioP
       const nextAnimationsMeta = { ...animationsMeta };
       delete nextAnimationsMeta[name];
       editor.setAnimationsMeta(nextAnimationsMeta);
+      if (editor.state.autoPlayAnimation === name) {
+        editor.setAutoPlayAnimation(null);
+      }
       if (activeAnimation === name) {
         const remaining = Object.keys(next);
         setActiveAnimation(remaining.length ? remaining[0] : null);
       }
     },
-    [activeAnimation, animations, animationsMeta, editor, setActiveAnimation],
+    [activeAnimation, animations, animationsMeta, editor, editor.state.autoPlayAnimation, setActiveAnimation],
   );
 
   const handleToggleAnimationLoop = useCallback(() => {
@@ -854,25 +849,9 @@ export const AnimationStudio = ({ editor, integration, image }: AnimationStudioP
 
   const handleSelectAutoPlayAnimation = useCallback(
     (targetName: string | null) => {
-      const nextMeta: SpriteAnimationsMeta = {};
-      Object.entries(animationsMeta).forEach(([name, meta]) => {
-        const copy: SpriteAnimationMeta = { ...meta };
-        if ('autoPlay' in copy) {
-          delete copy.autoPlay;
-        }
-        if (Object.keys(copy).length) {
-          nextMeta[name] = copy;
-        }
-      });
-      if (targetName) {
-        nextMeta[targetName] = {
-          ...(nextMeta[targetName] ?? animationsMeta[targetName] ?? {}),
-          autoPlay: true,
-        };
-      }
-      editor.setAnimationsMeta(nextMeta);
+      editor.setAutoPlayAnimation(targetName);
     },
-    [animationsMeta, editor],
+    [editor],
   );
 
   const confirmDeleteAnimation = useCallback(
