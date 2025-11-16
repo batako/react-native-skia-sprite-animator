@@ -2,7 +2,6 @@ import React, { forwardRef, useImperativeHandle } from 'react';
 import TestRenderer, { act, ReactTestRenderer } from 'react-test-renderer';
 import type { SpriteEditorApi, UseSpriteEditorOptions } from '../src/editor/hooks/useSpriteEditor';
 import { useSpriteEditor } from '../src/editor/hooks/useSpriteEditor';
-import { DefaultSpriteTemplate } from '../src/editor/templates/DefaultSpriteTemplate';
 
 const renderEditor = (options?: UseSpriteEditorOptions) => {
   const ref = React.createRef<SpriteEditorApi>();
@@ -113,7 +112,7 @@ describe('useSpriteEditor', () => {
       harness.api.updateMeta({ displayName: 'Hero' });
     });
 
-    const payload = harness.api.exportJSON(DefaultSpriteTemplate);
+    const payload = harness.api.exportJSON();
     expect(payload).toMatchObject({
       frames: [
         {

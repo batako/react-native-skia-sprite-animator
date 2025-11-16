@@ -1,7 +1,11 @@
 import React from 'react';
 import { Asset } from 'expo-asset';
 import { SafeAreaView, ScrollView, StatusBar, StyleSheet, Text, View } from 'react-native';
-import { type SpriteEditorFrame, type SpriteEditorState, useSpriteEditor } from 'react-native-skia-sprite-animator';
+import {
+  type SpriteEditorFrame,
+  type SpriteEditorState,
+  useSpriteEditor,
+} from 'react-native-skia-sprite-animator';
 import type { DataSourceParam } from '@shopify/react-native-skia';
 import { AnimationStudio } from '../components/AnimationStudio';
 import { TemplatePanel } from '../components/TemplatePanel';

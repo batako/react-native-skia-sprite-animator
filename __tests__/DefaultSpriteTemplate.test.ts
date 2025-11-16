@@ -29,8 +29,7 @@ describe('DefaultSpriteTemplate', () => {
   });
 
   it('hydrates editor state from JSON', () => {
-    expect(DefaultSpriteTemplate.fromJSON).toBeDefined();
-    const imported = DefaultSpriteTemplate.fromJSON!({
+    const imported = DefaultSpriteTemplate.fromJSON({
       frames: [{ x: 0, y: 0, w: 16, h: 16 }],
       animations: { idle: [0] },
       meta: { displayName: 'Hero' },

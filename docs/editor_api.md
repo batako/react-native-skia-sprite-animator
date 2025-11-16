@@ -31,12 +31,11 @@ const EditorScreen = () => {
 
 ### Options
 
-| Option                    | Description                                                 |
-| ------------------------- | ----------------------------------------------------------- |
-| `initialState`            | Seeds frames/animations/meta when the hook mounts.          |
-| `historyLimit`            | Maximum undo depth (defaults to 50).                        |
-| `template`                | Overrides the template used by `exportJSON` / `importJSON`. |
-| `trackSelectionInHistory` | When `true`, selection changes create undo snapshots.       |
+| Option                    | Description                                           |
+| ------------------------- | ----------------------------------------------------- |
+| `initialState`            | Seeds frames/animations/meta when the hook mounts.    |
+| `historyLimit`            | Maximum undo depth (defaults to 50).                  |
+| `trackSelectionInHistory` | When `true`, selection changes create undo snapshots. |
 
 ### Returned API
 
@@ -49,9 +48,9 @@ const EditorScreen = () => {
 - `copySelected`, `cutSelected`, `pasteClipboard({ index })`: Clipboard helpers that duplicate frames with fresh ids when pasted.
 - `undo`, `redo`, `canUndo`, `canRedo`: History helpers (snapshots are lightweight and respect `historyLimit`).
 - `setAnimations`, `setAnimationsMeta`, `updateMeta`: Control higher-level sprite metadata.
-- `exportJSON(template?)`: Serialises the current snapshot using the provided template (defaults to `DefaultSpriteTemplate`).
-- `importJSON(data, template?)`: Rehydrates editor state from template payloads (includes undo support so imports can be reverted).
-- `reset(nextState?)`: Replaces the current editor contents without touching the configured template.
+- `exportJSON()`: Serialises the current snapshot into spriteStorage-compatible JSON.
+- `importJSON(data)`: Rehydrates editor state from spriteStorage-compatible payloads (includes undo support so imports can be reverted).
+- `reset(nextState?)`: Replaces the current editor contents.
 
 ### Clipboard example
 
@@ -70,32 +69,18 @@ const paste = () => {
 
 ---
 
-## Template system
+## Serialization helpers
 
-Editor exports/imports use the `SpriteTemplate` interface:
-
-```ts
-interface SpriteTemplate<TData = unknown> {
-  name: string;
-  version: number;
-  toJSON(state: SpriteEditorSnapshot): TData;
-  fromJSON?(data: TData): Partial<SpriteEditorSnapshot> | null;
-}
-```
-
-`DefaultSpriteTemplate` mirrors the spriteStorage payload (frames are exported without ids). It can hydrate editor state from existing spriteStorage JSON as long as frames exist.
+`exportJSON()` and `importJSON()` always use the built-in `DefaultSpriteTemplate`, which mirrors the spriteStorage payload (frames are exported without ids). Use it whenever you need to persist editor state or preview the JSON handed to `SpriteAnimator`.
 
 ```ts
-import { DefaultSpriteTemplate } from 'react-native-skia-sprite-animator';
+const payload = editor.exportJSON();
+await saveSprite({ sprite: payload });
 
-const json = editor.exportJSON(DefaultSpriteTemplate);
-await saveSprite({ sprite: json });
-
-const imported = DefaultSpriteTemplate.fromJSON(json);
-editor.importJSON(json); // undoable
+editor.importJSON(payload); // undoable
 ```
 
-You can implement custom templates for cloud sync or proprietary schemas by providing your own `SpriteTemplate` and passing it through the hook options or `exportJSON` / `importJSON` helpers.
+If you need to strip transient fields before saving, run the payload through `cleanSpriteData`.
 
 ---
 
@@ -115,6 +100,6 @@ Geometry helpers are UI-agnostic utilities intended for marquee tools, selection
 ## Migration notes (v0.2 → v0.3)
 
 - Renderer inputs remain unchanged: `SpriteAnimator` and `spriteStorage` still expect the v0.2 schema.
-- Editor state tracks frames by `id` internally, but templates strip ids during export so runtime components continue to work without modification.
+- Editor state tracks frames by `id` internally, but `exportJSON()` strips ids during export so runtime components continue to work without modification.
 - Use `DefaultSpriteTemplate.fromJSON()` to load legacy spriteStorage payloads into the editor before editing.
 - Undo depth now defaults to 50 snapshots; adjust `historyLimit` if you need more/less aggressive memory usage.

@@ -25,8 +25,7 @@ react-native-skia-sprite/
 │  ├─ useSpriteEditor.ts        # 編集ロジックを提供
 │  ├─ SpriteEditUtils.ts        # 矩形操作やスナップ等のユーティリティ
 │  ├─ templates/
-│  │   ├─ defaultTemplate.ts    # 標準JSONテンプレート
-│  │   └─ customTemplate.ts     # 利用者が定義できるカスタムテンプレート
+│  │   └─ defaultTemplate.ts    # 標準JSONシリアライザ
 │  ├─ types.ts
 ├─ storage/
 │  ├─ spriteStorage.ts          # FileSystem 上のセーブ・ロードAPI
@@ -62,7 +61,7 @@ UIなしで、編集状態やフレーム操作を管理する Hook。
 
 ```tsx
 const { frames, selectedIndex, selectFrame, addFrame, updateFrame, deleteFrame, exportJSON } =
-  useSpriteEditor(template);
+  useSpriteEditor();
 ```
 
 ### 3. SpriteEditUtils
@@ -72,23 +71,9 @@ const { frames, selectedIndex, selectFrame, addFrame, updateFrame, deleteFrame, 
 - 抽出矩形正規化 (`normalizeRect()`)
 - 複数フレームの合成 (`mergeFrames()`)
 
-### 4. SpriteTemplate API
+### 4. Serialization
 
-編集結果(JSON)の出力フォーマットを自由に変えられるテンプレート機能。
-
-```ts
-const customTemplate: SpriteTemplate = {
-  name: 'withAnimations',
-  build: ({ displayName, frames, extra }) => ({
-    id: crypto.randomUUID(),
-    meta: { displayName, category: extra?.category ?? 'default' },
-    frames,
-    animations: extra?.animations ?? {},
-  }),
-};
-```
-
-`useSpriteEditor(customTemplate)` で使用すると、`exportJSON()` 時に出力構造が変わる。
+エディターの import/export は組み込みの `DefaultSpriteTemplate` のみを使用し、常に `spriteStorage` と同じ JSON を生成します。カスタムテンプレート機能は廃止し、`exportJSON()` / `importJSON()` は固定フォーマットのみを扱います。
 
 ### 5. spriteStorage
 
@@ -121,21 +106,16 @@ const sprite = await loadSprite(spriteId);
 }
 ```
 
-- 最小構成は `frames`のみで動作。
-- `animations` や `origin`などは各自のテンプレートで追加可能。
+- 最小構成は `frames` のみで動作。
+- `animations` や `origin` など必要な情報は `exportJSON()` が返す同じ構造 (`animations`, `animationsMeta`, `meta`) に自由に追加できる。
 
 ---
 
-## 🛠️ テンプレート機能の使い方
+## 🛠️ JSON エクスポートの使い方
 
 ```tsx
-const editor = useSpriteEditor(customTemplate);
-
-const json = editor.exportJSON({
-  displayName: 'Enemy Run',
-  imageUri: spriteImageUri,
-  extra: { animations: { run: [0, 1, 2] } },
-});
+const editor = useSpriteEditor();
+const json = editor.exportJSON(); // spriteStorage 互換
 ```
 
 ---
@@ -150,16 +130,16 @@ const json = editor.exportJSON({
 
 ## 🔹 今後のロードマップ
 
-| バージョン | 主要機能                                     |
-| ---------- | -------------------------------------------- |
-| v0.1       | SpriteAnimator + spriteStorage               |
-| v0.2       | SpriteAnimator AnimatedSprite2D パリティ対応 |
-| v0.3       | useSpriteEditor + SpriteEditUtils            |
-| v0.4       | SpriteTemplate API 実装 (テンプレート可変更) |
-| v0.5       | npm公開 + デモUI(サンプルエディタ)           |
+| バージョン | 主要機能                                      |
+| ---------- | --------------------------------------------- |
+| v0.1       | SpriteAnimator + spriteStorage                |
+| v0.2       | SpriteAnimator AnimatedSprite2D パリティ対応  |
+| v0.3       | useSpriteEditor + SpriteEditUtils             |
+| v0.4       | Sprite JSON シリアライズの統一 (Default のみ) |
+| v0.5       | npm公開 + デモUI(サンプルエディタ)            |
 
 ---
 
 ## 🔑 結論
 
-> **react-native-skia-sprite** は、「再生」「編集ロジック」「保存・JSONテンプレートベース」のみを提供する、単純で強力なSkiaスプライトエンジン基盤とする。
+> **react-native-skia-sprite** は、「再生」「編集ロジック」「保存（固定JSONフォーマット）」のみを提供する、単純で強力な Skia スプライトエンジン基盤とする。

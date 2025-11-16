@@ -6,7 +6,7 @@
 
 - **SpriteAnimator** – declarative + imperative animation playback with Skia rendering, frame events, directional flips, speed controls, and animation metadata overrides.
 - **spriteStorage** – `saveSprite`, `loadSprite`, `listSprites`, `deleteSprite`, and storage configuration helpers so sprites plus metadata persist on device using Expo File System.
-- **Editor APIs** – `useSpriteEditor` (frame CRUD, selection, clipboard, undo/redo, metadata updates), `SpriteTemplate` / `DefaultSpriteTemplate` (import/export pipelines), and `SpriteEditUtils` (grid snapping, rect merging, hit-testing).
+- **Editor APIs** – `useSpriteEditor` (frame CRUD, selection, clipboard, undo/redo, metadata updates), `DefaultSpriteTemplate` helpers (import/export), and `SpriteEditUtils` (grid snapping, rect merging, hit-testing).
 - **Standalone Expo editor** – an example app under `examples/standalone-editor/` that combines every API (canvas editing, real-time playback, storage, templates, metadata) to serve as the canonical feature showcase.
 
 ## Installation
@@ -186,7 +186,7 @@ Editor primitives live under `src/editor/` so you can build custom sprite toolin
 
 - `useSpriteEditor`: React hook that manages frames, selection, clipboard, undo/redo history, and template-based export/import. It’s UI-agnostic—wire it into your own panels, gestures, or devtools.
 - `SpriteEditUtils`: Geometry helpers (`snapToGrid`, `normalizeRect`, `pointInFrame`, `mergeFrames`) for snap-lines, hit-tests, and bounding boxes.
-- `SpriteTemplate` + `DefaultSpriteTemplate`: Serialize editor state to the same JSON shape expected by `spriteStorage`, or provide your own template for custom pipelines.
+- `DefaultSpriteTemplate`: Serialize editor state to the same JSON shape expected by `spriteStorage`.
 
 See [docs/editor_api.md](docs/editor_api.md) for usage examples and option tables.
 
@@ -198,7 +198,7 @@ What it demonstrates:
 
 - `useSpriteEditor` powering frame CRUD, selection, clipboard, undo/redo, metadata editing, and template-aware import/export.
 - Real-time playback by piping live editor state into `SpriteAnimator`, including seek, pause, and speed scaling.
-- Template workflows (`DefaultSpriteTemplate` plus a compact custom template) with JSON preview/import text areas.
+- Export/import panel that previews the spriteStorage JSON (DefaultSpriteTemplate) used everywhere.
 - Local persistence backed by `spriteStorage` (`saveSprite`, `loadSprite`, `listSprites`, `deleteSprite`).
 - `SpriteEditUtils` on the Skia canvas (grid overlays, hit-testing, selection bounds) so geometry helpers are shown in context.
 

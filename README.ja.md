@@ -6,7 +6,7 @@
 
 - **SpriteAnimator**: Skia Canvas 上での宣言的/命令的な再生、フレームイベント、反転描画、速度スケール、アニメーション別のメタデータなどをサポート。
 - **spriteStorage**: `saveSprite` / `loadSprite` / `listSprites` / `deleteSprite` および保存先設定ヘルパーにより、JSON と画像を Expo File System に永続化。
-- **エディター API**: `useSpriteEditor`（フレーム CRUD・選択・クリップボード・Undo/Redo・メタ編集・テンプレート import/export）、`SpriteTemplate` / `DefaultSpriteTemplate`、`SpriteEditUtils`（スナップ・矩形マージ・ヒットテスト）。
+- **エディター API**: `useSpriteEditor`（フレーム CRUD・選択・クリップボード・Undo/Redo・メタ編集）、`DefaultSpriteTemplate`（JSON import/export）、`SpriteEditUtils`（スナップ・矩形マージ・ヒットテスト）。
 - **Expo スタンドアロンエディタ**: `examples/standalone-editor/` に、上記すべての機能を 1 画面で体験できるデモアプリを同梱。
 
 ## インストール
@@ -187,7 +187,7 @@ UI を持たないエディター用ツール群も `src/editor/` で提供し�
 
 - `useSpriteEditor`: フレーム一覧、選択状態、クリップボード、Undo/Redo、テンプレートベースの import/export を一括で管理する React Hook。UI には一切依存しないため、ボタンやジェスチャー、ショートカットに自由に接続できます。
 - `SpriteEditUtils`: `snapToGrid`、`normalizeRect`、`pointInFrame`、`mergeFrames` など、エディターで使い回せるジオメトリ系のヘルパー群。
-- `SpriteTemplate` / `DefaultSpriteTemplate`: エディター状態を `spriteStorage` と同じ JSON へ変換するためのインターフェースと標準テンプレート。独自テンプレートの実装も可能です。
+- `DefaultSpriteTemplate`: エディター状態を `spriteStorage` と同じ JSON へ変換するためのヘルパー。
 
 詳しいサンプルやオプションの一覧は [docs/editor_api.ja.md](docs/editor_api.ja.md) を参照してください。
 
@@ -199,7 +199,7 @@ UI を持たないエディター用ツール群も `src/editor/` で提供し�
 
 - `useSpriteEditor` によるフレーム CRUD／選択／クリップボード／Undo/Redo／メタデータ編集／テンプレート import/export。
 - `SpriteAnimator` と同期する再生パネル（再生/停止/シーク/速度調整/選択フレームへのジャンプ）。
-- `DefaultSpriteTemplate` とカスタムテンプレートの切り替え、エクスポート JSON プレビュー、インポートテキストエリア。
+- `DefaultSpriteTemplate` 形式の JSON をプレビュー／インポートできるパネル。
 - `spriteStorage` 連携の保存・読み込み・削除・レジストリ更新。
 - `SpriteEditUtils` を使ったグリッド、ヒットテスト、選択境界の描画。
 
