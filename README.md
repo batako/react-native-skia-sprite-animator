@@ -48,8 +48,6 @@ export function HeroPreview() {
       data={heroData}
       initialAnimation="idle"
       animations={heroData.animations}
-      autoplay
-      loop
       speedScale={1}
       flipX={false}
       flipY={false}
@@ -64,12 +62,10 @@ export function HeroPreview() {
 - `image`: Accepts both `require()` assets and `SkImage` values.
 - `data.frames`: Array of `{ x, y, w, h, duration? }`. The optional `duration` field exists for backward compatibility, but rendering now derives timing exclusively from the per-animation `fps` + `multipliers` metadata described below.
 - `data.animations` / `animations`: Map animation names to frame indexes (e.g. `{ walk: [0, 1, 2] }`). Pass an explicit `animations` prop when you need runtime overrides.
-- `data.animationsMeta` / `animationsMeta`: Optional per-animation overrides (`loop`, `autoPlay`, `fps`, and `multipliers` to stretch individual frames) that augment the component-level props.
+- `data.animationsMeta` / `animationsMeta`: Optional per-animation overrides (`loop`, `autoPlay`, `fps`, and `multipliers` to stretch individual frames).
 - `initialAnimation`: Name of the animation that should play first. Falls back to the first available animation or raw frame order.
-- `autoplay`: Whether the component should start advancing frames immediately (defaults to `true`).
 - `speedScale`: Multiplier applied to frame timing (`2` renders twice as fast, `0.5` slows down).
 - `flipX` / `flipY`: Mirror the rendered sprite horizontally or vertically without changing the source image.
-- `loop`: When `false`, stops on the last frame of the active animation and fires `onEnd` once.
 - `spriteScale`: Scales the rendered width/height without modifying frame data (defaults to `1`).
 - `onAnimationEnd`: Called once when a non-looping animation finishes. Receives the animation name (or `null` when playing the raw frame order).
 - `onFrameChange`: Fired every time the rendered frame changes. Receives `{ animationName, frameIndex, frameCursor }`.
@@ -85,7 +81,7 @@ const animatorRef = useRef<SpriteAnimatorHandle>(null);
 
 return (
   <>
-    <SpriteAnimator ref={animatorRef} data={heroData} image={heroSheet} autoplay={false} />
+    <SpriteAnimator ref={animatorRef} data={heroData} image={heroSheet} />
     <Button title="Play Idle" onPress={() => animatorRef.current?.play('idle')} />
     <Button
       title="Blink Once"

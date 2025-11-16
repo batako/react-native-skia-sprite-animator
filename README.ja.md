@@ -48,8 +48,6 @@ export function HeroPreview() {
       data={heroData}
       initialAnimation="idle"
       animations={heroData.animations}
-      autoplay
-      loop
       speedScale={1}
       flipX={false}
       flipY={false}
@@ -64,12 +62,10 @@ export function HeroPreview() {
 - `image`: `require()` や `SkImage` をそのまま渡せます。
 - `data.frames`: `{ x, y, w, h, duration? }` の配列。`duration` は後方互換のために残してありますが、実際のタイミングはアニメーションごとの `fps` / `multipliers` メタデータで決まります。
 - `data.animations` / `animations`: `{ walk: [0, 1, 2] }` のようにアニメーション名とフレーム番号を紐づけます。ランタイムで差し替えたい場合は props の `animations` を渡してください。
-- `data.animationsMeta` / `animationsMeta`: 各アニメーションごとに `loop` / `autoPlay` / `fps` / `multipliers`（フレーム倍率）を上書きするための設定です。
+- `data.animationsMeta` / `animationsMeta`: 各アニメーションごとに `loop` / `autoPlay` / `fps` / `multipliers`（フレーム倍率）を設定するためのメタデータです。
 - `initialAnimation`: 再生開始時に選択するアニメーション名。指定が無い場合は最初のアニメーション、または素のフレーム順を使います。
-- `autoplay`: コンポーネントがマウントされた直後に自動で再生するかどうか (デフォルト `true`)。
 - `speedScale`: 再生速度の倍率。`2` で 2 倍速、`0.5` で半分の速度になります。
 - `flipX` / `flipY`: 画像を左右・上下に反転して描画します (フレームデータの編集は不要)。
-- `loop`: false の場合はアニメーションの最後のフレームで停止し、`onEnd` が一度だけ呼ばれます。
 - `spriteScale`: 描画サイズを倍率指定したい場合に使用します (デフォルト 1)。
 - `onAnimationEnd`: ループしないアニメーションが最後のフレームまで到達したときに一度だけ呼ばれます（引数はアニメーション名、または `null`）。
 - `onFrameChange`: 描画フレームが変わるたびに `{ animationName, frameIndex, frameCursor }` を受け取ります。
@@ -85,7 +81,7 @@ const animatorRef = useRef<SpriteAnimatorHandle>(null);
 
 return (
   <>
-    <SpriteAnimator ref={animatorRef} data={heroData} image={heroSheet} autoplay={false} />
+    <SpriteAnimator ref={animatorRef} data={heroData} image={heroSheet} />
     <Button title="Play Idle" onPress={() => animatorRef.current?.play('idle')} />
     <Button
       title="Blink Once"

@@ -77,7 +77,9 @@ describe('SpriteAnimator', () => {
       <SpriteAnimator
         image={mockSkImage()}
         data={{ frames: timedFrames }}
-        loop={false}
+        animations={{ run: [0, 1] }}
+        animationsMeta={{ run: { loop: false } }}
+        initialAnimation="run"
         onEnd={onEnd}
       />,
     );
@@ -170,7 +172,6 @@ describe('SpriteAnimator', () => {
         }}
         animations={{ blink: [2, 1] }}
         initialAnimation="blink"
-        autoplay={false}
       />,
     );
 
@@ -196,7 +197,6 @@ describe('SpriteAnimator', () => {
         image={mockSkImage()}
         data={{ frames }}
         animations={{ reverse: [1, 0] }}
-        autoplay={false}
       />,
     );
 
@@ -218,7 +218,7 @@ describe('SpriteAnimator', () => {
   it('stops playback and resets to the first frame', () => {
     const controller = React.createRef<SpriteAnimatorHandle>();
     const renderer = renderComponent(
-      <SpriteAnimator ref={controller} image={mockSkImage()} data={{ frames }} autoplay={false} />,
+      <SpriteAnimator ref={controller} image={mockSkImage()} data={{ frames }} />,
     );
 
     act(() => {
@@ -281,8 +281,6 @@ describe('SpriteAnimator', () => {
         data={{ frames }}
         animations={{ blink: [0, 1] }}
         animationsMeta={{ blink: { loop: false } }}
-        loop
-        autoplay={false}
         onEnd={onEnd}
       />,
     );
@@ -312,11 +310,13 @@ describe('SpriteAnimator', () => {
         ref={controller}
         image={mockSkImage()}
         data={{ frames }}
-        autoplay={false}
         onFrameChange={onFrameChange}
       />,
     );
 
+    act(() => {
+      controller.current?.pause();
+    });
     onFrameChange.mockClear();
     act(() => {
       controller.current?.setFrame(1);
@@ -339,7 +339,6 @@ describe('SpriteAnimator', () => {
         data={{ frames }}
         animations={{ walk: [0, 1], blink: [1] }}
         initialAnimation="walk"
-        autoplay={false}
       />,
     );
 
@@ -360,8 +359,7 @@ describe('SpriteAnimator', () => {
         image={mockSkImage()}
         data={{ frames }}
         animations={{ blink: [0, 1] }}
-        loop={false}
-        autoplay={false}
+        animationsMeta={{ blink: { loop: false } }}
         onAnimationEnd={onAnimationEnd}
       />,
     );

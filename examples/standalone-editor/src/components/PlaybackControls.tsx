@@ -50,8 +50,6 @@ export const PlaybackControls = ({ integration, image }: PlaybackControlsProps) 
           ref={animatorRef}
           image={image}
           data={runtimeData}
-          loop
-          autoplay={false}
           speedScale={speedScale}
           onFrameChange={onFrameChange}
           style={styles.canvas}

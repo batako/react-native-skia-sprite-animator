@@ -162,10 +162,6 @@ export interface SpriteAnimatorProps {
   animations?: SpriteAnimations;
   /** Optional runtime override for animation metadata like looping. */
   animationsMeta?: SpriteAnimationsMeta;
-  /** Global fallback for whether animations should loop. */
-  loop?: boolean;
-  /** Automatically start playback when the component mounts. */
-  autoplay?: boolean;
   /** Name of the animation that should run initially. */
   initialAnimation?: string;
   /** Multiplier applied to playback speed. */
@@ -199,6 +195,7 @@ const DEFAULT_FRAME_DURATION = 1000 / DEFAULT_FPS;
 const MIN_FRAME_MULTIPLIER = 0.01;
 const MIN_SPEED = 0.001;
 const DEFAULT_DIRECTION: SpriteAnimatorDirection = 'forward';
+const DEFAULT_LOOP_BEHAVIOR = true;
 
 const clamp = (value: number, min: number, max: number) => {
   if (value < min) return min;
@@ -233,8 +230,6 @@ const SpriteAnimatorComponent = (
     data,
     animations,
     animationsMeta,
-    loop = true,
-    autoplay = true,
     initialAnimation,
     speedScale = 1,
     flipX = false,
@@ -321,9 +316,9 @@ const SpriteAnimatorComponent = (
           return metaLoop;
         }
       }
-      return loop;
+      return DEFAULT_LOOP_BEHAVIOR;
     },
-    [loop, mergedAnimationsMeta],
+    [mergedAnimationsMeta],
   );
 
   const normalizedSpeedScale =
@@ -335,7 +330,7 @@ const SpriteAnimatorComponent = (
   const initialSequence = resolveSequence(initialAnimationName);
   const [animState, setAnimState] = useState<AnimationState>(() => ({
     name: initialSequence.length ? (initialAnimationName ?? null) : null,
-    playing: autoplay && initialSequence.length > 1,
+    playing: initialSequence.length > 1,
     frameCursor: 0,
     speed: 1,
     direction: DEFAULT_DIRECTION,
@@ -396,28 +391,6 @@ const SpriteAnimatorComponent = (
       };
     });
   }, [ensureAnimationName, initialAnimation, resolveSequence]);
-
-  useEffect(() => {
-    if (autoplay) {
-      setAnimState((prev) => {
-        if (prev.playing) {
-          return prev;
-        }
-        const sequence = resolveSequence(prev.name);
-        if (sequence.length <= 1) {
-          return prev;
-        }
-        return { ...prev, playing: true };
-      });
-      return;
-    }
-    setAnimState((prev) => {
-      if (!prev.playing) {
-        return prev;
-      }
-      return { ...prev, playing: false };
-    });
-  }, [autoplay, resolveSequence]);
 
   const scheduleOnEndCallback = useCallback(() => {
     if (onEndTimerRef.current) {
