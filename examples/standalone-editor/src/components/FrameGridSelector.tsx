@@ -40,7 +40,7 @@ const isImageDescriptor = (value: FrameGridImageProp): value is FrameGridImageDe
 export interface FrameGridSelectorProps {
   image?: FrameGridImageProp;
   fallbackImage?: FrameGridImageProp;
-  onAddFrames: (cells: FrameGridCell[]) => void;
+  onAddFrames: (cells: FrameGridCell[], image?: FrameGridImageDescriptor) => void;
   defaultCellWidth?: number;
   defaultCellHeight?: number;
   emptyMessage?: string;
@@ -230,7 +230,11 @@ export const FrameGridSelector = ({
     const selectedCells = selectedIds
       .map((id) => cells.find((cell) => cell.id === id))
       .filter((cell): cell is FrameGridCell => Boolean(cell));
-    onAddFrames(selectedCells);
+    if (!normalizedImage) {
+      onAddFrames(selectedCells);
+    } else {
+      onAddFrames(selectedCells, normalizedImage);
+    }
     setSelectedIds([]);
   };
 

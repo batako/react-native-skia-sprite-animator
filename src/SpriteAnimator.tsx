@@ -37,6 +37,8 @@ export interface SpriteFrame {
    * Falls back to the built-in default timing when omitted.
    */
   duration?: number;
+  /** Optional absolute URI to the source image for this frame (overrides the global image prop). */
+  imageUri?: string;
 }
 
 /**
@@ -341,7 +343,7 @@ const SpriteAnimatorComponent = (
   const imageIsSkImage = isSkImage(image);
   const assetSource = imageIsSkImage ? null : (image as unknown as DataSourceParam);
   const assetImage = useImage(assetSource);
-  const resolvedImage = imageIsSkImage ? image : assetImage;
+  const baseImage = imageIsSkImage ? (image as SkImage) : assetImage;
   useEffect(() => {
     setAnimState((prev) => {
       const ensuredName = ensureAnimationName(prev.name);
@@ -592,6 +594,9 @@ const SpriteAnimatorComponent = (
   const activeSequence = resolveSequence(animState.name);
   const activeFrameIndex = activeSequence[animState.frameCursor] ?? activeSequence[0] ?? 0;
   const currentFrame = frames[activeFrameIndex];
+  const frameImageSource = currentFrame?.imageUri ?? null;
+  const frameSpecificImage = useImage(frameImageSource ?? null);
+  const resolvedImage = frameSpecificImage ?? baseImage;
 
   useEffect(() => {
     if (!currentFrame) {

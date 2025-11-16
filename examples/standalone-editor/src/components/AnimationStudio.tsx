@@ -29,15 +29,19 @@ import { MaterialIcons } from '@expo/vector-icons';
 import { IconButton, type IconButtonRenderIconProps } from './IconButton';
 import { MacWindow, type MacWindowVariant } from './MacWindow';
 import { PreviewPlayer } from './PreviewPlayer';
-import { FrameGridSelector, type FrameGridCell } from './FrameGridSelector';
+import {
+  FrameGridSelector,
+  type FrameGridCell,
+  type FrameGridImageDescriptor,
+} from './FrameGridSelector';
 import { SelectableTextInput } from './SelectableTextInput';
 import type { EditorIntegration } from '../hooks/useEditorIntegration';
+import { FileBrowserModal } from './FileBrowserModal';
 
 interface AnimationStudioProps {
   editor: SpriteEditorApi;
   integration: EditorIntegration;
   image: DataSourceParam;
-  onSelectImage?: () => void;
 }
 
 const DEFAULT_ANIMATION_FPS = 5;
@@ -171,12 +175,7 @@ const cleanupAnimationMetaEntry = (
   sequenceLength: number,
 ): SpriteAnimationMeta => normalizeAnimationMetaEntry(entry, sequenceLength);
 
-export const AnimationStudio = ({
-  editor,
-  integration,
-  image,
-  onSelectImage,
-}: AnimationStudioProps) => {
+export const AnimationStudio = ({ editor, integration, image }: AnimationStudioProps) => {
   const frames = editor.state.frames;
   const animations = useMemo(() => editor.state.animations ?? {}, [editor.state.animations]);
   const animationsMeta = useMemo(
@@ -193,6 +192,15 @@ export const AnimationStudio = ({
   const [timelineFilledHeight, setTimelineFilledHeight] = useState(0);
   const [isFramePickerVisible, setFramePickerVisible] = useState(false);
   const [framePickerVariant, setFramePickerVariant] = useState<MacWindowVariant>('default');
+  const [isFrameSourceBrowserVisible, setFrameSourceBrowserVisible] = useState(false);
+  const [framePickerImage, setFramePickerImage] = useState<FrameGridImageDescriptor | null>(null);
+  const [frameImageInfos, setFrameImageInfos] = useState<
+    Record<string, { width: number; height: number; ready: boolean }>
+  >({});
+  const frameImageInfosRef = useRef(frameImageInfos);
+  useEffect(() => {
+    frameImageInfosRef.current = frameImageInfos;
+  }, [frameImageInfos]);
   const {
     activeAnimation,
     setActiveAnimation,
@@ -603,6 +611,67 @@ export const AnimationStudio = ({
 
   const imageInfo = useImageDimensions(image);
   const timelineImageSource = useMemo(() => resolveReactNativeImageSource(image), [image]);
+  const frameImageUris = useMemo(() => {
+    const unique = new Set<string>();
+    editor.state.frames.forEach((frame) => {
+      if (frame.imageUri) {
+        unique.add(frame.imageUri);
+      }
+    });
+    return Array.from(unique);
+  }, [editor.state.frames]);
+
+  useEffect(() => {
+    const known = frameImageInfosRef.current;
+    const pending = frameImageUris.filter((uri) => uri && !known[uri]);
+    if (!pending.length) {
+      return;
+    }
+    let cancelled = false;
+    pending.forEach((uri) => {
+      Image.getSize(
+        uri,
+        (width, height) => {
+          if (cancelled) {
+            return;
+          }
+          if (cancelled) {
+            return;
+          }
+          setFrameImageInfos((prev) => {
+            if (prev[uri]) {
+              return prev;
+            }
+            const next = {
+              ...prev,
+              [uri]: { width, height, ready: true },
+            };
+            frameImageInfosRef.current = next;
+            return next;
+          });
+        },
+        () => {
+          if (cancelled) {
+            return;
+          }
+          setFrameImageInfos((prev) => {
+            if (prev[uri]) {
+              return prev;
+            }
+            const next = {
+              ...prev,
+              [uri]: { width: 0, height: 0, ready: false },
+            };
+            frameImageInfosRef.current = next;
+            return next;
+          });
+        },
+      );
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [frameImageUris]);
   const handleAnimationFpsChange = useCallback(
     (nextFps: number) => {
       if (!currentAnimationName) {
@@ -647,11 +716,39 @@ export const AnimationStudio = ({
     [animations, animationsMeta, currentAnimationName, editor, setAnimationMultipliers],
   );
 
+  const resolveFrameImageUri = useCallback((descriptor?: FrameGridImageDescriptor | null) => {
+    if (!descriptor?.source) {
+      return undefined;
+    }
+    const source = descriptor.source as DataSourceParam;
+    if (typeof source === 'string') {
+      return source;
+    }
+    if (typeof source === 'number') {
+      return undefined;
+    }
+    if ('uri' in (source as Record<string, unknown>)) {
+      const uriValue = (source as { uri?: string }).uri;
+      if (uriValue) {
+        return uriValue;
+      }
+    }
+    return undefined;
+  }, []);
+
   const handleGridAddFrames = useCallback(
-    (cells: FrameGridCell[]) => {
+    (cells: FrameGridCell[], sourceImage?: FrameGridImageDescriptor) => {
       if (!cells.length) {
         return;
       }
+      const previousAnimation = currentAnimationName;
+      const previousTimelineIndex = selectedTimelineIndex;
+
+      // Clear selection before inserting frames; keeping the previous selection active while frames are appended causes the timeline state to toggle rapidly
+      setActiveAnimation(null);
+      setTimelineSelection(null);
+
+      const resolvedImageUri = resolveFrameImageUri(sourceImage);
       const startIndex = editor.state.frames.length;
       const newIndexes: number[] = [];
       cells.forEach((cell, idx) => {
@@ -661,6 +758,7 @@ export const AnimationStudio = ({
           w: cell.width,
           h: cell.height,
           duration: undefined,
+          imageUri: resolvedImageUri,
         });
         newIndexes.push(startIndex + idx);
       });
@@ -674,12 +772,28 @@ export const AnimationStudio = ({
           return result;
         },
       );
-      if (newIndexes.length && nextSequence.length) {
-        const timelineIndex = nextSequence.length - newIndexes.length;
-        setTimelineSelection(timelineIndex);
-      }
+
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          if (previousAnimation) {
+            setActiveAnimation(previousAnimation);
+          }
+          if (previousTimelineIndex !== null && nextSequence.length) {
+            const clamped = Math.max(0, Math.min(nextSequence.length - 1, previousTimelineIndex));
+            setTimelineSelection(clamped);
+          }
+        });
+      });
     },
-    [editor, setTimelineSelection, updateSequence],
+    [
+      currentAnimationName,
+      editor,
+      selectedTimelineIndex,
+      resolveFrameImageUri,
+      setActiveAnimation,
+      setTimelineSelection,
+      updateSequence,
+    ],
   );
 
   const handleAddAnimation = () => {
@@ -938,12 +1052,6 @@ export const AnimationStudio = ({
     <View style={styles.container}>
       <View style={styles.header}>
         <Text style={styles.title}>Animation Studio</Text>
-        {onSelectImage && (
-          <TouchableOpacity style={styles.imagePickerButton} onPress={onSelectImage}>
-            <MaterialIcons name="image" size={18} color="#bdc9ff" />
-            <Text style={styles.imagePickerText}>Change Image</Text>
-          </TouchableOpacity>
-        )}
       </View>
       <View style={styles.previewSection}>
         <View style={styles.previewHeaderRow}>
@@ -1106,7 +1214,7 @@ export const AnimationStudio = ({
                 <View style={styles.timelineDivider} />
                 <IconButton
                   name="grid-on"
-                  onPress={() => setFramePickerVisible(true)}
+                  onPress={() => setFrameSourceBrowserVisible(true)}
                   disabled={!hasActiveAnimation || isPlaying}
                   accessibilityLabel="Open frame picker modal"
                 />
@@ -1191,48 +1299,73 @@ export const AnimationStudio = ({
                         onPress={() => selectTimelineFrame(timelineIndex)}
                       >
                         <View style={styles.timelineCardBody}>
-                          {frame && imageInfo.ready && timelineImageSource ? (
-                            <View
-                              style={[
-                                styles.thumb,
-                                {
-                                  width: viewportSize,
-                                  height: viewportSize,
-                                },
-                              ]}
-                            >
+                          {(() => {
+                            if (!frame) {
+                              return (
+                                <View
+                                  style={[
+                                    styles.thumb,
+                                    styles.thumbPlaceholder,
+                                    { width: viewportSize, height: viewportSize },
+                                  ]}
+                                >
+                                  <Text style={styles.thumbPlaceholderText}>No Image</Text>
+                                </View>
+                              );
+                            }
+                            const frameSource = frame.imageUri
+                              ? { uri: frame.imageUri }
+                              : timelineImageSource;
+                            const frameInfo = frame.imageUri
+                              ? frameImageInfos[frame.imageUri]
+                              : imageInfo;
+                            if (!frameSource || !frameInfo || !frameInfo.ready) {
+                              return (
+                                <View
+                                  style={[
+                                    styles.thumb,
+                                    styles.thumbPlaceholder,
+                                    { width: viewportSize, height: viewportSize },
+                                  ]}
+                                >
+                                  <Text style={styles.thumbPlaceholderText}>No Image</Text>
+                                </View>
+                              );
+                            }
+                            const info = frameInfo;
+                            return (
                               <View
-                                style={{
-                                  width: frame.w * frameScale,
-                                  height: frame.h * frameScale,
-                                  overflow: 'hidden',
-                                }}
+                                style={[
+                                  styles.thumb,
+                                  {
+                                    width: viewportSize,
+                                    height: viewportSize,
+                                  },
+                                ]}
                               >
-                                <Image
-                                  source={timelineImageSource}
-                                  resizeMode="cover"
+                                <View
                                   style={{
-                                    width: imageInfo.width * frameScale,
-                                    height: imageInfo.height * frameScale,
-                                    transform: [
-                                      { translateX: -frame.x * frameScale },
-                                      { translateY: -frame.y * frameScale },
-                                    ],
+                                    width: frame.w * frameScale,
+                                    height: frame.h * frameScale,
+                                    overflow: 'hidden',
                                   }}
-                                />
+                                >
+                                  <Image
+                                    source={frameSource}
+                                    resizeMode="cover"
+                                    style={{
+                                      width: (info.width || frame.w) * frameScale,
+                                      height: (info.height || frame.h) * frameScale,
+                                      transform: [
+                                        { translateX: -frame.x * frameScale },
+                                        { translateY: -frame.y * frameScale },
+                                      ],
+                                    }}
+                                  />
+                                </View>
                               </View>
-                            </View>
-                          ) : (
-                            <View
-                              style={[
-                                styles.thumb,
-                                styles.thumbPlaceholder,
-                                { width: viewportSize, height: viewportSize },
-                              ]}
-                            >
-                              <Text style={styles.thumbPlaceholderText}>No Image</Text>
-                            </View>
-                          )}
+                            );
+                          })()}
                         </View>
                         <View style={styles.timelineCardFooter}>
                           <Text style={styles.timelineCardMeta}>
@@ -1257,6 +1390,7 @@ export const AnimationStudio = ({
         onRequestClose={() => {
           setFramePickerVariant('default');
           setFramePickerVisible(false);
+          setFramePickerImage(null);
         }}
       >
         <View style={styles.modalOverlay}>
@@ -1266,21 +1400,35 @@ export const AnimationStudio = ({
             onClose={() => {
               setFramePickerVariant('default');
               setFramePickerVisible(false);
+              setFramePickerImage(null);
             }}
             enableCompact={false}
             style={framePickerVariant === 'default' ? styles.framePickerWindow : undefined}
             contentStyle={styles.framePickerContent}
           >
             <FrameGridSelector
-              image={{ source: image }}
-              onAddFrames={(cells) => {
-                handleGridAddFrames(cells);
+              image={framePickerImage ?? undefined}
+              emptyMessage="Select an image from the file browser to begin slicing."
+              onAddFrames={(cells, descriptor) => {
+                handleGridAddFrames(cells, descriptor ?? framePickerImage ?? undefined);
                 setFramePickerVisible(false);
+                setFramePickerImage(null);
               }}
             />
           </MacWindow>
         </View>
       </Modal>
+      <FileBrowserModal
+        visible={isFrameSourceBrowserVisible}
+        onClose={() => setFrameSourceBrowserVisible(false)}
+        onOpenFile={(uri) => {
+          setFrameSourceBrowserVisible(false);
+          setFramePickerVariant('default');
+          setFramePickerImage({ source: { uri }, name: uri.split('/').pop() ?? uri });
+          setFramePickerVisible(true);
+        }}
+        allowedMimeTypes={['image/*']}
+      />
     </View>
   );
 };
@@ -1505,22 +1653,6 @@ const styles = StyleSheet.create({
   previewHeaderRow: {
     width: '100%',
     marginBottom: 8,
-  },
-  imagePickerButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 10,
-    borderWidth: 1,
-    borderColor: '#2a3147',
-    backgroundColor: '#1c2233',
-  },
-  imagePickerText: {
-    color: '#dfe7ff',
-    marginLeft: 6,
-    fontSize: 12,
-    fontWeight: '600',
   },
   body: {
     marginTop: 16,

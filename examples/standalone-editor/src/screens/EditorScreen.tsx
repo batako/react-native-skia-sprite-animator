@@ -12,7 +12,6 @@ import type { DataSourceParam } from '@shopify/react-native-skia';
 import { AnimationStudio } from '../components/AnimationStudio';
 import { TemplatePanel } from '../components/TemplatePanel';
 import { StoragePanel } from '../components/StoragePanel';
-import { FileBrowserModal } from '../components/FileBrowserModal';
 import { MetaEditor } from '../components/MetaEditor';
 import { useEditorIntegration } from '../hooks/useEditorIntegration';
 
@@ -56,7 +55,6 @@ export const EditorScreen = () => {
   const [imageSource, setImageSource] = React.useState<DataSourceParam>(SAMPLE_SPRITE);
   const [imageUri, setImageUri] = React.useState<string | null>(null);
   const editorRef = React.useRef(editor);
-  const [isFileBrowserVisible, setFileBrowserVisible] = React.useState(false);
 
   React.useEffect(() => {
     editorRef.current = editor;
@@ -73,7 +71,13 @@ export const EditorScreen = () => {
       const uri = asset.localUri ?? asset.uri;
       setImageUri(uri);
       setImageSource(uri);
-      editorRef.current.updateMeta({ imageUri: uri });
+      editorRef.current.reset({
+        frames: SAMPLE_FRAMES.map((frame) => ({ ...frame, imageUri: uri })),
+        animations: SAMPLE_INITIAL_STATE.animations ?? {},
+        animationsMeta: SAMPLE_INITIAL_STATE.animationsMeta,
+        selected: SAMPLE_INITIAL_STATE.selected ?? [],
+        meta: SAMPLE_INITIAL_STATE.meta ?? {},
+      });
     };
     loadSample();
     return () => {
@@ -92,28 +96,6 @@ export const EditorScreen = () => {
     }
   }, []);
 
-  const resetEditorState = React.useCallback(() => {
-    editorRef.current.reset({
-      frames: [],
-      animations: {},
-      animationsMeta: {},
-      selected: [],
-    });
-  }, []);
-
-  const handleOpenFile = React.useCallback(
-    (uri: string) => {
-      resetEditorState();
-      handleImageUriChange(uri);
-    },
-    [handleImageUriChange, resetEditorState],
-  );
-
-  const handleChangeImageRequest = React.useCallback(() => {
-    integration.stop();
-    setFileBrowserVisible(true);
-  }, [integration]);
-
   return (
     <SafeAreaView style={styles.safeArea}>
       <StatusBar barStyle="light-content" />
@@ -125,22 +107,11 @@ export const EditorScreen = () => {
           Edit frames, play animations, switch templates, and persist sprites to disk with a single
           screen.
         </Text>
-        <AnimationStudio
-          editor={editor}
-          integration={integration}
-          image={imageSource}
-          onSelectImage={handleChangeImageRequest}
-        />
+        <AnimationStudio editor={editor} integration={integration} image={imageSource} />
         <MetaEditor editor={editor} />
         <TemplatePanel editor={editor} template={template} onTemplateChange={setTemplate} />
         <StoragePanel editor={editor} imageUri={imageUri} onImageUriChange={handleImageUriChange} />
       </ScrollView>
-      <FileBrowserModal
-        visible={isFileBrowserVisible}
-        onClose={() => setFileBrowserVisible(false)}
-        onOpenFile={handleOpenFile}
-        allowedMimeTypes={['image/*']}
-      />
     </SafeAreaView>
   );
 };

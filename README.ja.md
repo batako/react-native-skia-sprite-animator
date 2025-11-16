@@ -60,7 +60,7 @@ export function HeroPreview() {
 ```
 
 - `image`: `require()` や `SkImage` をそのまま渡せます。
-- `data.frames`: `{ x, y, w, h, duration? }` の配列。`duration` は後方互換のために残してありますが、実際のタイミングはアニメーションごとの `fps` / `multipliers` メタデータで決まります。
+- `data.frames`: `{ x, y, w, h, duration?, imageUri? }` の配列。`duration` は後方互換のために残しつつ、`imageUri` を指定するとフレーム単位で別画像を参照できます（未指定時は `image` prop を使用）。
 - `data.animations` / `animations`: `{ walk: [0, 1, 2] }` のようにアニメーション名とフレーム番号を紐づけます。ランタイムで差し替えたい場合は props の `animations` を渡してください。
 - `data.animationsMeta` / `animationsMeta`: 各アニメーションごとに `loop` / `autoPlay` / `fps` / `multipliers`（フレーム倍率）を設定するためのメタデータです。
 - `initialAnimation`: 再生開始時に選択するアニメーション名。指定が無い場合は最初のアニメーション、または素のフレーム順を使います。
@@ -107,8 +107,8 @@ return (
 ````ts
 const data: SpriteData = {
   frames: [
-    { x: 0, y: 0, w: 64, h: 64, duration: 120 },
-    { x: 64, y: 0, w: 64, h: 64 },
+    { x: 0, y: 0, w: 64, h: 64, duration: 120, imageUri: 'file:///sprites/images/hero.png' },
+    { x: 64, y: 0, w: 64, h: 64, imageUri: 'file:///sprites/images/fx.png' },
   ],
   animations: {
     walk: [0, 1],

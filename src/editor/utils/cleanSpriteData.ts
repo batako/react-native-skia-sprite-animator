@@ -16,7 +16,6 @@ type SpriteDataLike<TFrame extends SpriteFrame> = Pick<
 
 export interface CleanSpriteDataResult<TFrame extends SpriteFrame> extends SpriteDataLike<TFrame> {
   frameIndexMap: number[];
-  removedFrameIndexes: number[];
   animations: SpriteAnimations;
   animationsMeta?: SpriteAnimationsMeta;
 }
@@ -99,7 +98,7 @@ export const cleanSpriteData = <TFrame extends SpriteFrame>(
 
   const keepAllFrames = referencedRawIndexes.size === 0;
   const frameKey = (frame: SpriteFrame) =>
-    `${frame.x}|${frame.y}|${frame.w}|${frame.h}|${frame.duration ?? ''}`;
+    `${frame.x}|${frame.y}|${frame.w}|${frame.h}|${frame.duration ?? ''}|${frame.imageUri ?? ''}`;
 
   const canonicalByRaw = new Map<number, number>();
   const canonicalOrder: number[] = [];
@@ -224,10 +223,6 @@ export const cleanSpriteData = <TFrame extends SpriteFrame>(
     }
   }
 
-  const removedFrameIndexes = data.frames
-    .map((_, rawIndex) => (frameIndexMap[rawIndex] === -1 ? rawIndex : -1))
-    .filter((index) => index >= 0);
-
   const finalAnimationsMeta: SpriteAnimationsMeta = {};
   Object.entries(cleanedAnimations).forEach(([name, sequence]) => {
     const baseEntry = animationsMeta?.[name] ?? {};
@@ -268,6 +263,5 @@ export const cleanSpriteData = <TFrame extends SpriteFrame>(
     animations: cleanedAnimations,
     animationsMeta: finalAnimationsMeta,
     frameIndexMap,
-    removedFrameIndexes,
   };
 };

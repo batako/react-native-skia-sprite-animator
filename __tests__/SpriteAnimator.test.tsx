@@ -48,8 +48,9 @@ describe('SpriteAnimator', () => {
       <SpriteAnimator image={mockSkImage()} data={{ frames }} spriteScale={2} />,
     );
 
-    expect(skiaMock.mockUseImage).toHaveBeenCalledTimes(1);
-    expect(skiaMock.mockUseImage).toHaveBeenCalledWith(null);
+    expect(skiaMock.mockUseImage).toHaveBeenCalledTimes(2);
+    expect(skiaMock.mockUseImage).toHaveBeenNthCalledWith(1, null);
+    expect(skiaMock.mockUseImage).toHaveBeenNthCalledWith(2, null);
     const groupNode = renderer.root.findByType(skiaMock.Group as any);
     const clipRect = groupNode.props.clip as {
       x: number;
@@ -124,17 +125,30 @@ describe('SpriteAnimator', () => {
 
   it('uses useImage for asset sources and skips autoplay for single-frame data', () => {
     const assetSource = 'bundle://hero.png' as ImageSourcePropType;
-    const resolvedImage = mockSkImage();
-    skiaMock.mockUseImage.mockReturnValue(resolvedImage as any);
+    skiaMock.mockUseImage.mockImplementation(() => null);
+
+    renderComponent(<SpriteAnimator image={assetSource} data={{ frames: [frames[0]] }} />);
+
+    expect(skiaMock.mockUseImage).toHaveBeenCalledTimes(2);
+    expect(jest.getTimerCount()).toBe(0);
+  });
+
+  it('loads per-frame image URIs via useImage', () => {
+    const frameUri = 'file:///alt-sprite.png';
+    const perFrameImage = mockSkImage();
+    skiaMock.mockUseImage
+      .mockImplementationOnce(() => null)
+      .mockImplementationOnce(() => perFrameImage as any);
 
     const renderer = renderComponent(
-      <SpriteAnimator image={assetSource} data={{ frames: [frames[0]] }} />,
+      <SpriteAnimator
+        image={mockSkImage()}
+        data={{ frames: [{ ...frames[0], imageUri: frameUri }] }}
+      />,
     );
 
-    expect(skiaMock.mockUseImage).toHaveBeenCalledTimes(1);
-    expect(jest.getTimerCount()).toBe(0);
     const imageNode = renderer.root.findByType(skiaMock.MockSkiaImage);
-    expect(imageNode.props.x).toBeCloseTo(0);
+    expect(imageNode.props.image).toBe(perFrameImage);
   });
 
   it('clears pending timers on unmount', () => {

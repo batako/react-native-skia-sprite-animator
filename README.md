@@ -60,7 +60,7 @@ export function HeroPreview() {
 ```
 
 - `image`: Accepts both `require()` assets and `SkImage` values.
-- `data.frames`: Array of `{ x, y, w, h, duration? }`. The optional `duration` field exists for backward compatibility, but rendering now derives timing exclusively from the per-animation `fps` + `multipliers` metadata described below.
+- `data.frames`: Array of `{ x, y, w, h, duration?, imageUri? }`. `duration` remains for backwards compatibility, while `imageUri` lets you override the global sprite sheet per frame (falling back to the `image` prop when omitted).
 - `data.animations` / `animations`: Map animation names to frame indexes (e.g. `{ walk: [0, 1, 2] }`). Pass an explicit `animations` prop when you need runtime overrides.
 - `data.animationsMeta` / `animationsMeta`: Optional per-animation overrides (`loop`, `autoPlay`, `fps`, and `multipliers` to stretch individual frames).
 - `initialAnimation`: Name of the animation that should play first. Falls back to the first available animation or raw frame order.
@@ -107,8 +107,8 @@ Available methods:
 ```ts
 const data: SpriteData = {
   frames: [
-    { x: 0, y: 0, w: 64, h: 64, duration: 120 },
-    { x: 64, y: 0, w: 64, h: 64 },
+    { x: 0, y: 0, w: 64, h: 64, duration: 120, imageUri: 'file:///sprites/images/hero.png' },
+    { x: 64, y: 0, w: 64, h: 64, imageUri: 'file:///sprites/images/fx.png' },
   ],
   animations: {
     walk: [0, 1],
