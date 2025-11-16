@@ -11,6 +11,8 @@ export interface SpriteMetadata {
   imageUri: string;
   /** Creation timestamp in milliseconds. */
   createdAt: number;
+  /** Last update timestamp in milliseconds. */
+  updatedAt: number;
   /** Version number assigned when exporting the sprite. */
   version: number;
   [key: string]: unknown;
@@ -240,12 +242,14 @@ export const saveSprite = async <TExtra extends Record<string, unknown>>({
   });
 
   const metaInput = (sprite.meta ?? {}) as Partial<SpriteMetadata>;
+  const now = Date.now();
   const metadata: SpriteMetadata = {
     displayName:
       typeof metaInput.displayName === 'string'
         ? metaInput.displayName
         : `Sprite ${spriteId.slice(0, 6)}`,
-    createdAt: typeof metaInput.createdAt === 'number' ? metaInput.createdAt : Date.now(),
+    createdAt: typeof metaInput.createdAt === 'number' ? metaInput.createdAt : now,
+    updatedAt: typeof metaInput.updatedAt === 'number' ? metaInput.updatedAt : now,
     version: typeof metaInput.version === 'number' ? metaInput.version : 1,
     imageUri: destination,
   };
@@ -254,7 +258,13 @@ export const saveSprite = async <TExtra extends Record<string, unknown>>({
     if (value === undefined) {
       return;
     }
-    if (key === 'displayName' || key === 'createdAt' || key === 'version' || key === 'imageUri') {
+    if (
+      key === 'displayName' ||
+      key === 'createdAt' ||
+      key === 'updatedAt' ||
+      key === 'version' ||
+      key === 'imageUri'
+    ) {
       return;
     }
     (metadata as Record<string, unknown>)[key] = value;

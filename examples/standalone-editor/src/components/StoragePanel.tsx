@@ -1,5 +1,6 @@
 import React from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { Alert, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import * as FileSystem from 'expo-file-system/legacy';
 import {
   DefaultSpriteTemplate,
   deleteSprite,
@@ -21,6 +22,9 @@ export const StoragePanel = ({ editor, imageUri, onImageUriChange }: StoragePane
   const [sprites, setSprites] = React.useState<SpriteSummary[]>([]);
   const [status, setStatus] = React.useState<string | null>(null);
   const [isBusy, setIsBusy] = React.useState(false);
+  const [saveName, setSaveName] = React.useState('');
+  const [editingId, setEditingId] = React.useState<string | null>(null);
+  const [renameDraft, setRenameDraft] = React.useState('');
 
   const refresh = React.useCallback(async () => {
     try {
@@ -40,31 +44,28 @@ export const StoragePanel = ({ editor, imageUri, onImageUriChange }: StoragePane
       setStatus('Add at least one frame before saving.');
       return;
     }
-    if (!imageUri) {
-      setStatus('Image URI is required to persist sprites.');
-      return;
-    }
+    const trimmedName = saveName.trim() || 'Untitled Sprite';
     setIsBusy(true);
     try {
       const payload = editor.exportJSON(DefaultSpriteTemplate);
-      const stored = await saveSprite({
+      const now = Date.now();
+      await saveSprite({
         imageTempUri: imageUri,
         sprite: {
           ...payload,
           meta: {
             ...(payload.meta ?? {}),
-            displayName: payload.meta?.displayName ?? 'Untitled Sprite',
+            displayName: trimmedName,
             version: (payload.meta?.version ?? 0) + 1,
+            createdAt: payload.meta?.createdAt ?? now,
+            updatedAt: now,
           },
         },
       });
-      editor.updateMeta({
-        displayName: stored.meta.displayName,
-        version: stored.meta.version,
-        imageUri: stored.meta.imageUri,
-      });
-      setStatus(`Saved sprite ${stored.meta.displayName}.`);
+      editor.updateMeta({ displayName: trimmedName });
+      setStatus(`Saved sprite ${trimmedName}.`);
       await refresh();
+      setSaveName('');
     } catch (error) {
       setStatus((error as Error).message);
     } finally {
@@ -80,9 +81,9 @@ export const StoragePanel = ({ editor, imageUri, onImageUriChange }: StoragePane
         setStatus('Sprite not found on disk.');
         return;
       }
-      editor.importJSON(stored, DefaultSpriteTemplate);
-      editor.updateMeta(stored.meta);
-      onImageUriChange(stored.meta.imageUri ?? null);
+      const { imageUri: loadedImageUri, version: _version, ...restMeta } = stored.meta;
+      editor.importJSON({ ...stored, meta: restMeta }, DefaultSpriteTemplate);
+      onImageUriChange(loadedImageUri ?? null);
       setStatus(`Loaded sprite ${stored.meta.displayName}.`);
     } catch (error) {
       setStatus((error as Error).message);
@@ -91,54 +92,197 @@ export const StoragePanel = ({ editor, imageUri, onImageUriChange }: StoragePane
     }
   };
 
-  const handleDelete = async (id: string) => {
+  const handleOverwrite = async (id: string, displayName: string) => {
+    if (!editor.state.frames.length) {
+      setStatus('Add at least one frame before saving.');
+      return;
+    }
+    setIsBusy(true);
+    let tempImageCopy: string | null = null;
+    try {
+      const payload = editor.exportJSON(DefaultSpriteTemplate);
+      const stored = await loadSprite(id);
+      if (!stored) {
+        setStatus('Sprite not found on disk.');
+        return;
+      }
+      let sourceImage = imageUri;
+      if (!sourceImage) {
+        if (!stored.meta.imageUri) {
+          throw new Error('Image URI is required to persist sprites.');
+        }
+        tempImageCopy = `${
+          FileSystem.cacheDirectory ?? FileSystem.documentDirectory
+        }overwrite_${Date.now()}`;
+        await FileSystem.copyAsync({ from: stored.meta.imageUri, to: tempImageCopy });
+        sourceImage = tempImageCopy;
+      }
+      const now = Date.now();
+      await saveSprite({
+        imageTempUri: sourceImage,
+        sprite: {
+          ...payload,
+          id,
+          meta: {
+            ...(payload.meta ?? {}),
+            displayName,
+            version: (payload.meta?.version ?? 0) + 1,
+            createdAt: stored.meta.createdAt ?? now,
+            updatedAt: now,
+          },
+        },
+      });
+      setStatus(`Overwrote sprite ${displayName}.`);
+      await refresh();
+    } catch (error) {
+      setStatus((error as Error).message);
+    } finally {
+      if (tempImageCopy) {
+        await FileSystem.deleteAsync(tempImageCopy, { idempotent: true });
+      }
+      setIsBusy(false);
+    }
+  };
+
+  const handleDelete = async (id: string, name: string) => {
+    if (isBusy) {
+      return;
+    }
+    Alert.alert('Delete sprite?', `Are you sure you want to remove "${name}" from storage?`, [
+      { text: 'Cancel', style: 'cancel' },
+      {
+        text: 'Delete',
+        style: 'destructive',
+        onPress: async () => {
+          setIsBusy(true);
+          try {
+            await deleteSprite(id);
+            await refresh();
+            setStatus(`Sprite ${name} removed from storage.`);
+          } catch (error) {
+            setStatus((error as Error).message);
+          } finally {
+            setIsBusy(false);
+          }
+        },
+      },
+    ]);
+  };
+
+  const handleRename = async (id: string, nextName: string) => {
+    const trimmed = nextName.trim();
+    if (!trimmed) {
+      setStatus('Name cannot be empty.');
+      setEditingId(null);
+      setRenameDraft('');
+      return;
+    }
+    const existing = sprites.find((sprite) => sprite.id === id);
+    if (existing && existing.displayName === trimmed) {
+      setEditingId(null);
+      setRenameDraft('');
+      return;
+    }
     setIsBusy(true);
     try {
-      await deleteSprite(id);
+      const stored = await loadSprite(id);
+      if (!stored) {
+        setStatus('Sprite not found on disk.');
+        return;
+      }
+      const tempUri = `${FileSystem.cacheDirectory ?? FileSystem.documentDirectory}rename_${Date.now()}`;
+      await FileSystem.copyAsync({ from: stored.meta.imageUri, to: tempUri });
+      await saveSprite({
+        imageTempUri: tempUri,
+        sprite: {
+          id: stored.id,
+          frames: stored.frames,
+          animations: stored.animations,
+          animationsMeta: stored.animationsMeta,
+          meta: { ...stored.meta, displayName: trimmed, updatedAt: Date.now() },
+        },
+      });
+      await FileSystem.deleteAsync(tempUri, { idempotent: true });
+      setStatus(`Renamed sprite to ${trimmed}.`);
       await refresh();
-      setStatus('Sprite removed from storage.');
     } catch (error) {
       setStatus((error as Error).message);
     } finally {
       setIsBusy(false);
+      setEditingId(null);
+      setRenameDraft('');
     }
   };
 
   return (
     <View style={styles.container}>
       <Text style={styles.heading}>Storage</Text>
-      <View style={styles.buttonRow}>
-        <IconButton
-          name="save"
-          onPress={handleSave}
-          disabled={isBusy}
-          accessibilityLabel="Save sprite"
-        />
-        <IconButton
-          name="refresh"
-          onPress={refresh}
-          disabled={isBusy}
-          accessibilityLabel="Refresh list"
-        />
+      <View style={styles.formRow}>
+        <View style={{ flex: 1 }}>
+          <Text style={styles.meta}>Sprite name</Text>
+          <TextInput
+            style={styles.nameInput}
+            value={saveName}
+            onChangeText={setSaveName}
+            placeholder="Untitled Sprite"
+            editable={!isBusy}
+          />
+        </View>
+        <View style={styles.formActions}>
+          <IconButton
+            iconFamily="material"
+            name="save"
+            onPress={handleSave}
+            disabled={isBusy}
+            accessibilityLabel="Save sprite"
+          />
+        </View>
       </View>
-      <Text style={styles.meta}>Image URI: {imageUri ?? 'not set'}</Text>
       <View style={styles.list}>
         {sprites.map((sprite) => (
           <View key={sprite.id} style={styles.spriteRow}>
             <View style={{ flex: 1 }}>
-              <Text style={styles.spriteName}>{sprite.displayName}</Text>
-              <Text style={styles.spriteMeta}>{new Date(sprite.createdAt).toLocaleString()}</Text>
+              {editingId === sprite.id ? (
+                <TextInput
+                  style={styles.renameInput}
+                  value={renameDraft}
+                  onChangeText={setRenameDraft}
+                  autoFocus
+                  onSubmitEditing={() => handleRename(sprite.id, renameDraft)}
+                  onBlur={() => handleRename(sprite.id, renameDraft)}
+                />
+              ) : (
+                <TouchableOpacity
+                  style={styles.renameDisplay}
+                  onPress={() => {
+                    setEditingId(sprite.id);
+                    setRenameDraft(sprite.displayName);
+                  }}
+                  disabled={isBusy}
+                >
+                  <Text style={styles.spriteName}>{sprite.displayName}</Text>
+                </TouchableOpacity>
+              )}
             </View>
             <View style={styles.rowButtons}>
+              {editingId === sprite.id ? null : (
+                <IconButton
+                  iconFamily="material"
+                  name="save"
+                  onPress={() => handleOverwrite(sprite.id, sprite.displayName)}
+                  disabled={isBusy}
+                  accessibilityLabel="Overwrite sprite with current editor state"
+                />
+              )}
               <IconButton
-                name="file-download"
+                name="file-upload"
                 onPress={() => handleLoad(sprite.id)}
                 disabled={isBusy}
                 accessibilityLabel="Load sprite"
               />
               <IconButton
                 name="delete"
-                onPress={() => handleDelete(sprite.id)}
+                onPress={() => handleDelete(sprite.id, sprite.displayName)}
                 disabled={isBusy}
                 accessibilityLabel="Delete sprite"
               />
@@ -166,9 +310,26 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     marginBottom: 8,
   },
-  buttonRow: {
+  formRow: {
     flexDirection: 'row',
-    marginBottom: 4,
+    gap: 12,
+    alignItems: 'flex-end',
+    marginBottom: 8,
+  },
+  formActions: {
+    flexDirection: 'row',
+    gap: 6,
+  },
+  nameInput: {
+    marginTop: 4,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#303852',
+    backgroundColor: '#1a1f2d',
+    color: '#f6f8ff',
+    marginBottom: 8,
   },
   meta: {
     marginTop: 8,
@@ -196,6 +357,22 @@ const styles = StyleSheet.create({
   },
   rowButtons: {
     flexDirection: 'row',
+    gap: 8,
+    alignItems: 'center',
+  },
+  renameInput: {
+    flex: 1,
+    borderWidth: 1,
+    borderColor: '#39405c',
+    borderRadius: 6,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    color: '#f0f4ff',
+    height: 34,
+  },
+  renameDisplay: {
+    height: 34,
+    justifyContent: 'center',
   },
   empty: {
     color: '#606984',

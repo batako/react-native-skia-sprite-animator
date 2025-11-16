@@ -89,10 +89,8 @@ export const EditorScreen = () => {
     setImageUri(uri);
     if (uri) {
       setImageSource(uri);
-      editorRef.current.updateMeta({ imageUri: uri });
     } else {
       setImageSource(SAMPLE_SPRITE);
-      editorRef.current.updateMeta({ imageUri: undefined });
     }
   }, []);
 
