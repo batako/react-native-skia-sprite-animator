@@ -148,20 +148,20 @@ export const AnimationStudio = ({
     [commitPendingMultiplier],
   );
 
-  const renderResumeForwardIcon = useCallback(
+  const renderRestartForwardIcon = useCallback(
     ({ color, size }: IconButtonRenderIconProps) => (
-      <View style={styles.resumeIcon}>
-        <View style={[styles.resumeIconBar, { backgroundColor: color, height: size }]} />
+      <View style={styles.restartIcon}>
+        <View style={[styles.restartIconBar, { backgroundColor: color, height: size }]} />
         <MaterialIcons name="play-arrow" size={size} color={color} />
       </View>
     ),
     [],
   );
 
-  const renderResumeReverseIcon = useCallback(
+  const renderRestartReverseIcon = useCallback(
     ({ color, size }: IconButtonRenderIconProps) => (
-      <View style={[styles.resumeIcon, styles.resumeIconReverse]}>
-        <View style={[styles.resumeIconBar, { backgroundColor: color, height: size }]} />
+      <View style={[styles.restartIcon, styles.restartIconReverse]}>
+        <View style={[styles.restartIconBar, { backgroundColor: color, height: size }]} />
         <MaterialIcons name="play-arrow" size={size} color={color} style={styles.reverseIcon} />
       </View>
     ),
@@ -960,7 +960,7 @@ export const AnimationStudio = ({
                   iconStyle={styles.reverseIcon}
                 />
                 <IconButton
-                  renderIcon={renderResumeReverseIcon}
+                  renderIcon={renderRestartReverseIcon}
                   onPress={() => {
                     if (!currentSequence.length) {
                       return;
@@ -981,7 +981,7 @@ export const AnimationStudio = ({
                   }
                 />
                 <IconButton
-                  renderIcon={renderResumeForwardIcon}
+                  renderIcon={renderRestartForwardIcon}
                   onPress={() => {
                     if (!currentSequence.length) {
                       return;
@@ -1535,15 +1535,15 @@ const styles = StyleSheet.create({
     flexWrap: 'wrap',
     columnGap: 4,
   },
-  resumeIcon: {
+  restartIcon: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 2,
   },
-  resumeIconReverse: {
+  restartIconReverse: {
     flexDirection: 'row-reverse',
   },
-  resumeIconBar: {
+  restartIconBar: {
     width: 2,
     borderRadius: 1,
   },
