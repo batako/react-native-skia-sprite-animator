@@ -122,7 +122,8 @@ const data: SpriteData = {
   autoPlayAnimation: "walk",
   meta: {
     displayName: "Hero Walk",
-    origin: { x: 0.5, y: 1 },
+    createdAt: 1730890000000,
+    updatedAt: 1730893600000,
   },
 };
 

@@ -1628,6 +1628,8 @@ const styles = StyleSheet.create({
     gap: 2,
   },
   animationRenameInput: {
+    flexShrink: 1,
+    maxWidth: 200,
     paddingHorizontal: 6,
     paddingVertical: 2,
     borderRadius: 4,
