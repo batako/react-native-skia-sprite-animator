@@ -90,12 +90,12 @@ export interface SpriteData {
   autoPlayAnimation?: string | null;
 }
 
-/**
- * Options for the `play` method exposed via the imperative handle.
- */
 /** Allowed playback directions. */
 export type SpriteAnimatorDirection = 'forward' | 'reverse';
 
+/**
+ * Options for the `play` method exposed via the imperative handle.
+ */
 export interface SpriteAnimatorPlayOptions {
   /** Frame index to start playback from. */
   fromFrame?: number;

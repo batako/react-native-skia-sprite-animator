@@ -19,20 +19,37 @@ const TIMELINE_CARD_SIZE = 150;
 const TIMELINE_CARD_PADDING = 10;
 const TIMELINE_FOOTER_HEIGHT = 28;
 
+/**
+ * Caches intrinsic dimensions for timeline thumbnails.
+ */
 export interface FrameImageInfo {
+  /** Intrinsic width of the referenced frame image. */
   width: number;
+  /** Intrinsic height of the referenced frame image. */
   height: number;
+  /** Whether the image dimensions are already loaded. */
   ready: boolean;
 }
 
+/**
+ * Shape describing a card rendered in the timeline grid.
+ */
 export interface TimelineSequenceCard {
+  /** Frame data used for thumbnail preview. */
   frame: SpriteEditorFrame | undefined;
+  /** Index of the frame in the sprite sheet. */
   frameIndex: number;
+  /** Index within the timeline sequence. */
   timelineIndex: number;
+  /** Whether this card is currently selected. */
   isSelected: boolean;
 }
 
+/**
+ * Methods exposed to parent components via the multiplier ref.
+ */
 export interface MultiplierFieldHandle {
+  /** Commits the current multiplier draft. */
   commit: () => void;
 }
 
@@ -93,42 +110,81 @@ const MultiplierField = React.forwardRef<MultiplierFieldHandle, MultiplierFieldP
 
 MultiplierField.displayName = 'MultiplierField';
 
+/**
+ * Props for the {@link TimelinePanel} component.
+ */
 export interface TimelinePanelProps {
+  /** Panel heading text. */
   title?: string;
+  /** Disables controls while animations play. */
   isPlaying: boolean;
+  /** Indicates whether an animation is targeted. */
   hasActiveAnimation: boolean;
+  /** Number of frames in the active sequence. */
   currentSequenceLength: number;
+  /** Name of the active animation (null for all frames). */
   currentAnimationName: string | null;
+  /** Card descriptors to render for the sequence. */
   sequenceCards: TimelineSequenceCard[];
+  /** Selected timeline index, or null. */
   selectedTimelineIndex: number | null;
+  /** Multiplier applied to the selected frame. */
   selectedMultiplier: number;
+  /** Frame definition associated with the selection. */
   selectedFrame: SpriteEditorFrame | null;
+  /** Whether there is a clipboard payload. */
   hasClipboard: boolean;
+  /** Default multiplier used when none is stored. */
   defaultFrameMultiplier: number;
+  /** Height measured for the cards viewport. */
   timelineMeasuredHeight: number;
+  /** Callback triggered when the timeline height changes. */
   onTimelineMeasured: (height: number) => void;
+  /** Plays from the current selection forward. */
   onPlayFromSelection: () => void;
+  /** Plays from the current selection in reverse. */
   onReverseFromSelection: () => void;
+  /** Restarts playback in forward direction. */
   onRestartForward: () => void;
+  /** Restarts playback in reverse direction. */
   onRestartReverse: () => void;
+  /** Pauses playback. */
   onPause: () => void;
+  /** Stops playback and resets cursor. */
   onStop: () => void;
+  /** Opens the frame picker modal. */
   onOpenFramePicker: () => void;
+  /** Opens the single-image picker modal. */
   onOpenImagePicker: () => void;
+  /** Copies the selected timeline frame. */
   onCopy: () => void;
+  /** Pastes clipboard into the timeline. */
   onPaste: () => void;
+  /** Moves selection to the left. */
   onMoveLeft: () => void;
+  /** Moves selection to the right. */
   onMoveRight: () => void;
+  /** Removes the selected frame. */
   onRemove: () => void;
+  /** Selects a frame by timeline index. */
   onSelectFrame: (timelineIndex: number) => void;
+  /** Ref to control the multiplier input. */
   multiplierRef: React.RefObject<MultiplierFieldHandle | null>;
+  /** Applies a new multiplier for the selection. */
   onSubmitMultiplier: (value: number) => void;
+  /** Image source used for timeline thumbnails. */
   timelineImageSource?: ImageSourcePropType;
+  /** Dimension cache per frame id. */
   frameImageInfos: Record<string, FrameImageInfo>;
+  /** Dimensions for fallback thumbnails. */
   fallbackImageInfo: FrameImageInfo | null;
+  /** Animations metadata indexed by name. */
   animationsMeta: SpriteAnimationsMeta;
 }
 
+/**
+ * Timeline card grid with transport controls and multiplier editor.
+ */
 export const TimelinePanel = ({
   title = 'Animation Frames',
   isPlaying,

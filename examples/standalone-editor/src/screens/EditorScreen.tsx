@@ -37,6 +37,9 @@ const SAMPLE_INITIAL_STATE: Partial<SpriteEditorState> = {
   meta: {},
 };
 
+/**
+ * The standalone editor demo screen that wires up AnimationStudio.
+ */
 export const EditorScreen = () => {
   const editor = useSpriteEditor({
     historyLimit: 100,

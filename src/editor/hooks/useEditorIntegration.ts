@@ -7,7 +7,11 @@ import type {
 } from '../../SpriteAnimator';
 import type { SpriteEditorApi } from './useSpriteEditor';
 
+/**
+ * Options for {@link useEditorIntegration}.
+ */
 export interface UseEditorIntegrationOptions {
+  /** Sprite editor instance driving the integration. */
   editor: SpriteEditorApi;
 }
 
@@ -22,6 +26,9 @@ interface PlayOptions {
   direction?: SpriteAnimatorDirection;
 }
 
+/**
+ * Ties the SpriteEditor state to the SpriteAnimator runtime.
+ */
 export const useEditorIntegration = ({ editor }: UseEditorIntegrationOptions) => {
   const animatorRef = useRef<SpriteAnimatorHandle>(null);
   const [speedScale, setSpeedScale] = useState(1);
@@ -310,4 +317,5 @@ export const useEditorIntegration = ({ editor }: UseEditorIntegrationOptions) =>
   } as const;
 };
 
+/** Convenience alias for the return type of {@link useEditorIntegration}. */
 export type EditorIntegration = ReturnType<typeof useEditorIntegration>;

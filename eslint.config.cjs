@@ -22,7 +22,29 @@ module.exports = defineConfig([
       },
     },
     rules: {
-      'jsdoc/require-jsdoc': 'off',
+      'jsdoc/require-jsdoc': [
+        'error',
+        {
+          publicOnly: true,
+          require: {
+            ArrowFunctionExpression: true,
+            ClassDeclaration: true,
+            ClassExpression: true,
+            FunctionDeclaration: true,
+            FunctionExpression: true,
+            MethodDefinition: true,
+          },
+          contexts: [
+            'ExportDefaultDeclaration > ArrowFunctionExpression',
+            'ExportNamedDeclaration > VariableDeclaration > VariableDeclarator > ArrowFunctionExpression',
+            'VariableDeclaration',
+            'TSInterfaceDeclaration',
+            'TSTypeAliasDeclaration',
+            'TSPropertySignature',
+            'TSMethodSignature',
+          ],
+        },
+      ],
       'jsdoc/check-alignment': 'error',
       'jsdoc/check-indentation': 'error',
       'jsdoc/check-param-names': [

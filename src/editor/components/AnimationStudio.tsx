@@ -46,18 +46,33 @@ import {
   type TimelineSequenceCard,
 } from './TimelinePanel';
 
+/**
+ * Adapter interface that lets consumers provide their own persistence layer.
+ */
 export interface SpriteStorageController {
+  /** Persists a sprite payload. */
   saveSprite: typeof saveSprite;
+  /** Loads a sprite by id; returns null when missing. */
   loadSprite: (id: string) => Promise<StoredSprite | null>;
+  /** Lists available sprite saves. */
   listSprites: () => Promise<SpriteSummary[]>;
+  /** Deletes a sprite by id. */
   deleteSprite: (id: string) => Promise<void>;
 }
 
+/**
+ * Props for the {@link AnimationStudio} composite component.
+ */
 export interface AnimationStudioProps {
+  /** Sprite editor instance that stores the canvas state. */
   editor: SpriteEditorApi;
+  /** Integration between the editor and SpriteAnimator preview. */
   integration: EditorIntegration;
+  /** Sprite sheet image source used throughout the studio. */
   image: DataSourceParam;
+  /** Optional storage hooks to override persistence. */
   storageController?: SpriteStorageController;
+  /** Meta keys that should be locked from editing/removal. */
   protectedMetaKeys?: string[];
 }
 
@@ -197,6 +212,9 @@ const cleanupAnimationMetaEntry = (
   sequenceLength: number,
 ): SpriteAnimationMeta => normalizeAnimationMetaEntry(entry, sequenceLength);
 
+/**
+ * High-level Animation Studio that wires editor, storage, metadata, and timeline UIs together.
+ */
 export const AnimationStudio = ({
   editor,
   integration,

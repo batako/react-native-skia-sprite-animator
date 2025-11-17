@@ -1,10 +1,17 @@
 import React, { useCallback, useRef } from 'react';
 import { TextInput, type TextInputProps } from 'react-native';
 
+/**
+ * Props for {@link SelectableTextInput}, extending the native TextInput props.
+ */
 export interface SelectableTextInputProps extends TextInputProps {
+  /** Automatically select the entire text when focused. */
   autoSelect?: boolean;
 }
 
+/**
+ * Text input that auto-selects its contents when focused.
+ */
 export const SelectableTextInput = React.forwardRef<TextInput, SelectableTextInputProps>(
   ({ selectTextOnFocus = true, autoSelect = true, onFocus, value, ...rest }, forwardedRef) => {
     const innerRef = useRef<TextInput>(null);

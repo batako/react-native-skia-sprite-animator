@@ -14,9 +14,15 @@ type SpriteDataLike<TFrame extends SpriteFrame> = Pick<
   [key: string]: unknown;
 };
 
+/**
+ * Result of {@link cleanSpriteData}, including a map from raw frames to normalized indexes.
+ */
 export interface CleanSpriteDataResult<TFrame extends SpriteFrame> extends SpriteDataLike<TFrame> {
+  /** Map from original frame indexes to the normalized list. */
   frameIndexMap: number[];
+  /** Cleaned animation map with invalid entries removed. */
   animations: SpriteAnimations;
+  /** Cleaned animation metadata tied to the remaining sequences. */
   animationsMeta?: SpriteAnimationsMeta;
 }
 
@@ -80,6 +86,9 @@ const mergeAnimationMeta = (
   return next;
 };
 
+/**
+ * Normalizes sprite data to remove duplicate frames and prune unused animations.
+ */
 export const cleanSpriteData = <TFrame extends SpriteFrame>(
   data: SpriteDataLike<TFrame>,
 ): CleanSpriteDataResult<TFrame> => {

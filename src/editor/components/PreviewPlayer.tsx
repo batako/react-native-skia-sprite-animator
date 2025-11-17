@@ -6,15 +6,27 @@ import type { DataSourceParam } from '@shopify/react-native-skia';
 import type { EditorIntegration } from '../hooks/useEditorIntegration';
 import { IconButton } from './IconButton';
 
+/**
+ * Props for the {@link PreviewPlayer} component.
+ */
 export interface PreviewPlayerProps {
+  /** Integration wires controlling playback. */
   integration: EditorIntegration;
+  /** Sprite sheet image rendered by SpriteAnimator. */
   image: DataSourceParam;
+  /** Optional title displayed above preview. */
   title?: string;
+  /** Fixed preview width (otherwise fits content). */
   width?: number;
+  /** Fixed preview height, defaults to card size. */
   height?: number;
+  /** Centers individual frames when true. */
   centered?: boolean;
 }
 
+/**
+ * Preview panel that embeds {@link SpriteAnimator} with zoom controls and stats.
+ */
 export const PreviewPlayer = ({
   integration,
   image,

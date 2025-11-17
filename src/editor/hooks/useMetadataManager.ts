@@ -1,24 +1,45 @@
 import { useCallback, useMemo, useState } from 'react';
 import type { SpriteEditorApi } from './useSpriteEditor';
 
+/**
+ * Internal metadata entry used by the metadata modal.
+ */
 export interface MetadataEntry {
+  /** Internal identifier for React lists. */
   id: string;
+  /** Metadata key string. */
   key: string;
+  /** Metadata value string. */
   value: string;
+  /** Indicates read-only protected entry. */
   readOnly?: boolean;
 }
 
+/**
+ * Options for {@link useMetadataManager}.
+ */
 export interface UseMetadataManagerOptions {
+  /** Editor instance to sync metadata with. */
   editor: SpriteEditorApi;
+  /** Keys that cannot be changed or removed. */
   protectedKeys?: string[];
 }
 
+/**
+ * Return type of {@link useMetadataManager}.
+ */
 export interface UseMetadataManagerResult {
+  /** Current editable entries. */
   entries: MetadataEntry[];
+  /** Resets entries to match editor state. */
   resetEntries: () => void;
+  /** Adds a new blank entry. */
   addEntry: () => void;
+  /** Updates a specific entry field. */
   updateEntry: (id: string, field: 'key' | 'value', text: string) => void;
+  /** Removes an entry (unless read-only). */
   removeEntry: (id: string) => void;
+  /** Applies entries back into the editor. */
   applyEntries: () => void;
 }
 
@@ -29,6 +50,9 @@ const createEntry = (key = '', value = '', readOnly = false): MetadataEntry => (
   readOnly,
 });
 
+/**
+ * Handles metadata CRUD interactions for the editor and modal UI.
+ */
 export const useMetadataManager = ({
   editor,
   protectedKeys = [],

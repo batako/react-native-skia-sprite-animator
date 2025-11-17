@@ -2,18 +2,33 @@ import React from 'react';
 import { View } from 'react-native';
 import { IconButton } from './IconButton';
 
+/**
+ * Props for the {@link TimelineControls} toolbar.
+ */
 export interface TimelineControlsProps {
+  /** Whether playback is currently running (disables controls). */
   isPlaying: boolean;
+  /** Currently selected timeline index or null. */
   selectedTimelineIndex: number | null;
+  /** Length of the active animation sequence. */
   currentSequenceLength: number;
+  /** True if there is data on the clipboard. */
   hasClipboard: boolean;
+  /** Copies the selected frame. */
   onCopy: () => void;
+  /** Pastes clipboard contents. */
   onPaste: () => void;
+  /** Moves the selection left. */
   onMoveLeft: () => void;
+  /** Moves the selection right. */
   onMoveRight: () => void;
+  /** Removes the selected frame. */
   onRemove: () => void;
 }
 
+/**
+ * Renders the copy/move/delete toolbar for timeline sequence editing.
+ */
 export const TimelineControls = ({
   isPlaying,
   selectedTimelineIndex,

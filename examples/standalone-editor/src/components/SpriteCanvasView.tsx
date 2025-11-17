@@ -12,14 +12,23 @@ import type { SpriteEditorApi } from 'react-native-skia-sprite-animator';
 import { mergeFrames, pointInFrame, snapToGrid } from 'react-native-skia-sprite-animator';
 import type { DataSourceParam } from '@shopify/react-native-skia';
 
+/**
+ * Props for the {@link SpriteCanvasView} component.
+ */
 export interface SpriteCanvasViewProps {
+  /** Editor API used to read/write frames. */
   editor: SpriteEditorApi;
+  /** Sprite sheet image to overlay the grid on. */
   image: DataSourceParam;
+  /** Grid snapping size in pixels. */
   gridSize?: number;
 }
 
 const MIN_SIZE = 256;
 
+/**
+ * Displays the sprite sheet with current frame selections and a simple tap handler.
+ */
 export const SpriteCanvasView = ({ editor, image, gridSize = 16 }: SpriteCanvasViewProps) => {
   const frames = editor.state.frames;
   const selectedIds = editor.state.selected;

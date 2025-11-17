@@ -3,6 +3,9 @@ import { StyleSheet, Text, TextInput, View } from 'react-native';
 import type { SpriteEditorApi } from 'react-native-skia-sprite-animator';
 import { IconButton } from './IconButton';
 
+/**
+ * Props for the {@link MetaEditor} component.
+ */
 interface MetaEditorProps {
   editor: SpriteEditorApi;
 }
@@ -13,6 +16,9 @@ interface MetaEntry {
   value: string;
 }
 
+/**
+ * Simple metadata editor used inside the example Animation Studio.
+ */
 export const MetaEditor = ({ editor }: MetaEditorProps) => {
   const meta = editor.state.meta;
   const [entries, setEntries] = React.useState<MetaEntry[]>([]);

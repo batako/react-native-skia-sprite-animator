@@ -15,16 +15,29 @@ import type { SpriteSummary } from '../../storage/spriteStorage';
 import { IconButton } from './IconButton';
 import { MacWindow } from './MacWindow';
 
+/**
+ * Props for the {@link StoragePanel} modal.
+ */
 interface StoragePanelProps {
+  /** Editor instance to read/write sprite data. */
   editor: SpriteEditorApi;
+  /** Controls whether the modal is shown. */
   visible: boolean;
+  /** Invoked when the modal should close. */
   onClose: () => void;
+  /** Callback triggered after saving completes. */
   onSpriteSaved?: (summary: SpriteSummary) => void;
+  /** Callback fired when a sprite is loaded. */
   onSpriteLoaded?: (summary: SpriteSummary) => void;
+  /** Default status text shown in toolbar. */
   defaultStatusMessage?: string;
+  /** Custom storage API injection. */
   storageApi?: SpriteStorageController;
 }
 
+/**
+ * Modal UI for working with the sprite storage controller.
+ */
 export const StoragePanel = ({
   editor,
   visible,

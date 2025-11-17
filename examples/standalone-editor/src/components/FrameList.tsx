@@ -3,12 +3,19 @@ import { ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import type { SpriteEditorApi } from 'react-native-skia-sprite-animator';
 import { IconButton } from './IconButton';
 
+/**
+ * Props for the {@link FrameList} component.
+ */
 export interface FrameListProps {
+  /** Sprite editor API instance driving the UI. */
   editor: SpriteEditorApi;
 }
 
 const DEFAULT_FRAME = { x: 0, y: 0, w: 32, h: 32, duration: 80 };
 
+/**
+ * Lists sprite frames with quick editing tools for the demo editor.
+ */
 export const FrameList = ({ editor }: FrameListProps) => {
   const frames = editor.state.frames;
   const selected = editor.state.selected;

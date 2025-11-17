@@ -4,10 +4,16 @@ import type { SpriteEditorApi } from 'react-native-skia-sprite-animator';
 import { cleanSpriteData } from 'react-native-skia-sprite-animator';
 import { IconButton } from './IconButton';
 
+/**
+ * Props for the {@link TemplatePanel} component.
+ */
 interface TemplatePanelProps {
   editor: SpriteEditorApi;
 }
 
+/**
+ * Provides import/export helpers for Sprite JSON in the example editor.
+ */
 export const TemplatePanel = ({ editor }: TemplatePanelProps) => {
   const [exportPreview, setExportPreview] = React.useState('');
   const [importText, setImportText] = React.useState('');

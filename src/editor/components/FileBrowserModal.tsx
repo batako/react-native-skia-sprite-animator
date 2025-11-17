@@ -16,11 +16,19 @@ import { MacWindow } from './MacWindow';
 
 const APP_FILES_DIR = `${FileSystem.documentDirectory ?? ''}app_files`;
 
+/**
+ * Props for the {@link FileBrowserModal} component.
+ */
 export interface FileBrowserModalProps {
+  /** Controls visibility of the modal. */
   visible: boolean;
+  /** Called when the modal should close. */
   onClose: () => void;
+  /** Invoked with selected file URI when user picks a file. */
   onOpenFile: (uri: string) => void;
+  /** Optional MIME whitelist. */
   allowedMimeTypes?: string[];
+  /** Optional extension whitelist (with or without leading dot). */
   allowedExtensions?: string[];
 }
 
@@ -32,6 +40,9 @@ interface FileEntry {
   isImage: boolean;
 }
 
+/**
+ * Cross-platform modal listing files in the app sandbox with optional filters.
+ */
 export const FileBrowserModal = ({
   visible,
   onClose,

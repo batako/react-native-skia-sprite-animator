@@ -13,36 +13,64 @@ import type { ImageSourcePropType } from 'react-native';
 import { IconButton } from './IconButton';
 import { SelectableTextInput } from './SelectableTextInput';
 
+/**
+ * Represents a selectable grid cell to be converted into sprite frames.
+ */
 export interface FrameGridCell {
+  /** Stable identifier for the cell. */
   id: string;
+  /** Row index within the generated grid. */
   row: number;
+  /** Column index within the generated grid. */
   column: number;
+  /** Pixel X coordinate. */
   x: number;
+  /** Pixel Y coordinate. */
   y: number;
+  /** Cell width in pixels. */
   width: number;
+  /** Cell height in pixels. */
   height: number;
 }
 
+/**
+ * Additional metadata describing an image source for the grid selector.
+ */
 export interface FrameGridImageDescriptor {
+  /** Image source (URI, require, etc). */
   source: DataSourceParam;
+  /** Known intrinsic width of the image. */
   width?: number;
+  /** Known intrinsic height of the image. */
   height?: number;
+  /** Optional display name. */
   name?: string;
+  /** Optional internal identifier. */
   id?: string;
 }
 
+/** Allowed `image` prop formats for {@link FrameGridSelector}. */
 export type FrameGridImageProp = DataSourceParam | FrameGridImageDescriptor;
 
 const isImageDescriptor = (value: FrameGridImageProp): value is FrameGridImageDescriptor => {
   return typeof value === 'object' && value !== null && 'source' in value;
 };
 
+/**
+ * Props for the {@link FrameGridSelector} component.
+ */
 export interface FrameGridSelectorProps {
+  /** Primary image to render when slicing. */
   image?: FrameGridImageProp;
+  /** Fallback image when `image` is absent. */
   fallbackImage?: FrameGridImageProp;
+  /** Called with generated cells when user adds frames. */
   onAddFrames: (cells: FrameGridCell[], image?: FrameGridImageDescriptor) => void;
+  /** Default cell width. */
   defaultCellWidth?: number;
+  /** Default cell height. */
   defaultCellHeight?: number;
+  /** Message shown when no image is available. */
   emptyMessage?: string;
 }
 
@@ -56,6 +84,9 @@ const normalizeImage = (value?: FrameGridImageProp): FrameGridImageDescriptor | 
   return { source: value as DataSourceParam };
 };
 
+/**
+ * Interactive grid overlay that helps slice sprite sheets into individual frames.
+ */
 export const FrameGridSelector = ({
   image,
   fallbackImage,

@@ -15,29 +15,55 @@ import {
   type StoredSprite,
 } from '../../storage/spriteStorage';
 
+/**
+ * Adapter interface used to inject custom sprite storage implementations.
+ */
 export interface SpriteStorageController {
+  /** Lists saved sprite summaries. */
   listSprites: () => Promise<SpriteSummary[]>;
+  /** Loads a stored sprite by id. */
   loadSprite: (id: string) => Promise<StoredSprite | null>;
+  /** Persists sprite data to storage. */
   saveSprite: typeof defaultSaveSprite;
+  /** Deletes a sprite by id. */
   deleteSprite: (id: string) => Promise<void>;
 }
 
+/**
+ * Options for {@link useSpriteStorage}.
+ */
 export interface UseSpriteStorageOptions {
+  /** Editor instance used for export/import. */
   editor: SpriteEditorApi;
+  /** Optional controller override. */
   controller?: SpriteStorageController;
+  /** Called when a sprite is successfully saved. */
   onSpriteSaved?: (summary: SpriteSummary) => void;
+  /** Called when a sprite is loaded. */
   onSpriteLoaded?: (summary: SpriteSummary) => void;
 }
 
+/**
+ * Result returned by {@link useSpriteStorage}.
+ */
 export interface UseSpriteStorageResult {
+  /** Cached list of stored sprites. */
   sprites: SpriteSummary[];
+  /** Status or error message for UI display. */
   status: string | null;
+  /** Indicates whether a storage operation is pending. */
   isBusy: boolean;
+  /** Reloads the list of stored sprites. */
   refresh: () => Promise<void>;
+  /** Saves the current editor state as a new sprite. */
   saveSpriteAs: (name: string) => Promise<SpriteSummary | null>;
+  /** Loads a sprite by id into the editor. */
   loadSpriteById: (id: string) => Promise<SpriteSummary | null>;
+  /** Overwrites an existing sprite entry. */
   overwriteSprite: (id: string, displayName: string) => Promise<SpriteSummary | null>;
+  /** Renames a stored sprite. */
   renameSprite: (id: string, name: string) => Promise<SpriteSummary | null>;
+  /** Deletes a sprite and reports success. */
   deleteSpriteById: (id: string, displayName: string) => Promise<boolean>;
 }
 
@@ -65,6 +91,9 @@ const toSpriteData = (stored: StoredSprite): SpriteData => ({
 const coerceTimestamp = (value: unknown): number | undefined =>
   typeof value === 'number' && Number.isFinite(value) ? (value as number) : undefined;
 
+/**
+ * Hook that wires the editor API to the sprite storage helpers.
+ */
 export const useSpriteStorage = ({
   editor,
   controller,

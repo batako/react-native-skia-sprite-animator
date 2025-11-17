@@ -5,11 +5,19 @@ import type { DataSourceParam } from '@shopify/react-native-skia';
 import type { EditorIntegration } from '../hooks/useEditorIntegration';
 import { IconButton } from './IconButton';
 
+/**
+ * Props for the {@link PlaybackControls} component.
+ */
 export interface PlaybackControlsProps {
+  /** Combined editor + animator integration helpers. */
   integration: EditorIntegration;
+  /** Sprite sheet image fed into SpriteAnimator. */
   image: DataSourceParam;
 }
 
+/**
+ * Renders preview playback controls around {@link SpriteAnimator}.
+ */
 export const PlaybackControls = ({ integration, image }: PlaybackControlsProps) => {
   const {
     animatorRef,

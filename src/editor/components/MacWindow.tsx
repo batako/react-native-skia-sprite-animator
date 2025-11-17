@@ -11,25 +11,46 @@ import {
 
 const DOUBLE_TAP_DELAY_MS = 300;
 
+/** Visual variants for the {@link MacWindow} chrome. */
 export type MacWindowVariant = 'default' | 'compact' | 'fullscreen';
 
+/**
+ * Props for the {@link MacWindow} component.
+ */
 export interface MacWindowProps {
+  /** Window title text. */
   title?: string;
+  /** Forces a specific variant via props. */
   variant?: MacWindowVariant;
+  /** Default variant when uncontrolled. */
   defaultVariant?: MacWindowVariant;
+  /** Fires when the variant toggles. */
   onVariantChange?: (variant: MacWindowVariant) => void;
+  /** Close button callback; defaults to resetting variant. */
   onClose?: () => void;
+  /** Minimize button callback; defaults to toggling compact. */
   onMinimize?: () => void;
+  /** Maximize button callback; defaults to toggling fullscreen. */
   onMaximize?: () => void;
+  /** Triggered when the header is double-tapped. */
   onHeaderDoubleTap?: () => void;
+  /** Optional toolbar content rendered below the header. */
   toolbarContent?: ReactNode;
+  /** Window body children. */
   children?: ReactNode;
+  /** Style overrides for the outer shell. */
   style?: StyleProp<ViewStyle>;
+  /** Style overrides for the content body. */
   contentStyle?: StyleProp<ViewStyle>;
+  /** Style overrides for the toolbar area. */
   toolbarStyle?: StyleProp<ViewStyle>;
+  /** Whether the compact/minimize button is available. */
   enableCompact?: boolean;
 }
 
+/**
+ * Desktop-inspired floating window with title bar controls.
+ */
 export const MacWindow = ({
   title = '',
   variant,

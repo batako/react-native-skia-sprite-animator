@@ -1,25 +1,47 @@
 import { useCallback, useMemo, useState } from 'react';
 import type { Dispatch, SetStateAction } from 'react';
 
+/**
+ * Options for {@link useTimelineEditor}.
+ */
 export interface UseTimelineEditorOptions {
+  /** Initial selection index when hook mounts. */
   initialSelectedIndex?: number | null;
+  /** Called before the selection changes. */
   onBeforeSelectionChange?: () => void;
 }
 
+/**
+ * Return type of {@link useTimelineEditor}.
+ */
 export interface UseTimelineEditorResult {
+  /** Clipboard captured from timeline selections. */
   clipboard: number[] | null;
+  /** Whether clipboard currently has data. */
   hasClipboard: boolean;
+  /** Selected timeline index or null. */
   selectedIndex: number | null;
+  /** Height measured for the timeline viewport. */
   measuredHeight: number;
+  /** Height currently filled by cards/content. */
   filledHeight: number;
+  /** Sets the selected index, firing before-change hook. */
   setSelectedIndex: (value: SetStateAction<number | null>) => void;
+  /** Sets the clipboard payload. */
   setClipboard: Dispatch<SetStateAction<number[] | null>>;
+  /** Copies the selected frame index from a sequence. */
   copySelection: (sequence: number[], indexOverride?: number | null) => number[] | null;
+  /** Clears clipboard contents. */
   clearClipboard: () => void;
+  /** Stores the measured height of the panel. */
   setMeasuredHeight: (height: number) => void;
+  /** Updates the filled height with arbitrary logic. */
   updateFilledHeight: (updater: (prev: number) => number) => void;
 }
 
+/**
+ * Handles clipboard and selection state for the timeline UI.
+ */
 export const useTimelineEditor = ({
   initialSelectedIndex = null,
   onBeforeSelectionChange,
