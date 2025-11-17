@@ -46,6 +46,7 @@ import type { EditorIntegration } from '../hooks/useEditorIntegration';
 import { FileBrowserModal } from './FileBrowserModal';
 import { StoragePanel } from './StoragePanel';
 import { useMetadataManager } from '../hooks/useMetadataManager';
+import { useTimelineEditor } from '../hooks/useTimelineEditor';
 import { TimelineControls } from './TimelineControls';
 
 interface SpriteStorageController {
@@ -61,13 +62,6 @@ interface AnimationStudioProps {
   image: DataSourceParam;
   storageController?: SpriteStorageController;
   protectedMetaKeys?: string[];
-}
-
-interface MetaEntry {
-  id: string;
-  key: string;
-  value: string;
-  readOnly?: boolean;
 }
 
 const DEFAULT_ANIMATION_FPS = 5;
@@ -223,13 +217,9 @@ export const AnimationStudio = ({
     [editor.state.animationsMeta],
   );
   const legacySettingsMigratedRef = useRef(false);
-  const [timelineClipboard, setTimelineClipboard] = useState<number[] | null>(null);
-  const [selectedTimelineIndex, setSelectedTimelineIndex] = useState<number | null>(null);
   const [renamingAnimation, setRenamingAnimation] = useState<string | null>(null);
   const [renameDraft, setRenameDraft] = useState('');
   const [renameError, setRenameError] = useState<string | null>(null);
-  const [timelineMeasuredHeight, setTimelineMeasuredHeight] = useState(0);
-  const [timelineFilledHeight, setTimelineFilledHeight] = useState(0);
   const [isFramePickerVisible, setFramePickerVisible] = useState(false);
   const [framePickerVariant, setFramePickerVariant] = useState<MacWindowVariant>('default');
   const [isStorageManagerVisible, setStorageManagerVisible] = useState(false);
@@ -251,7 +241,6 @@ export const AnimationStudio = ({
   const [isMetaModalVisible, setMetaModalVisible] = useState(false);
   const [isTemplateModalVisible, setTemplateModalVisible] = useState(false);
   const storageApi = storageController ?? defaultStorageController;
-  const protectedMetaKeySet = useMemo(() => new Set(protectedMetaKeys), [protectedMetaKeys]);
 
   useEffect(() => {
     if (!fileActionMessage) {
@@ -289,13 +278,17 @@ export const AnimationStudio = ({
   const commitPendingMultiplier = useCallback(() => {
     multiplierFieldRef.current?.commit();
   }, []);
-  const setTimelineSelection = useCallback<React.Dispatch<React.SetStateAction<number | null>>>(
-    (value) => {
-      commitPendingMultiplier();
-      setSelectedTimelineIndex(value);
-    },
-    [commitPendingMultiplier],
-  );
+  const {
+    clipboard: timelineClipboard,
+    hasClipboard: hasTimelineClipboard,
+    selectedIndex: selectedTimelineIndex,
+    measuredHeight: timelineMeasuredHeight,
+    filledHeight: timelineFilledHeight,
+    setSelectedIndex: setTimelineSelection,
+    copySelection: copyTimelineSelection,
+    setMeasuredHeight: setTimelineMeasuredHeight,
+    updateFilledHeight: setTimelineFilledHeight,
+  } = useTimelineEditor({ onBeforeSelectionChange: commitPendingMultiplier });
 
   useEffect(() => {
     resetMeta();
@@ -488,7 +481,9 @@ export const AnimationStudio = ({
       return;
     }
     const resolvedDisplayName = (
-      editor.state.meta?.displayName ?? lastStoredSummary.displayName ?? ''
+      editor.state.meta?.displayName ??
+      lastStoredSummary.displayName ??
+      ''
     ).trim();
     if (!resolvedDisplayName.length) {
       setFileActionMessage(STORAGE_MESSAGE_REQUIRE_NAME);
@@ -525,7 +520,7 @@ export const AnimationStudio = ({
     } finally {
       setIsQuickSaving(false);
     }
-  }, [editor, isQuickSaving, lastStoredSummary]);
+  }, [editor, isQuickSaving, lastStoredSummary, storageApi]);
 
   const autoPlayAnimationName = editor.state.autoPlayAnimation ?? null;
 
@@ -1065,15 +1060,9 @@ export const AnimationStudio = ({
     [handleDeleteAnimation],
   );
 
-  const handleCopyTimelineFrame = () => {
-    if (selectedTimelineIndex === null) {
-      return;
-    }
-    const frameIndex = currentSequence[selectedTimelineIndex];
-    if (typeof frameIndex === 'number') {
-      setTimelineClipboard([frameIndex]);
-    }
-  };
+  const handleCopyTimelineFrame = useCallback(() => {
+    copyTimelineSelection(currentSequence);
+  }, [copyTimelineSelection, currentSequence]);
 
   const handlePasteTimelineFrame = () => {
     if (!timelineClipboard?.length) {
@@ -1198,7 +1187,7 @@ export const AnimationStudio = ({
     if (currentSequence.length > 0 && timelineMeasuredHeight > 0) {
       setTimelineFilledHeight((prev) => Math.max(prev, timelineMeasuredHeight));
     }
-  }, [currentSequence.length, timelineMeasuredHeight]);
+  }, [currentSequence.length, setTimelineFilledHeight, timelineMeasuredHeight]);
 
   const animationColumnStyle = useMemo(() => {
     const stylesArray = [styles.animationListColumn];
@@ -1462,7 +1451,7 @@ export const AnimationStudio = ({
                   isPlaying={isPlaying}
                   selectedTimelineIndex={selectedTimelineIndex}
                   currentSequenceLength={currentSequence.length}
-                  hasClipboard={Boolean(timelineClipboard?.length)}
+                  hasClipboard={hasTimelineClipboard}
                   onCopy={handleCopyTimelineFrame}
                   onPaste={handlePasteTimelineFrame}
                   onMoveLeft={() => handleMoveTimelineFrame(-1)}
@@ -1669,47 +1658,47 @@ export const AnimationStudio = ({
             enableCompact={false}
             style={styles.metaModalWindow}
           >
-        <View style={styles.metaHeaderRow}>
-          <Text style={styles.metaHeading}>Primitive keys are exported with the sprite.</Text>
-          <IconButton name="add" onPress={addEntry} accessibilityLabel="Add metadata entry" />
-        </View>
-        <ScrollView style={styles.metaRowsStack} contentContainerStyle={styles.metaRowsContent}>
-          {metaEntries.map((entry) => (
-            <View key={entry.id} style={styles.metaRow}>
-              <View style={styles.metaField}>
-                <Text style={styles.metaLabel}>Key</Text>
-                <TextInput
-                  value={entry.key}
-                  onChangeText={(text) => updateEntry(entry.id, 'key', text)}
-                  style={styles.metaInput}
-                  editable={!entry.readOnly}
-                  placeholder="metadata key"
-                />
-              </View>
-              <View style={styles.metaField}>
-                <Text style={styles.metaLabel}>Value</Text>
-                <TextInput
-                  value={entry.value}
-                  onChangeText={(text) => updateEntry(entry.id, 'value', text)}
-                  style={styles.metaInput}
-                  editable={!entry.readOnly}
-                  placeholder="value"
-                />
-              </View>
-              {entry.readOnly ? (
-                <View style={styles.metaDeleteSpacer} />
-              ) : (
-                <IconButton
-                  name="delete"
-                  onPress={() => removeEntry(entry.id)}
-                  accessibilityLabel="Remove metadata entry"
-                />
-              )}
+            <View style={styles.metaHeaderRow}>
+              <Text style={styles.metaHeading}>Primitive keys are exported with the sprite.</Text>
+              <IconButton name="add" onPress={addEntry} accessibilityLabel="Add metadata entry" />
             </View>
-          ))}
-        </ScrollView>
-        <View style={styles.metaButtonRow}>
-          <IconButton name="save" onPress={applyEntries} accessibilityLabel="Apply metadata" />
+            <ScrollView style={styles.metaRowsStack} contentContainerStyle={styles.metaRowsContent}>
+              {metaEntries.map((entry) => (
+                <View key={entry.id} style={styles.metaRow}>
+                  <View style={styles.metaField}>
+                    <Text style={styles.metaLabel}>Key</Text>
+                    <TextInput
+                      value={entry.key}
+                      onChangeText={(text) => updateEntry(entry.id, 'key', text)}
+                      style={styles.metaInput}
+                      editable={!entry.readOnly}
+                      placeholder="metadata key"
+                    />
+                  </View>
+                  <View style={styles.metaField}>
+                    <Text style={styles.metaLabel}>Value</Text>
+                    <TextInput
+                      value={entry.value}
+                      onChangeText={(text) => updateEntry(entry.id, 'value', text)}
+                      style={styles.metaInput}
+                      editable={!entry.readOnly}
+                      placeholder="value"
+                    />
+                  </View>
+                  {entry.readOnly ? (
+                    <View style={styles.metaDeleteSpacer} />
+                  ) : (
+                    <IconButton
+                      name="delete"
+                      onPress={() => removeEntry(entry.id)}
+                      accessibilityLabel="Remove metadata entry"
+                    />
+                  )}
+                </View>
+              ))}
+            </ScrollView>
+            <View style={styles.metaButtonRow}>
+              <IconButton name="save" onPress={applyEntries} accessibilityLabel="Apply metadata" />
             </View>
             <Text style={styles.metaHelpText}>
               Saved metadata is included when exporting JSON or saving via Sprite Storage.
@@ -1731,7 +1720,7 @@ export const AnimationStudio = ({
             enableCompact={false}
             style={styles.templateModalWindow}
           >
-        <View style={styles.templateContent}>
+            <View style={styles.templateContent}>
               <Text style={styles.templateDescription}>
                 Uses the same format consumed by SpriteAnimator previews and spriteStorage save/load
                 helpers.
@@ -1749,32 +1738,32 @@ export const AnimationStudio = ({
                   accessibilityLabel="Import sprite JSON"
                 />
               </View>
-            <View style={styles.templateRows}>
-              <View style={styles.templateHalf}>
-                <View style={styles.templateStack}>
-                  <Text style={styles.templateSubheading}>Export Preview</Text>
-                  <SelectableTextInput
-                    style={[styles.templateTextArea, styles.templateTextAreaFixed]}
-                    multiline
-                    value={exportPreview}
-                    onChangeText={() => {}}
-                    placeholder="Press Export to view the current payload"
-                  />
+              <View style={styles.templateRows}>
+                <View style={styles.templateHalf}>
+                  <View style={styles.templateStack}>
+                    <Text style={styles.templateSubheading}>Export Preview</Text>
+                    <SelectableTextInput
+                      style={[styles.templateTextArea, styles.templateTextAreaFixed]}
+                      multiline
+                      value={exportPreview}
+                      onChangeText={() => {}}
+                      placeholder="Press Export to view the current payload"
+                    />
+                  </View>
+                </View>
+                <View style={styles.templateHalf}>
+                  <View style={styles.templateStack}>
+                    <Text style={styles.templateSubheading}>Import JSON</Text>
+                    <TextInput
+                      style={[styles.templateTextArea, styles.templateTextAreaFixed]}
+                      multiline
+                      value={importText}
+                      onChangeText={setImportText}
+                      placeholder="Paste JSON here and press Import"
+                    />
+                  </View>
                 </View>
               </View>
-              <View style={styles.templateHalf}>
-                <View style={styles.templateStack}>
-                  <Text style={styles.templateSubheading}>Import JSON</Text>
-                  <TextInput
-                    style={[styles.templateTextArea, styles.templateTextAreaFixed]}
-                    multiline
-                    value={importText}
-                    onChangeText={setImportText}
-                    placeholder="Paste JSON here and press Import"
-                  />
-                </View>
-              </View>
-            </View>
               {templateStatus ? <Text style={styles.templateStatus}>{templateStatus}</Text> : null}
             </View>
           </MacWindow>

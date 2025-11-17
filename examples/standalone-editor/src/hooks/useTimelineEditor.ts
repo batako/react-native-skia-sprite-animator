@@ -1,84 +1,91 @@
 import { useCallback, useMemo, useState } from 'react';
-import type { SpriteEditorFrame } from 'react-native-skia-sprite-animator';
+import type { Dispatch, SetStateAction } from 'react';
 
-export interface TimelineState {
+export interface UseTimelineEditorOptions {
+  initialSelectedIndex?: number | null;
+  onBeforeSelectionChange?: () => void;
+}
+
+export interface UseTimelineEditorResult {
   clipboard: number[] | null;
+  hasClipboard: boolean;
   selectedIndex: number | null;
   measuredHeight: number;
   filledHeight: number;
-}
-
-export interface UseTimelineEditorOptions {
-  frames: SpriteEditorFrame[];
-  sequence: number[];
-}
-
-export interface TimelineEditorApi {
-  state: TimelineState;
-  setSelectedIndex: (index: number | null) => void;
-  copySelection: () => void;
-  pasteSelection: (count?: number) => void;
-  moveSelection: (direction: -1 | 1) => void;
-  removeSelection: () => void;
+  setSelectedIndex: (value: SetStateAction<number | null>) => void;
+  setClipboard: Dispatch<SetStateAction<number[] | null>>;
+  copySelection: (sequence: number[], indexOverride?: number | null) => number[] | null;
+  clearClipboard: () => void;
+  setMeasuredHeight: (height: number) => void;
+  updateFilledHeight: (updater: (prev: number) => number) => void;
 }
 
 export const useTimelineEditor = ({
-  frames,
-  sequence,
-}: UseTimelineEditorOptions): TimelineEditorApi => {
+  initialSelectedIndex = null,
+  onBeforeSelectionChange,
+}: UseTimelineEditorOptions = {}): UseTimelineEditorResult => {
   const [clipboard, setClipboard] = useState<number[] | null>(null);
-  const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
-  const [measuredHeight, setMeasuredHeight] = useState(0);
-  const [filledHeight, setFilledHeight] = useState(0);
+  const [selectedIndexState, setSelectedIndexState] = useState<number | null>(initialSelectedIndex);
+  const [measuredHeight, setMeasuredHeightState] = useState(0);
+  const [filledHeight, setFilledHeightState] = useState(0);
 
-  const copySelection = useCallback(() => {
-    if (selectedIndex === null) {
-      return;
-    }
-    const frameIndex = sequence[selectedIndex];
-    if (typeof frameIndex === 'number') {
-      setClipboard([frameIndex]);
-    }
-  }, [selectedIndex, sequence]);
-
-  const pasteSelection = useCallback(
-    (count = 1) => {
-      if (!clipboard?.length) {
-        return;
+  const setSelectedIndex = useCallback(
+    (value: SetStateAction<number | null>) => {
+      if (onBeforeSelectionChange) {
+        onBeforeSelectionChange();
       }
-      const insertIndex =
-        selectedIndex !== null ? Math.max(selectedIndex + 1, 0) : sequence.length;
-      const payload: number[] = [];
-      for (let i = 0; i < count; i += 1) {
-        payload.push(clipboard[i % clipboard.length]!);
-      }
-      // NOTE: This hook currently does not mutate the upstream sequence; integration will handle it.
+      setSelectedIndexState((prev) => {
+        if (typeof value === 'function') {
+          return (value as (current: number | null) => number | null)(prev);
+        }
+        return value;
+      });
     },
-    [clipboard, selectedIndex, sequence.length],
+    [onBeforeSelectionChange],
   );
 
-  const moveSelection = useCallback(
-    (_direction: -1 | 1) => {
-      // placeholder: real mutation handled by parent for now
-    },
-    [],
-  );
-
-  const removeSelection = useCallback(() => {
-    // placeholder to be wired later
+  const setMeasuredHeight = useCallback((height: number) => {
+    setMeasuredHeightState(height);
   }, []);
 
-  return {
-    state: {
-      clipboard,
-      selectedIndex,
-      measuredHeight,
-      filledHeight,
+  const updateFilledHeight = useCallback((updater: (prev: number) => number) => {
+    setFilledHeightState((prev) => updater(prev));
+  }, []);
+
+  const copySelection = useCallback(
+    (sequence: number[], indexOverride: number | null = selectedIndexState) => {
+      const index = indexOverride ?? selectedIndexState;
+      if (index === null) {
+        return null;
+      }
+      const frameIndex = sequence[index];
+      if (typeof frameIndex !== 'number') {
+        return null;
+      }
+      const payload = [frameIndex];
+      setClipboard(payload);
+      return payload;
     },
+    [selectedIndexState],
+  );
+
+  const clearClipboard = useCallback(() => {
+    setClipboard(null);
+  }, []);
+
+  const hasClipboard = useMemo(() => Boolean(clipboard?.length), [clipboard]);
+
+  return {
+    clipboard,
+    hasClipboard,
+    selectedIndex: selectedIndexState,
+    measuredHeight,
+    filledHeight,
     setSelectedIndex,
+    setClipboard,
     copySelection,
-    pasteSelection,
-    moveSelection,
-    removeSelection,
+    clearClipboard,
+    setMeasuredHeight,
+    updateFilledHeight,
   };
 };

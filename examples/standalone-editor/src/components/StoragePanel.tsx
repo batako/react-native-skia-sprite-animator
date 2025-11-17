@@ -43,7 +43,6 @@ export const StoragePanel = ({
     refresh,
     saveSpriteAs,
     loadSpriteById,
-    overwriteSprite,
     renameSprite,
     deleteSpriteById,
   } = useSpriteStorage({
@@ -69,13 +68,6 @@ export const StoragePanel = ({
 
   const handleLoad = async (id: string) => {
     await loadSpriteById(id);
-  };
-
-  const handleOverwrite = async (id: string, displayName: string) => {
-    const summary = await overwriteSprite(id, displayName);
-    if (summary) {
-      onClose();
-    }
   };
 
   const handleDelete = async (id: string, name: string) => {
