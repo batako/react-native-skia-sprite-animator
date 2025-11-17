@@ -12,6 +12,7 @@ export interface PreviewPlayerProps {
   title?: string;
   width?: number;
   height?: number;
+  centered?: boolean;
 }
 
 export const PreviewPlayer = ({
@@ -20,6 +21,7 @@ export const PreviewPlayer = ({
   title = 'Animation Preview',
   width,
   height,
+  centered = true,
 }: PreviewPlayerProps) => {
   const {
     animatorRef,
@@ -29,6 +31,7 @@ export const PreviewPlayer = ({
     onFrameChange,
     onAnimationEnd,
     activeAnimation,
+    frameCursor,
   } = integration;
   const animatorImageSource = image as SpriteAnimatorSource;
   const { width: imageWidth, height: imageHeight } = useImageDimensions(image);
@@ -46,19 +49,29 @@ export const PreviewPlayer = ({
     maxWidth: null,
     previewHeight: 0,
   });
+  const frames = runtimeData.frames ?? [];
   const frameBounds = React.useMemo(() => {
-    const frames = runtimeData.frames ?? [];
     if (!frames.length) {
-      return { width: imageWidth ?? 64, height: imageHeight ?? 64 };
+      return { width: 64, height: 64 };
     }
     return frames.reduce(
       (acc, frame) => ({
         width: Math.max(acc.width, frame.w),
         height: Math.max(acc.height, frame.h),
       }),
-      { width: 1, height: 1 },
+      { width: 0, height: 0 },
     );
-  }, [runtimeData.frames, imageWidth, imageHeight]);
+  }, [frames]);
+  const currentFrameSize = React.useMemo(() => {
+    if (!centered) {
+      return null;
+    }
+    if (typeof frameCursor === 'number' && frames[frameCursor]) {
+      const frame = frames[frameCursor];
+      return { width: frame.w, height: frame.h };
+    }
+    return null;
+  }, [centered, frameCursor, frames]);
 
   const MIN_PREVIEW_HEIGHT = 420;
   const baseWidth = frameBounds.width || 64;
@@ -190,22 +203,45 @@ export const PreviewPlayer = ({
           <View style={[styles.canvasInner, { height: displayHeight }]}>
             <View style={[styles.canvasViewport, { width: zoomedWidth, height: zoomedHeight }]}>
               <View
-                style={{ width: targetWidth, height: targetHeight, transform: [{ scale: zoom }] }}
+                style={{
+                  width: targetWidth,
+                  height: targetHeight,
+                  transform: [{ scale: zoom }],
+                }}
               >
-                {hasFramesToRender ? (
-                  <SpriteAnimator
-                    ref={animatorRef}
-                    image={animatorImageSource}
-                    data={runtimeData}
-                    animationsMeta={animationsMeta}
-                    speedScale={speedScale}
-                    onFrameChange={onFrameChange}
-                    onAnimationEnd={onAnimationEnd}
-                    style={[styles.canvas, { width: targetWidth, height: targetHeight }]}
-                  />
-                ) : (
-                  <View style={{ width: targetWidth, height: targetHeight }} />
-                )}
+                <View
+                  style={
+                    centered
+                      ? [styles.canvasCentered, { width: targetWidth, height: targetHeight }]
+                      : null
+                  }
+                >
+                  {hasFramesToRender ? (
+                    <SpriteAnimator
+                      ref={animatorRef}
+                      image={animatorImageSource}
+                      data={runtimeData}
+                      animationsMeta={animationsMeta}
+                      speedScale={speedScale}
+                      onFrameChange={onFrameChange}
+                      onAnimationEnd={onAnimationEnd}
+                      initialAnimation={activeAnimation ?? undefined}
+                      style={[
+                        styles.canvas,
+                        {
+                          width: centered
+                            ? currentFrameSize?.width ?? targetWidth
+                            : targetWidth,
+                          height: centered
+                            ? currentFrameSize?.height ?? targetHeight
+                            : targetHeight,
+                        },
+                      ]}
+                    />
+                  ) : (
+                    <View style={{ width: targetWidth, height: targetHeight }} />
+                  )}
+                </View>
               </View>
             </View>
           </View>
@@ -275,6 +311,10 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     maxWidth: '100%',
     alignSelf: 'center',
+  },
+  canvasCentered: {
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   canvas: {
     overflow: 'hidden',
