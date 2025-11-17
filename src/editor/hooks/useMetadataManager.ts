@@ -1,5 +1,5 @@
 import { useCallback, useMemo, useState } from 'react';
-import type { SpriteEditorApi } from 'react-native-skia-sprite-animator';
+import type { SpriteEditorApi } from './useSpriteEditor';
 
 export interface MetadataEntry {
   id: string;

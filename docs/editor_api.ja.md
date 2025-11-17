@@ -69,6 +69,99 @@ const paste = () => {
 
 ---
 
+## useTimelineEditor Hook
+
+`useTimelineEditor` はタイムライン UI 向けの軽量状態フックです。選択中のインデックス、コピー用のクリップボード、タイムラインの高さなどをまとめて管理できるため、再生ツールバーやスクロールビューと連携しやすくなります。
+
+```ts
+import { useTimelineEditor } from 'react-native-skia-sprite-animator';
+
+const timeline = useTimelineEditor({ onBeforeSelectionChange: commitMultiplier });
+```
+
+### オプション
+
+| オプション                | 説明                                                |
+| ------------------------- | --------------------------------------------------- |
+| `initialSelectedIndex`    | フック初期化時に選択済みとするインデックス。        |
+| `onBeforeSelectionChange` | `setSelectedIndex` 実行前に呼び出されるコールバック。 |
+
+### 返される API
+
+- `selectedIndex` / `setSelectedIndex`: 現在のタイムライン選択と更新ロジック。
+- `clipboard` / `hasClipboard`: コピー済みフレーム ID の配列と有無。
+- `copySelection(sequence, override?)`: 現在の（または指定した）位置のフレームをコピーします。
+- `clearClipboard()`: クリップボードをクリア。
+- `setMeasuredHeight(height)` / `updateFilledHeight(updater)`: タイムライン列とアニメーション列の高さを揃えるための測定値を記録。
+
+`useSpriteEditor` と組み合わせて、TimelinePanel やカスタム再生 UI の状態管理に利用してください。
+
+---
+
+## useMetadataManager Hook
+
+`useMetadataManager` はエディターメタ情報を「キー／値」ペアとして編集するためのフックです。数値・文字列・真偽値のみを扱い、protected キーを指定すると読み取り専用として扱います。
+
+```ts
+import { useMetadataManager } from 'react-native-skia-sprite-animator';
+
+const {
+  entries,
+  addEntry,
+  updateEntry,
+  removeEntry,
+  resetEntries,
+  applyEntries,
+} = useMetadataManager({ editor, protectedKeys: ['displayName'] });
+```
+
+### 返される API
+
+- `entries`: `{ id, key, value, readOnly }` 形式の配列。モーダルやフォームにそのままバインドできます。
+- `addEntry()` / `removeEntry(id)`: 行の追加・削除。
+- `updateEntry(id, field, text)`: 指定行のキーまたは値を更新。
+- `resetEntries()`: `editor.state.meta` から再読み込み。
+- `applyEntries()`: 変更内容を `editor.updateMeta` へ反映し、削除されたキーも整理します。
+
+---
+
+## useSpriteStorage Hook
+
+`useSpriteStorage` は `spriteStorage` の list/load/save/delete を React Hooks でラップしたものです。ステータス文字列やビジーフラグも提供するため、保存ダイアログやストレージブラウザを簡単に構築できます。
+
+```ts
+import { useSpriteStorage } from 'react-native-skia-sprite-animator';
+
+const storage = useSpriteStorage({
+  editor,
+  onSpriteSaved: (summary) => console.log('saved', summary.displayName),
+});
+```
+
+### オプション
+
+| オプション         | 説明                                                                 |
+| ------------------ | -------------------------------------------------------------------- |
+| `editor`           | 永続化したい `SpriteEditorApi` インスタンス。                         |
+| `controller`       | list/load/save/delete を差し替える際に指定するカスタム実装。          |
+| `onSpriteSaved`    | セーブ／上書き完了時に呼ばれるコールバック。                          |
+| `onSpriteLoaded`   | ロード完了時に呼ばれるコールバック。                                 |
+
+### 返される API
+
+- `sprites`: `SpriteSummary` の配列（表示名、作成日時、更新日時を含む）。
+- `status`: UI に表示できるステータス／エラーメッセージ。
+- `isBusy`: 非同期処理中フラグ。
+- `refresh()`: レジストリを再読み込み。
+- `saveSpriteAs(name)` / `overwriteSprite(id, name)`: 現在のエディター状態を保存。
+- `loadSpriteById(id)`: 指定 ID のスプライトを読み込み、エディターに import。
+- `renameSprite(id, name)`: 保存済みスプライトの表示名だけを更新。
+- `deleteSpriteById(id, displayName)`: ストレージから削除。
+
+`controller` を差し替えれば、任意のストレージ（クラウド API やユーザー独自のファイルシステム）にも簡単に対応できます。
+
+---
+
 ## シリアライズヘルパー
 
 `exportJSON()` / `importJSON()` は常に組み込みの `DefaultSpriteTemplate` を使用し、spriteStorage 互換の JSON をやり取りします。SpriteAnimator へのプレビューや `spriteStorage` 連携はこの JSON をそのまま使えば OK です。

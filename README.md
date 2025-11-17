@@ -6,7 +6,7 @@
 
 - **SpriteAnimator** – declarative + imperative animation playback with Skia rendering, frame events, directional flips, speed controls, and animation metadata overrides.
 - **spriteStorage** – `saveSprite`, `loadSprite`, `listSprites`, `deleteSprite`, and storage configuration helpers so sprites plus metadata persist on device using Expo File System.
-- **Editor APIs** – `useSpriteEditor` (frame CRUD, selection, clipboard, undo/redo, metadata updates), `DefaultSpriteTemplate` helpers (import/export), and `SpriteEditUtils` (grid snapping, rect merging, hit-testing).
+- **Editor APIs** – `useSpriteEditor` (frame CRUD, selection, clipboard, undo/redo, metadata updates), editor-agnostic hooks like `useTimelineEditor` / `useMetadataManager` / `useSpriteStorage`, plus `DefaultSpriteTemplate` helpers (import/export) and `SpriteEditUtils` (grid snapping, rect merging, hit-testing).
 - **Standalone Expo editor** – an example app under `examples/standalone-editor/` that combines every API (canvas editing, real-time playback, storage, templates, metadata) to serve as the canonical feature showcase.
 
 ## Installation
@@ -188,6 +188,9 @@ await deleteSprite(saved.id);
 Editor primitives live under `src/editor/` so you can build custom sprite tooling without bundling any UI opinions.
 
 - `useSpriteEditor`: React hook that manages frames, selection, clipboard, undo/redo history, and template-based export/import. It’s UI-agnostic—wire it into your own panels, gestures, or devtools.
+- `useTimelineEditor`: Keeps track of the selected timeline index, clipboard payloads, and layout measurements so custom Timeline/Playback toolbars can stay in sync with `SpriteAnimator`.
+- `useMetadataManager`: Normalizes primitive meta entries into `{ key, value }` rows with helpers for adding, removing, and persisting updates via `editor.updateMeta`.
+- `useSpriteStorage`: Wraps `spriteStorage` helpers with UI-friendly state (`status`, `isBusy`, list of `SpriteSummary` items) and supports injecting custom storage controllers.
 - `SpriteEditUtils`: Geometry helpers (`snapToGrid`, `normalizeRect`, `pointInFrame`, `mergeFrames`) for snap-lines, hit-tests, and bounding boxes.
 - `DefaultSpriteTemplate`: Serialize editor state to the same JSON shape expected by `spriteStorage`.
 

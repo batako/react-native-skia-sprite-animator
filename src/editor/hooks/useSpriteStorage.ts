@@ -1,13 +1,13 @@
 import { useCallback, useEffect, useState } from 'react';
+import type { SpriteEditorApi } from './useSpriteEditor';
 import {
   deleteSprite as defaultDeleteSprite,
   listSprites as defaultListSprites,
   loadSprite as defaultLoadSprite,
   saveSprite as defaultSaveSprite,
-  type SpriteEditorApi,
   type SpriteSummary,
   type StoredSprite,
-} from 'react-native-skia-sprite-animator';
+} from '../../storage/spriteStorage';
 
 export interface SpriteStorageController {
   listSprites: () => Promise<SpriteSummary[]>;
@@ -23,7 +23,7 @@ export interface UseSpriteStorageOptions {
   onSpriteLoaded?: (summary: SpriteSummary) => void;
 }
 
-interface UseSpriteStorageResult {
+export interface UseSpriteStorageResult {
   sprites: SpriteSummary[];
   status: string | null;
   isBusy: boolean;
@@ -202,7 +202,6 @@ export const useSpriteStorage = ({
         });
         const summary = toSummary(result);
         setStatus(`Renamed sprite to ${trimmed}.`);
-        onSpriteSaved?.(summary);
         await refresh();
         return summary;
       } catch (error) {
@@ -212,7 +211,7 @@ export const useSpriteStorage = ({
         setIsBusy(false);
       }
     },
-    [onSpriteSaved, refresh, storage],
+    [refresh, storage],
   );
 
   const deleteSpriteById = useCallback(
@@ -220,8 +219,8 @@ export const useSpriteStorage = ({
       setIsBusy(true);
       try {
         await storage.deleteSprite(id);
+        setStatus(`Deleted sprite ${displayName}.`);
         await refresh();
-        setStatus(`Sprite ${displayName} removed from storage.`);
         return true;
       } catch (error) {
         setStatus((error as Error).message);

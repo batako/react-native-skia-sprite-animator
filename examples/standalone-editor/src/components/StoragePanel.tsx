@@ -9,10 +9,14 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import type { SpriteEditorApi, SpriteSummary } from 'react-native-skia-sprite-animator';
+import {
+  useSpriteStorage,
+  type SpriteEditorApi,
+  type SpriteSummary,
+  type SpriteStorageController,
+} from 'react-native-skia-sprite-animator';
 import { IconButton } from './IconButton';
 import { MacWindow } from './MacWindow';
-import { useSpriteStorage, type SpriteStorageController } from '../hooks/useSpriteStorage';
 
 interface StoragePanelProps {
   editor: SpriteEditorApi;

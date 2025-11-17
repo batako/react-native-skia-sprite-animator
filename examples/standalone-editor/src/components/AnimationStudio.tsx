@@ -17,6 +17,8 @@ import {
   listSprites,
   loadSprite,
   deleteSprite,
+  useMetadataManager,
+  useTimelineEditor,
   type SpriteAnimationMeta,
   type SpriteAnimationsMeta,
   type SpriteEditorApi,
@@ -38,8 +40,6 @@ import { SelectableTextInput } from './SelectableTextInput';
 import type { EditorIntegration } from '../hooks/useEditorIntegration';
 import { FileBrowserModal } from './FileBrowserModal';
 import { StoragePanel } from './StoragePanel';
-import { useMetadataManager } from '../hooks/useMetadataManager';
-import { useTimelineEditor } from '../hooks/useTimelineEditor';
 import {
   TimelinePanel,
   type FrameImageInfo,

@@ -6,7 +6,7 @@
 
 - **SpriteAnimator**: Skia Canvas 上での宣言的/命令的な再生、フレームイベント、反転描画、速度スケール、アニメーション別のメタデータなどをサポート。
 - **spriteStorage**: `saveSprite` / `loadSprite` / `listSprites` / `deleteSprite` および保存先設定ヘルパーにより、JSON と画像を Expo File System に永続化。
-- **エディター API**: `useSpriteEditor`（フレーム CRUD・選択・クリップボード・Undo/Redo・メタ編集）、`DefaultSpriteTemplate`（JSON import/export）、`SpriteEditUtils`（スナップ・矩形マージ・ヒットテスト）。
+- **エディター API**: `useSpriteEditor`（フレーム CRUD・選択・クリップボード・Undo/Redo・メタ編集）、`useTimelineEditor` / `useMetadataManager` / `useSpriteStorage` などの UI 非依存フック、`DefaultSpriteTemplate`（JSON import/export）、`SpriteEditUtils`（スナップ・矩形マージ・ヒットテスト）。
 - **Expo スタンドアロンエディタ**: `examples/standalone-editor/` に、上記すべての機能を 1 画面で体験できるデモアプリを同梱。
 
 ## インストール
@@ -189,6 +189,9 @@ await deleteSprite(saved.id);
 UI を持たないエディター用ツール群も `src/editor/` で提供しています。これらを組み合わせれば、各プロダクトに最適なエディター UI を自由に構築できます。
 
 - `useSpriteEditor`: フレーム一覧、選択状態、クリップボード、Undo/Redo、テンプレートベースの import/export を一括で管理する React Hook。UI には一切依存しないため、ボタンやジェスチャー、ショートカットに自由に接続できます。
+- `useTimelineEditor`: タイムラインの選択位置やクリップボード、レイアウト寸法を管理し、再生パネルや Timeline UI と `SpriteAnimator` を同期させやすくします。
+- `useMetadataManager`: `editor.state.meta` に格納されたプリミティブ値を `{ key, value }` の行として編集するためのヘルパー。保護キーの指定やリセット/適用操作も提供します。
+- `useSpriteStorage`: `spriteStorage` の list/load/save/delete をラップし、`status` や `isBusy` を含む UI 向け状態を返します。カスタムコントローラーを渡せば保存先も差し替え可能です。
 - `SpriteEditUtils`: `snapToGrid`、`normalizeRect`、`pointInFrame`、`mergeFrames` など、エディターで使い回せるジオメトリ系のヘルパー群。
 - `DefaultSpriteTemplate`: エディター状態を `spriteStorage` と同じ JSON へ変換するためのヘルパー。
 

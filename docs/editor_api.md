@@ -69,6 +69,101 @@ const paste = () => {
 
 ---
 
+## useTimelineEditor hook
+
+`useTimelineEditor` is a lightweight utility hook for timeline-oriented UIs. It keeps track of the selected timeline index, clipboard payloads, and layout measurements so you can drive custom toolbars or scrollers.
+
+```ts
+import { useTimelineEditor } from 'react-native-skia-sprite-animator';
+
+const timeline = useTimelineEditor({ onBeforeSelectionChange: commitPendingEdits });
+```
+
+### Options
+
+| Option                    | Description                                                        |
+| ------------------------- | ------------------------------------------------------------------ |
+| `initialSelectedIndex`    | Pre-selects a timeline index when the hook mounts.                 |
+| `onBeforeSelectionChange` | Callback fired before `setSelectedIndex` mutates internal state.   |
+
+### Returned API
+
+- `selectedIndex`: Currently selected timeline index (`null` when nothing is selected).
+- `setSelectedIndex(updater)`: Updates the selection (either via value or updater function).
+- `clipboard` / `hasClipboard`: Stores cloned frame ids for copy/paste operations.
+- `copySelection(sequence, overrideIndex?)`: Copies the frame id at the current (or provided) index.
+- `clearClipboard()`: Clears the stored clipboard payload.
+- `setMeasuredHeight(height)` / `updateFilledHeight(updater)`: Track scroll container measurements to keep animation lists aligned next to the timeline.
+
+Use it alongside `useSpriteEditor` to keep toolbar buttons, contextual menus, and multiplier inputs in sync with the actual cursor inside `SpriteAnimator`.
+
+---
+
+## useMetadataManager hook
+
+`useMetadataManager` normalizes meta entries stored in `SpriteEditorApi.state.meta` so you can edit simple key/value pairs in a modal without writing boilerplate. It only surfaces primitive types (string/number/boolean) to prevent surprises when serializing to JSON.
+
+```ts
+import { useMetadataManager } from 'react-native-skia-sprite-animator';
+
+const {
+  entries,
+  addEntry,
+  updateEntry,
+  removeEntry,
+  applyEntries,
+} = useMetadataManager({ editor, protectedKeys: ['displayName'] });
+```
+
+### Returned API
+
+- `entries`: Array of `{ id, key, value, readOnly }` describing editable fields.
+- `addEntry()`: Appends a blank row.
+- `updateEntry(id, 'key' | 'value', text)`: Updates the draft value for a given row (ignores read-only entries).
+- `removeEntry(id)`: Removes rows that aren't protected.
+- `resetEntries()`: Resyncs drafts from the editor state (useful when reopening modals).
+- `applyEntries()`: Persists primitive keys back into `editor.updateMeta`, removing keys that were deleted unless they are in `protectedKeys`.
+
+---
+
+## useSpriteStorage hook
+
+`useSpriteStorage` wraps the spriteStorage helpers with UI-friendly state, making it easy to build save/load dialogs or integrate with custom persistence backends.
+
+```ts
+import { useSpriteStorage } from 'react-native-skia-sprite-animator';
+
+const storage = useSpriteStorage({
+  editor,
+  onSpriteSaved: (summary) => console.log('saved', summary.displayName),
+});
+```
+
+### Options
+
+| Option            | Description                                                                 |
+| ----------------- | --------------------------------------------------------------------------- |
+| `editor`          | Required `SpriteEditorApi` instance whose state should be persisted.        |
+| `controller`      | Overrides the default storage helpers (list/load/save/delete) if necessary. |
+| `onSpriteSaved`   | Called whenever a sprite is saved or overwritten.                           |
+| `onSpriteLoaded`  | Called whenever a sprite is loaded into the editor.                         |
+
+### Returned API
+
+- `sprites`: Array of `SpriteSummary` entries fetched from storage.
+- `status`: Human-readable status/error string for UI messages.
+- `isBusy`: Boolean you can use to disable buttons while async work is happening.
+- `refresh()`: Reloads the storage registry.
+- `saveSpriteAs(name)`: Persists the current editor state under a new name.
+- `loadSpriteById(id)`: Loads a sprite and imports it into the editor.
+- `overwriteSprite(id, name)`: Replaces an existing sprite by id.
+- `renameSprite(id, name)`: Updates the stored display name without touching frames.
+- `deleteSpriteById(id, displayName)`: Removes a sprite from storage.
+
+You can provide a custom `controller` to back these operations with your own filesystem, HTTP API, or cloud storage layer.
+
+---
+
 ## Serialization helpers
 
 `exportJSON()` and `importJSON()` always use the built-in `DefaultSpriteTemplate`, which mirrors the spriteStorage payload (frames are exported without ids). Use it whenever you need to persist editor state or preview the JSON handed to `SpriteAnimator`.
