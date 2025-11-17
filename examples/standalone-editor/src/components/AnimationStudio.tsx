@@ -334,6 +334,8 @@ export const AnimationStudio = ({ editor, integration, image }: AnimationStudioP
     legacySettingsMigratedRef.current = true;
   }, [animationsMeta, editor, editor.state.meta]);
 
+  const autoPlayAnimationName = editor.state.autoPlayAnimation ?? null;
+
   const renderRestartForwardIcon = useCallback(
     ({ color, size }: IconButtonRenderIconProps) => (
       <View style={styles.restartIcon}>
@@ -382,7 +384,7 @@ export const AnimationStudio = ({ editor, integration, image }: AnimationStudioP
       editor.setAnimations(nextAnimations);
       const nextAnimationsMeta = renameRecordKey(animationsMeta, renamingAnimation, nextName);
       editor.setAnimationsMeta(nextAnimationsMeta);
-      if (editor.state.autoPlayAnimation === renamingAnimation) {
+      if (autoPlayAnimationName === renamingAnimation) {
         editor.setAutoPlayAnimation(nextName);
       }
       setActiveAnimation(nextName);
@@ -396,7 +398,7 @@ export const AnimationStudio = ({ editor, integration, image }: AnimationStudioP
     renamingAnimation,
     renameDraft,
     setActiveAnimation,
-    editor.state.autoPlayAnimation,
+    autoPlayAnimationName,
   ]);
 
   const handleSelectAnimationItem = useCallback(
@@ -515,7 +517,6 @@ export const AnimationStudio = ({ editor, integration, image }: AnimationStudioP
   const currentAnimationLoop = currentAnimationName
     ? (animationsMeta[currentAnimationName]?.loop ?? true)
     : true;
-  const autoPlayAnimationName = editor.state.autoPlayAnimation ?? null;
 
   const lastAnimationRef = useRef<string | null>(null);
   useEffect(() => {
@@ -816,7 +817,7 @@ export const AnimationStudio = ({ editor, integration, image }: AnimationStudioP
       const nextAnimationsMeta = { ...animationsMeta };
       delete nextAnimationsMeta[name];
       editor.setAnimationsMeta(nextAnimationsMeta);
-      if (editor.state.autoPlayAnimation === name) {
+      if (autoPlayAnimationName === name) {
         editor.setAutoPlayAnimation(null);
       }
       if (activeAnimation === name) {
@@ -824,7 +825,14 @@ export const AnimationStudio = ({ editor, integration, image }: AnimationStudioP
         setActiveAnimation(remaining.length ? remaining[0] : null);
       }
     },
-    [activeAnimation, animations, animationsMeta, editor, editor.state.autoPlayAnimation, setActiveAnimation],
+    [
+      activeAnimation,
+      animations,
+      animationsMeta,
+      editor,
+      autoPlayAnimationName,
+      setActiveAnimation,
+    ],
   );
 
   const handleToggleAnimationLoop = useCallback(() => {
@@ -1113,9 +1121,7 @@ export const AnimationStudio = ({ editor, integration, image }: AnimationStudioP
                   <View style={styles.animationListItemInner}>
                     <TouchableOpacity
                       onPress={() =>
-                        handleSelectAutoPlayAnimation(
-                          autoPlayAnimationName === name ? null : name,
-                        )
+                        handleSelectAutoPlayAnimation(autoPlayAnimationName === name ? null : name)
                       }
                       accessibilityLabel={
                         autoPlayAnimationName === name
@@ -1126,7 +1132,9 @@ export const AnimationStudio = ({ editor, integration, image }: AnimationStudioP
                       hitSlop={{ top: 6, bottom: 6, left: 6, right: 6 }}
                     >
                       <MaterialIcons
-                        name={autoPlayAnimationName === name ? 'play-circle' : 'play-circle-outline'}
+                        name={
+                          autoPlayAnimationName === name ? 'play-circle' : 'play-circle-outline'
+                        }
                         size={20}
                         color={autoPlayAnimationName === name ? '#f6c343' : '#4d5878'}
                       />

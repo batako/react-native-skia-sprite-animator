@@ -670,8 +670,7 @@ export const useSpriteEditor = (options: UseSpriteEditorOptions = {}): SpriteEdi
   const setAutoPlayAnimation = useCallback<SpriteEditorApi['setAutoPlayAnimation']>(
     (animationName) => {
       apply((prev) => {
-        const nextName =
-          animationName && prev.animations[animationName] ? animationName : null;
+        const nextName = animationName && prev.animations[animationName] ? animationName : null;
         if (nextName === (prev.autoPlayAnimation ?? null)) {
           return prev;
         }
