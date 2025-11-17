@@ -270,8 +270,8 @@ export const TimelinePanel = ({
           <View style={styles.timelineCardFooter}>
             <Text style={styles.timelineCardMeta}>
               {timelineIndex}
-              {multiplierLabel}
               {typeof frameIndex === 'number' ? ` f${frameIndex}` : ''}
+              {multiplierLabel}
             </Text>
           </View>
         </TouchableOpacity>
