@@ -81,10 +81,10 @@ const timeline = useTimelineEditor({ onBeforeSelectionChange: commitPendingEdits
 
 ### Options
 
-| Option                    | Description                                                        |
-| ------------------------- | ------------------------------------------------------------------ |
-| `initialSelectedIndex`    | Pre-selects a timeline index when the hook mounts.                 |
-| `onBeforeSelectionChange` | Callback fired before `setSelectedIndex` mutates internal state.   |
+| Option                    | Description                                                      |
+| ------------------------- | ---------------------------------------------------------------- |
+| `initialSelectedIndex`    | Pre-selects a timeline index when the hook mounts.               |
+| `onBeforeSelectionChange` | Callback fired before `setSelectedIndex` mutates internal state. |
 
 ### Returned API
 
@@ -106,13 +106,10 @@ Use it alongside `useSpriteEditor` to keep toolbar buttons, contextual menus, an
 ```ts
 import { useMetadataManager } from 'react-native-skia-sprite-animator';
 
-const {
-  entries,
-  addEntry,
-  updateEntry,
-  removeEntry,
-  applyEntries,
-} = useMetadataManager({ editor, protectedKeys: ['displayName'] });
+const { entries, addEntry, updateEntry, removeEntry, applyEntries } = useMetadataManager({
+  editor,
+  protectedKeys: ['displayName'],
+});
 ```
 
 ### Returned API
@@ -141,12 +138,12 @@ const storage = useSpriteStorage({
 
 ### Options
 
-| Option            | Description                                                                 |
-| ----------------- | --------------------------------------------------------------------------- |
-| `editor`          | Required `SpriteEditorApi` instance whose state should be persisted.        |
-| `controller`      | Overrides the default storage helpers (list/load/save/delete) if necessary. |
-| `onSpriteSaved`   | Called whenever a sprite is saved or overwritten.                           |
-| `onSpriteLoaded`  | Called whenever a sprite is loaded into the editor.                         |
+| Option           | Description                                                                 |
+| ---------------- | --------------------------------------------------------------------------- |
+| `editor`         | Required `SpriteEditorApi` instance whose state should be persisted.        |
+| `controller`     | Overrides the default storage helpers (list/load/save/delete) if necessary. |
+| `onSpriteSaved`  | Called whenever a sprite is saved or overwritten.                           |
+| `onSpriteLoaded` | Called whenever a sprite is loaded into the editor.                         |
 
 ### Returned API
 

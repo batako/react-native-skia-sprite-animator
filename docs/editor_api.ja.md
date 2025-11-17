@@ -81,9 +81,9 @@ const timeline = useTimelineEditor({ onBeforeSelectionChange: commitMultiplier }
 
 ### オプション
 
-| オプション                | 説明                                                |
-| ------------------------- | --------------------------------------------------- |
-| `initialSelectedIndex`    | フック初期化時に選択済みとするインデックス。        |
+| オプション                | 説明                                                  |
+| ------------------------- | ----------------------------------------------------- |
+| `initialSelectedIndex`    | フック初期化時に選択済みとするインデックス。          |
 | `onBeforeSelectionChange` | `setSelectedIndex` 実行前に呼び出されるコールバック。 |
 
 ### 返される API
@@ -105,14 +105,8 @@ const timeline = useTimelineEditor({ onBeforeSelectionChange: commitMultiplier }
 ```ts
 import { useMetadataManager } from 'react-native-skia-sprite-animator';
 
-const {
-  entries,
-  addEntry,
-  updateEntry,
-  removeEntry,
-  resetEntries,
-  applyEntries,
-} = useMetadataManager({ editor, protectedKeys: ['displayName'] });
+const { entries, addEntry, updateEntry, removeEntry, resetEntries, applyEntries } =
+  useMetadataManager({ editor, protectedKeys: ['displayName'] });
 ```
 
 ### 返される API
@@ -140,12 +134,12 @@ const storage = useSpriteStorage({
 
 ### オプション
 
-| オプション         | 説明                                                                 |
-| ------------------ | -------------------------------------------------------------------- |
-| `editor`           | 永続化したい `SpriteEditorApi` インスタンス。                         |
-| `controller`       | list/load/save/delete を差し替える際に指定するカスタム実装。          |
-| `onSpriteSaved`    | セーブ／上書き完了時に呼ばれるコールバック。                          |
-| `onSpriteLoaded`   | ロード完了時に呼ばれるコールバック。                                 |
+| オプション       | 説明                                                         |
+| ---------------- | ------------------------------------------------------------ |
+| `editor`         | 永続化したい `SpriteEditorApi` インスタンス。                |
+| `controller`     | list/load/save/delete を差し替える際に指定するカスタム実装。 |
+| `onSpriteSaved`  | セーブ／上書き完了時に呼ばれるコールバック。                 |
+| `onSpriteLoaded` | ロード完了時に呼ばれるコールバック。                         |
 
 ### 返される API
 

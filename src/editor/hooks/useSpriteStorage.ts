@@ -1,5 +1,11 @@
 import { useCallback, useEffect, useState } from 'react';
 import type { SpriteEditorApi } from './useSpriteEditor';
+import type {
+  SpriteAnimations,
+  SpriteAnimationsMeta,
+  SpriteData,
+  SpriteFrame,
+} from '../../SpriteAnimator';
 import {
   deleteSprite as defaultDeleteSprite,
   listSprites as defaultListSprites,
@@ -49,6 +55,16 @@ const defaultController: SpriteStorageController = {
   deleteSprite: defaultDeleteSprite,
 };
 
+const toSpriteData = (stored: StoredSprite): SpriteData => ({
+  frames: stored.frames as SpriteFrame[],
+  animations: stored.animations as SpriteAnimations | undefined,
+  animationsMeta: stored.animationsMeta as SpriteAnimationsMeta | undefined,
+  meta: stored.meta,
+});
+
+const coerceTimestamp = (value: unknown): number | undefined =>
+  typeof value === 'number' && Number.isFinite(value) ? (value as number) : undefined;
+
 export const useSpriteStorage = ({
   editor,
   controller,
@@ -90,7 +106,7 @@ export const useSpriteStorage = ({
             meta: {
               ...(payload.meta ?? {}),
               displayName: trimmedName,
-              createdAt: payload.meta?.createdAt ?? now,
+              createdAt: coerceTimestamp(payload.meta?.createdAt) ?? now,
               updatedAt: now,
             },
           },
@@ -120,7 +136,7 @@ export const useSpriteStorage = ({
           setStatus('Sprite not found on disk.');
           return null;
         }
-        editor.importJSON(stored);
+        editor.importJSON(toSpriteData(stored));
         const summary = toSummary(stored);
         setStatus(`Loaded sprite ${stored.meta.displayName}.`);
         onSpriteLoaded?.(summary);
@@ -157,7 +173,7 @@ export const useSpriteStorage = ({
             meta: {
               ...(payload.meta ?? {}),
               displayName,
-              createdAt: stored.meta.createdAt ?? now,
+              createdAt: coerceTimestamp(stored.meta.createdAt) ?? now,
               updatedAt: now,
             },
           },
@@ -194,9 +210,9 @@ export const useSpriteStorage = ({
         const result = await storage.saveSprite({
           sprite: {
             id: stored.id,
-            frames: stored.frames,
-            animations: stored.animations,
-            animationsMeta: stored.animationsMeta,
+            frames: stored.frames as SpriteFrame[],
+            animations: stored.animations as SpriteAnimations | undefined,
+            animationsMeta: stored.animationsMeta as SpriteAnimationsMeta | undefined,
             meta: { ...stored.meta, displayName: trimmed, updatedAt: Date.now() },
           },
         });
