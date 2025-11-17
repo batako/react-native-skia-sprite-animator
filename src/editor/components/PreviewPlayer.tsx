@@ -1,6 +1,5 @@
 import React from 'react';
 import { Image, LayoutChangeEvent, Pressable, StyleSheet, Text, View } from 'react-native';
-import type { ImageSourcePropType } from 'react-native';
 import { SpriteAnimator } from '../../SpriteAnimator';
 import type { SpriteAnimatorSource } from '../../SpriteAnimator';
 import type { DataSourceParam, SkImage } from '@shopify/react-native-skia';
