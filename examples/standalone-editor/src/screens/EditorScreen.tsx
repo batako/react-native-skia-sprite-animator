@@ -5,6 +5,7 @@ import {
   type SpriteEditorFrame,
   type SpriteEditorState,
   useSpriteEditor,
+  getEditorStrings,
 } from 'react-native-skia-sprite-animator';
 import type { DataSourceParam } from '@shopify/react-native-skia';
 import { AnimationStudio } from '../components/AnimationStudio';
@@ -47,6 +48,7 @@ export const EditorScreen = () => {
     initialState: SAMPLE_INITIAL_STATE,
   });
   const integration = useEditorIntegration({ editor });
+  const strings = React.useMemo(() => getEditorStrings(), []);
 
   const [imageSource, setImageSource] = React.useState<DataSourceParam>(SAMPLE_SPRITE);
   const editorRef = React.useRef(editor);
@@ -88,10 +90,7 @@ export const EditorScreen = () => {
         <View style={styles.headerRow}>
           <Text style={styles.title}>Sprite Editor</Text>
         </View>
-        <Text style={styles.subtitle}>
-          Edit frames, play animations, preview with AnimatedSprite2D, and persist sprites to disk
-          with a single screen.
-        </Text>
+        <Text style={styles.subtitle}>{strings.editorScreen.subtitle}</Text>
         <AnimationStudio editor={editor} integration={integration} image={imageSource} />
       </ScrollView>
     </SafeAreaView>

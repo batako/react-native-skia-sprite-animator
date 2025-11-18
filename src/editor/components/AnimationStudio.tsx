@@ -45,6 +45,7 @@ import {
   type MultiplierFieldHandle,
   type TimelineSequenceCard,
 } from './TimelinePanel';
+import { getEditorStrings, formatEditorString } from '../localization';
 
 /**
  * Adapter interface that lets consumers provide their own persistence layer.
@@ -82,8 +83,6 @@ const MAX_ANIMATION_FPS = 60;
 const DEFAULT_FRAME_MULTIPLIER = 1;
 const MIN_FRAME_MULTIPLIER = 0.1;
 const MULTIPLIER_EPSILON = 0.0001;
-const STORAGE_MESSAGE_DEFAULT = 'Manage saved sprites or import past work.';
-const STORAGE_MESSAGE_REQUIRE_NAME = 'Use Sprite Storage to name and save new sprites.';
 const DEFAULT_PROTECTED_META_KEYS = ['displayName', 'createdAt', 'updatedAt'];
 
 const defaultStorageController: SpriteStorageController = {
@@ -222,6 +221,7 @@ export const AnimationStudio = ({
   storageController,
   protectedMetaKeys = DEFAULT_PROTECTED_META_KEYS,
 }: AnimationStudioProps) => {
+  const strings = useMemo(() => getEditorStrings(), []);
   const frames = editor.state.frames;
   const animations = useMemo(() => editor.state.animations ?? {}, [editor.state.animations]);
   const animationsMeta = useMemo(
@@ -236,7 +236,9 @@ export const AnimationStudio = ({
   const [framePickerVariant, setFramePickerVariant] = useState<MacWindowVariant>('default');
   const [isStorageManagerVisible, setStorageManagerVisible] = useState(false);
   const [fileActionMessage, setFileActionMessage] = useState<string | null>(null);
-  const [storagePromptMessage, setStoragePromptMessage] = useState(STORAGE_MESSAGE_DEFAULT);
+  const [storagePromptMessage, setStoragePromptMessage] = useState<string>(
+    strings.animationStudio.defaultStatusMessage,
+  );
   const [isQuickSaving, setIsQuickSaving] = useState(false);
   const [lastStoredSummary, setLastStoredSummary] = useState<SpriteSummary | null>(null);
   const {
@@ -308,19 +310,19 @@ export const AnimationStudio = ({
   const handleExportTemplate = useCallback(() => {
     const payload = cleanSpriteData(editor.exportJSON() as any);
     setExportPreview(JSON.stringify(payload, null, 2));
-    setTemplateStatus('Exported spriteStorage-compatible JSON.');
-  }, [editor]);
+    setTemplateStatus(strings.animationStudio.templateExported);
+  }, [editor, strings.animationStudio.templateExported]);
 
   const handleImportTemplate = useCallback(() => {
     try {
       const parsed = JSON.parse(importText);
       editor.importJSON(cleanSpriteData(parsed as any));
-      setTemplateStatus('Import succeeded and editor history was reset.');
+      setTemplateStatus(strings.animationStudio.templateImported);
       setTemplateModalVisible(false);
     } catch (error) {
       setTemplateStatus((error as Error).message);
     }
-  }, [editor, importText]);
+  }, [editor, importText, strings.animationStudio.templateImported]);
 
   const handleOpenMetaModal = useCallback(() => {
     resetMeta();
@@ -446,27 +448,34 @@ export const AnimationStudio = ({
   }, [animationsMeta, editor, editor.state.meta]);
 
   const handleOpenStorageManager = useCallback(() => {
-    setStoragePromptMessage(STORAGE_MESSAGE_DEFAULT);
+    setStoragePromptMessage(strings.animationStudio.defaultStatusMessage);
     setStorageManagerVisible(true);
-  }, []);
+  }, [strings.animationStudio.defaultStatusMessage]);
 
   const handleCloseStorageManager = useCallback(() => {
     setStorageManagerVisible(false);
-    setStoragePromptMessage(STORAGE_MESSAGE_DEFAULT);
-  }, []);
+    setStoragePromptMessage(strings.animationStudio.defaultStatusMessage);
+  }, [strings.animationStudio.defaultStatusMessage]);
 
-  const handleStorageSaved = useCallback((summary: SpriteSummary) => {
-    setLastStoredSummary(summary);
-    setFileActionMessage(`Saved ${summary.displayName}`);
-  }, []);
+  const handleStorageSaved = useCallback(
+    (summary: SpriteSummary) => {
+      setLastStoredSummary(summary);
+      setFileActionMessage(
+        formatEditorString(strings.animationStudio.statusSaved, { name: summary.displayName }),
+      );
+    },
+    [strings.animationStudio.statusSaved],
+  );
 
   const handleStorageLoaded = useCallback(
     (summary: SpriteSummary) => {
       setLastStoredSummary(summary);
-      setFileActionMessage(`Loaded ${summary.displayName}`);
+      setFileActionMessage(
+        formatEditorString(strings.animationStudio.statusLoaded, { name: summary.displayName }),
+      );
       handleCloseStorageManager();
     },
-    [handleCloseStorageManager],
+    [handleCloseStorageManager, strings.animationStudio.statusLoaded],
   );
 
   const handleQuickSave = useCallback(async () => {
@@ -474,12 +483,12 @@ export const AnimationStudio = ({
       return;
     }
     if (!editor.state.frames.length) {
-      setFileActionMessage('Add at least one frame before saving.');
+      setFileActionMessage(strings.animationStudio.needFramesBeforeSave);
       return;
     }
     if (!lastStoredSummary) {
-      setFileActionMessage(STORAGE_MESSAGE_REQUIRE_NAME);
-      setStoragePromptMessage(STORAGE_MESSAGE_REQUIRE_NAME);
+      setFileActionMessage(strings.animationStudio.requireNameMessage);
+      setStoragePromptMessage(strings.animationStudio.requireNameMessage);
       setStorageManagerVisible(true);
       return;
     }
@@ -489,8 +498,8 @@ export const AnimationStudio = ({
       ''
     ).trim();
     if (!resolvedDisplayName.length) {
-      setFileActionMessage(STORAGE_MESSAGE_REQUIRE_NAME);
-      setStoragePromptMessage(STORAGE_MESSAGE_REQUIRE_NAME);
+      setFileActionMessage(strings.animationStudio.requireNameMessage);
+      setStoragePromptMessage(strings.animationStudio.requireNameMessage);
       setStorageManagerVisible(true);
       return;
     }
@@ -517,13 +526,23 @@ export const AnimationStudio = ({
         updatedAt: stored.meta.updatedAt,
       };
       setLastStoredSummary(summary);
-      setFileActionMessage(`Saved ${summary.displayName}`);
+      setFileActionMessage(
+        formatEditorString(strings.animationStudio.statusSaved, { name: summary.displayName }),
+      );
     } catch (error) {
       setFileActionMessage((error as Error).message);
     } finally {
       setIsQuickSaving(false);
     }
-  }, [editor, isQuickSaving, lastStoredSummary, storageApi]);
+  }, [
+    editor,
+    isQuickSaving,
+    lastStoredSummary,
+    storageApi,
+    strings.animationStudio.needFramesBeforeSave,
+    strings.animationStudio.requireNameMessage,
+    strings.animationStudio.statusSaved,
+  ]);
 
   const autoPlayAnimationName = editor.state.autoPlayAnimation ?? null;
   const animationNames = useMemo(() => Object.keys(animations), [animations]);
@@ -552,11 +571,11 @@ export const AnimationStudio = ({
     }
     const nextName = renameDraft.trim();
     if (!nextName.length) {
-      setRenameError('Please enter a name');
+      setRenameError(strings.animationStudio.renameMissing);
       return;
     }
     if (nextName !== renamingAnimation && animations[nextName]) {
-      setRenameError('An animation with the same name already exists');
+      setRenameError(strings.animationStudio.renameDuplicate);
       return;
     }
     if (nextName !== renamingAnimation) {
@@ -583,6 +602,8 @@ export const AnimationStudio = ({
     renameDraft,
     setActiveAnimation,
     autoPlayAnimationName,
+    strings.animationStudio.renameDuplicate,
+    strings.animationStudio.renameMissing,
   ]);
 
   const handleSelectAnimationItem = useCallback(
@@ -1014,11 +1035,18 @@ export const AnimationStudio = ({
           handleGridAddFrames([cell], descriptor);
         },
         () => {
-          Alert.alert('Import failed', 'Unable to load the selected image.');
+          Alert.alert(
+            strings.animationStudio.importFailedTitle,
+            strings.animationStudio.importFailedDescription,
+          );
         },
       );
     },
-    [handleGridAddFrames],
+    [
+      handleGridAddFrames,
+      strings.animationStudio.importFailedDescription,
+      strings.animationStudio.importFailedTitle,
+    ],
   );
 
   const handleAddAnimation = () => {
@@ -1090,12 +1118,26 @@ export const AnimationStudio = ({
 
   const confirmDeleteAnimation = useCallback(
     (name: string) => {
-      Alert.alert('Delete animation?', 'Are you sure you want to remove this animation?', [
-        { text: 'Cancel', style: 'cancel' },
-        { text: 'Delete', style: 'destructive', onPress: () => handleDeleteAnimation(name) },
-      ]);
+      Alert.alert(
+        strings.animationStudio.deleteAnimationTitle,
+        strings.animationStudio.deleteAnimationMessage,
+        [
+          { text: strings.general.cancel, style: 'cancel' },
+          {
+            text: strings.general.delete,
+            style: 'destructive',
+            onPress: () => handleDeleteAnimation(name),
+          },
+        ],
+      );
     },
-    [handleDeleteAnimation],
+    [
+      handleDeleteAnimation,
+      strings.animationStudio.deleteAnimationMessage,
+      strings.animationStudio.deleteAnimationTitle,
+      strings.general.cancel,
+      strings.general.delete,
+    ],
   );
 
   const handleCopyTimelineFrame = useCallback(() => {
@@ -1296,22 +1338,22 @@ export const AnimationStudio = ({
             name="save"
             onPress={handleQuickSave}
             disabled={isQuickSaving}
-            accessibilityLabel="Save sprite"
+            accessibilityLabel={strings.animationStudio.saveSprite}
           />
           <IconButton
             name="folder"
             onPress={handleOpenStorageManager}
-            accessibilityLabel="Open storage manager"
+            accessibilityLabel={strings.animationStudio.openStorageManager}
           />
           <IconButton
             name="edit-note"
             onPress={handleOpenMetaModal}
-            accessibilityLabel="Edit metadata"
+            accessibilityLabel={strings.animationStudio.editMetadata}
           />
           <IconButton
             name="data-object"
             onPress={handleOpenTemplateModal}
-            accessibilityLabel="Open sprite JSON tools"
+            accessibilityLabel={strings.animationStudio.openSpriteJsonTools}
           />
         </View>
       </View>
@@ -1337,13 +1379,13 @@ export const AnimationStudio = ({
               <IconButton
                 name="add"
                 onPress={handleAddAnimation}
-                accessibilityLabel="Add animation"
+                accessibilityLabel={strings.animationStudio.addAnimation}
               />
               <IconButton
                 name="delete"
                 onPress={() => currentAnimationName && confirmDeleteAnimation(currentAnimationName)}
                 disabled={!currentAnimationName}
-                accessibilityLabel="Delete animation"
+                accessibilityLabel={strings.animationStudio.deleteAnimation}
               />
               <View style={styles.timelineDivider} />
               <IconButton
@@ -1352,7 +1394,9 @@ export const AnimationStudio = ({
                 disabled={!currentAnimationName}
                 style={currentAnimationLoop ? styles.loopButtonActive : styles.loopButtonInactive}
                 accessibilityLabel={
-                  currentAnimationLoop ? 'Disable loop for animation' : 'Enable loop for animation'
+                  currentAnimationLoop
+                    ? strings.animationStudio.disableLoop
+                    : strings.animationStudio.enableLoop
                 }
               />
             </View>
@@ -1384,8 +1428,8 @@ export const AnimationStudio = ({
                       }
                       accessibilityLabel={
                         autoPlayAnimationName === name
-                          ? 'Disable autoplay for this animation'
-                          : 'Enable autoplay for this animation'
+                          ? strings.animationStudio.disableAutoplay
+                          : strings.animationStudio.enableAutoplay
                       }
                       style={styles.autoPlayIndicatorButton}
                       hitSlop={{ top: 6, bottom: 6, left: 6, right: 6 }}
@@ -1466,7 +1510,7 @@ export const AnimationStudio = ({
       >
         <View style={styles.modalOverlay}>
           <MacWindow
-            title="Frame Picker"
+            title={strings.framePicker.title}
             onVariantChange={setFramePickerVariant}
             onClose={() => {
               setFramePickerVariant('default');
@@ -1479,7 +1523,7 @@ export const AnimationStudio = ({
           >
             <FrameGridSelector
               image={framePickerImage ?? undefined}
-              emptyMessage="Select an image from the file browser to begin slicing."
+              emptyMessage={strings.framePicker.emptyMessage}
               onAddFrames={(cells, descriptor) => {
                 handleGridAddFrames(cells, descriptor ?? framePickerImage ?? undefined);
                 setFramePickerVisible(false);
@@ -1529,37 +1573,41 @@ export const AnimationStudio = ({
       >
         <View style={styles.modalOverlay}>
           <MacWindow
-            title="Metadata"
+            title={strings.metadataModal.title}
             onClose={handleCloseMetaModal}
             contentStyle={styles.metaModalContent}
             enableCompact={false}
             style={styles.metaModalWindow}
           >
             <View style={styles.metaHeaderRow}>
-              <Text style={styles.metaHeading}>Primitive keys are exported with the sprite.</Text>
-              <IconButton name="add" onPress={addEntry} accessibilityLabel="Add metadata entry" />
+              <Text style={styles.metaHeading}>{strings.metadataModal.heading}</Text>
+              <IconButton
+                name="add"
+                onPress={addEntry}
+                accessibilityLabel={strings.metadataModal.addEntry}
+              />
             </View>
             <ScrollView style={styles.metaRowsStack} contentContainerStyle={styles.metaRowsContent}>
               {metaEntries.map((entry) => (
                 <View key={entry.id} style={styles.metaRow}>
                   <View style={styles.metaField}>
-                    <Text style={styles.metaLabel}>Key</Text>
+                    <Text style={styles.metaLabel}>{strings.metadataModal.keyLabel}</Text>
                     <TextInput
                       value={entry.key}
                       onChangeText={(text) => updateEntry(entry.id, 'key', text)}
                       style={styles.metaInput}
                       editable={!entry.readOnly}
-                      placeholder="metadata key"
+                      placeholder={strings.metadataModal.keyPlaceholder}
                     />
                   </View>
                   <View style={styles.metaField}>
-                    <Text style={styles.metaLabel}>Value</Text>
+                    <Text style={styles.metaLabel}>{strings.metadataModal.valueLabel}</Text>
                     <TextInput
                       value={entry.value}
                       onChangeText={(text) => updateEntry(entry.id, 'value', text)}
                       style={styles.metaInput}
                       editable={!entry.readOnly}
-                      placeholder="value"
+                      placeholder={strings.metadataModal.valuePlaceholder}
                     />
                   </View>
                   {entry.readOnly ? (
@@ -1568,18 +1616,20 @@ export const AnimationStudio = ({
                     <IconButton
                       name="delete"
                       onPress={() => removeEntry(entry.id)}
-                      accessibilityLabel="Remove metadata entry"
+                      accessibilityLabel={strings.metadataModal.removeEntry}
                     />
                   )}
                 </View>
               ))}
             </ScrollView>
             <View style={styles.metaButtonRow}>
-              <IconButton name="save" onPress={applyEntries} accessibilityLabel="Apply metadata" />
+              <IconButton
+                name="save"
+                onPress={applyEntries}
+                accessibilityLabel={strings.metadataModal.apply}
+              />
             </View>
-            <Text style={styles.metaHelpText}>
-              Saved metadata is included when exporting JSON or saving via Sprite Storage.
-            </Text>
+            <Text style={styles.metaHelpText}>{strings.metadataModal.helpText}</Text>
           </MacWindow>
         </View>
       </Modal>
@@ -1591,52 +1641,53 @@ export const AnimationStudio = ({
       >
         <View style={styles.modalOverlay}>
           <MacWindow
-            title="Sprite JSON"
+            title={strings.templateModal.title}
             onClose={handleCloseTemplateModal}
             contentStyle={styles.templateModalContent}
             enableCompact={false}
             style={styles.templateModalWindow}
           >
             <View style={styles.templateContent}>
-              <Text style={styles.templateDescription}>
-                Uses the same format consumed by SpriteAnimator previews and spriteStorage save/load
-                helpers.
-              </Text>
+              <Text style={styles.templateDescription}>{strings.templateModal.description}</Text>
               <View style={styles.templateButtonRow}>
                 <IconButton
                   name="file-download"
                   onPress={handleExportTemplate}
-                  accessibilityLabel="Export sprite JSON"
+                  accessibilityLabel={strings.templateModal.exportButton}
                 />
                 <IconButton
                   name="file-upload"
                   onPress={handleImportTemplate}
                   disabled={!importText.trim()}
-                  accessibilityLabel="Import sprite JSON"
+                  accessibilityLabel={strings.templateModal.importButton}
                 />
               </View>
               <View style={styles.templateRows}>
                 <View style={styles.templateHalf}>
                   <View style={styles.templateStack}>
-                    <Text style={styles.templateSubheading}>Export Preview</Text>
+                    <Text style={styles.templateSubheading}>
+                      {strings.templateModal.exportPreviewTitle}
+                    </Text>
                     <SelectableTextInput
                       style={[styles.templateTextArea, styles.templateTextAreaFixed]}
                       multiline
                       value={exportPreview}
                       onChangeText={() => {}}
-                      placeholder="Press Export to view the current payload"
+                      placeholder={strings.templateModal.exportPlaceholder}
                     />
                   </View>
                 </View>
                 <View style={styles.templateHalf}>
                   <View style={styles.templateStack}>
-                    <Text style={styles.templateSubheading}>Import JSON</Text>
+                    <Text style={styles.templateSubheading}>
+                      {strings.templateModal.importTitle}
+                    </Text>
                     <TextInput
                       style={[styles.templateTextArea, styles.templateTextAreaFixed]}
                       multiline
                       value={importText}
                       onChangeText={setImportText}
-                      placeholder="Paste JSON here and press Import"
+                      placeholder={strings.templateModal.importPlaceholder}
                     />
                   </View>
                 </View>

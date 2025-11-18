@@ -1,5 +1,5 @@
 /* eslint-disable jsdoc/require-jsdoc */
-import type { DataSourceParam } from '@shopify/react-native-skia';
+import type { DataSourceParam, SkImage } from '@shopify/react-native-skia';
 import type { SpriteEditorState } from '../types';
 import type {
   AnimatedSpriteFrame,
@@ -35,7 +35,10 @@ const buildFromDataSource = (
   if (typeof source === 'string') {
     return subset ? { type: 'uri', uri: source, subset } : { type: 'uri', uri: source };
   }
-  return subset ? { type: 'skImage', image: source, subset } : { type: 'skImage', image: source };
+  const imageSource = source as unknown as SkImage;
+  return subset
+    ? { type: 'skImage', image: imageSource, subset }
+    : { type: 'skImage', image: imageSource };
 };
 
 const cloneAnimations = (source: SpriteAnimationsMap | undefined): SpriteAnimationsMap => {

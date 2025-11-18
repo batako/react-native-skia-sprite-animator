@@ -13,6 +13,7 @@ import {
 import * as FileSystem from 'expo-file-system/legacy';
 import * as DocumentPicker from 'expo-document-picker';
 import { MacWindow } from './MacWindow';
+import { getEditorStrings, formatEditorString } from '../localization';
 
 const APP_FILES_DIR = `${FileSystem.documentDirectory ?? ''}app_files`;
 
@@ -50,6 +51,7 @@ export const FileBrowserModal = ({
   allowedMimeTypes,
   allowedExtensions,
 }: FileBrowserModalProps) => {
+  const strings = React.useMemo(() => getEditorStrings(), []);
   const [entries, setEntries] = useState<FileEntry[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const shouldRender = visible;
@@ -62,9 +64,9 @@ export const FileBrowserModal = ({
       }
     } catch (error) {
       console.error(error);
-      Alert.alert('Error', 'Failed to access app files directory.');
+      Alert.alert(strings.general.errorTitle, strings.fileBrowser.errorAccess);
     }
-  }, []);
+  }, [strings.fileBrowser.errorAccess, strings.general.errorTitle]);
 
   const normalizedExtensions = React.useMemo(() => {
     if (!allowedExtensions?.length) {
@@ -172,11 +174,16 @@ export const FileBrowserModal = ({
       setEntries(nextEntries);
     } catch (error) {
       console.error(error);
-      Alert.alert('Error', 'Failed to load files.');
+      Alert.alert(strings.general.errorTitle, strings.fileBrowser.errorLoad);
     } finally {
       setIsLoading(false);
     }
-  }, [ensureDirectory, shouldIncludeFile]);
+  }, [
+    ensureDirectory,
+    shouldIncludeFile,
+    strings.fileBrowser.errorLoad,
+    strings.general.errorTitle,
+  ]);
 
   useEffect(() => {
     if (visible) {
@@ -202,12 +209,15 @@ export const FileBrowserModal = ({
       const asset = result.assets[0];
       const sourceUri = asset.fileCopyUri ?? asset.uri;
       if (!sourceUri) {
-        Alert.alert('Upload failed', 'Could not access the selected file.');
+        Alert.alert(strings.fileBrowser.uploadFailedTitle, strings.fileBrowser.uploadFailedMessage);
         return;
       }
       const assetName = asset.name ?? sourceUri.split('/').pop() ?? 'file';
       if (!shouldIncludeFile(asset.mimeType ?? undefined, assetName)) {
-        Alert.alert('Unsupported file', 'The selected file type is not allowed.');
+        Alert.alert(
+          strings.fileBrowser.unsupportedFileTitle,
+          strings.fileBrowser.unsupportedFileMessage,
+        );
         return;
       }
       await ensureDirectory();
@@ -220,9 +230,20 @@ export const FileBrowserModal = ({
       await refreshEntries();
     } catch (error) {
       console.error(error);
-      Alert.alert('Error', 'Failed to upload file.');
+      Alert.alert(strings.general.errorTitle, strings.fileBrowser.errorUpload);
     }
-  }, [allowedMimeTypes, ensureDirectory, refreshEntries, shouldIncludeFile]);
+  }, [
+    allowedMimeTypes,
+    ensureDirectory,
+    refreshEntries,
+    shouldIncludeFile,
+    strings.fileBrowser.errorUpload,
+    strings.fileBrowser.unsupportedFileMessage,
+    strings.fileBrowser.unsupportedFileTitle,
+    strings.fileBrowser.uploadFailedMessage,
+    strings.fileBrowser.uploadFailedTitle,
+    strings.general.errorTitle,
+  ]);
 
   const handleOpen = useCallback(
     (entry: FileEntry) => {
@@ -234,35 +255,47 @@ export const FileBrowserModal = ({
 
   const handleDelete = useCallback(
     async (entry: FileEntry) => {
-      Alert.alert('Delete File', `Remove "${entry.name}"?`, [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Delete',
-          style: 'destructive',
-          onPress: async () => {
-            try {
-              await FileSystem.deleteAsync(entry.uri, { idempotent: true });
-              await refreshEntries();
-            } catch (error) {
-              console.error(error);
-              Alert.alert('Error', 'Failed to delete file.');
-            }
+      Alert.alert(
+        strings.fileBrowser.deleteConfirmTitle,
+        formatEditorString(strings.fileBrowser.deleteConfirmMessage, { name: entry.name }),
+        [
+          { text: strings.general.cancel, style: 'cancel' },
+          {
+            text: strings.general.delete,
+            style: 'destructive',
+            onPress: async () => {
+              try {
+                await FileSystem.deleteAsync(entry.uri, { idempotent: true });
+                await refreshEntries();
+              } catch (error) {
+                console.error(error);
+                Alert.alert(strings.general.errorTitle, strings.fileBrowser.errorDelete);
+              }
+            },
           },
-        },
-      ]);
+        ],
+      );
     },
-    [refreshEntries],
+    [
+      refreshEntries,
+      strings.fileBrowser.deleteConfirmMessage,
+      strings.fileBrowser.deleteConfirmTitle,
+      strings.fileBrowser.errorDelete,
+      strings.general.cancel,
+      strings.general.delete,
+      strings.general.errorTitle,
+    ],
   );
 
   const toolbarContent = (
     <TouchableOpacity style={styles.toolbarButton} onPress={handleUpload}>
-      <Text style={styles.toolbarButtonText}>Upload</Text>
+      <Text style={styles.toolbarButtonText}>{strings.fileBrowser.uploadButton}</Text>
     </TouchableOpacity>
   );
 
   const renderWindow = () => (
     <MacWindow
-      title="File Browser"
+      title={strings.fileBrowser.title}
       onClose={handleClose}
       enableCompact={false}
       toolbarContent={toolbarContent}
@@ -285,7 +318,9 @@ export const FileBrowserModal = ({
                 <Image source={{ uri: item.uri }} style={styles.thumbnail} />
               ) : (
                 <View style={styles.thumbnailPlaceholder}>
-                  <Text style={styles.thumbnailPlaceholderText}>FILE</Text>
+                  <Text style={styles.thumbnailPlaceholderText}>
+                    {strings.fileBrowser.thumbnailLabel}
+                  </Text>
                 </View>
               )}
               <View style={styles.fileRowContent}>
@@ -301,13 +336,13 @@ export const FileBrowserModal = ({
                 onPress={() => handleDelete(item)}
                 activeOpacity={0.7}
               >
-                <Text style={styles.deleteButtonText}>Delete</Text>
+                <Text style={styles.deleteButtonText}>{strings.fileBrowser.deleteButton}</Text>
               </TouchableOpacity>
             </TouchableOpacity>
           )}
           ListEmptyComponent={
             <View style={styles.emptyState}>
-              <Text style={styles.emptyText}>No files uploaded yet.</Text>
+              <Text style={styles.emptyText}>{strings.fileBrowser.noFiles}</Text>
             </View>
           }
         />

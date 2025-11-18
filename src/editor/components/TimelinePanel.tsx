@@ -14,6 +14,7 @@ import type { SpriteAnimationsMeta } from '../../SpriteAnimator';
 import type { SpriteEditorFrame } from '../types';
 import { IconButton } from './IconButton';
 import { TimelineControls } from './TimelineControls';
+import { getEditorStrings } from '../localization';
 
 const TIMELINE_CARD_SIZE = 150;
 const TIMELINE_CARD_PADDING = 10;
@@ -63,6 +64,7 @@ const MultiplierField = React.forwardRef<MultiplierFieldHandle, MultiplierFieldP
   ({ value, onSubmit, disabled }, ref) => {
     const [draft, setDraft] = useState(String(value));
     const [isFocused, setFocused] = useState(false);
+    const strings = useMemo(() => getEditorStrings(), []);
 
     const commit = useCallback(() => {
       const parsed = Number.parseFloat(draft);
@@ -85,7 +87,7 @@ const MultiplierField = React.forwardRef<MultiplierFieldHandle, MultiplierFieldP
 
     return (
       <View style={styles.multiplierRow}>
-        <Text style={styles.multiplierLabel}>Multiplier</Text>
+        <Text style={styles.multiplierLabel}>{strings.timeline.multiplierLabel}</Text>
         <TextInput
           value={draft}
           onChangeText={setDraft}
@@ -220,6 +222,7 @@ export const TimelinePanel = ({
   fallbackImageInfo,
   animationsMeta,
 }: TimelinePanelProps) => {
+  const strings = useMemo(() => getEditorStrings(), []);
   const renderRestartForwardIcon = useCallback(
     ({ color, size }: { color: string; size: number }) => (
       <View style={styles.restartIcon}>
@@ -271,7 +274,7 @@ export const TimelinePanel = ({
             { width: viewportSize, height: viewportSize },
           ]}
         >
-          <Text style={styles.thumbPlaceholderText}>No Image</Text>
+          <Text style={styles.thumbPlaceholderText}>{strings.timeline.thumbPlaceholder}</Text>
         </View>
       );
 
@@ -342,6 +345,7 @@ export const TimelinePanel = ({
       fallbackImageInfo,
       frameImageInfos,
       onSelectFrame,
+      strings,
       timelineImageSource,
     ],
   );
@@ -382,47 +386,49 @@ export const TimelinePanel = ({
             name="play-arrow"
             onPress={onReverseFromSelection}
             disabled={isPlaying || currentSequenceLength === 0}
-            accessibilityLabel="Play animation in reverse"
+            accessibilityLabel={strings.timeline.playReverse}
             iconStyle={styles.reverseIcon}
           />
           <IconButton
             renderIcon={renderRestartReverseIcon}
             onPress={onRestartReverse}
             disabled={currentSequenceLength === 0}
-            accessibilityLabel="Restart animation in reverse from beginning"
+            accessibilityLabel={strings.timeline.restartReverse}
           />
           <IconButton
             iconFamily="material"
             name={isPlaying ? 'pause' : 'stop'}
             onPress={togglePlayback}
             disabled={!hasActiveAnimation || !currentSequenceLength}
-            accessibilityLabel={isPlaying ? 'Pause animation preview' : 'Stop animation preview'}
+            accessibilityLabel={
+              isPlaying ? strings.timeline.pausePreview : strings.timeline.stopPreview
+            }
           />
           <IconButton
             renderIcon={renderRestartForwardIcon}
             onPress={onRestartForward}
             disabled={currentSequenceLength === 0}
-            accessibilityLabel="Restart animation from beginning"
+            accessibilityLabel={strings.timeline.restart}
           />
           <IconButton
             iconFamily="material"
             name="play-arrow"
             onPress={onPlayFromSelection}
             disabled={isPlaying || currentSequenceLength === 0}
-            accessibilityLabel="Play animation preview"
+            accessibilityLabel={strings.timeline.playPreview}
           />
           <View style={styles.timelineDivider} />
           <IconButton
             name="insert-photo"
             onPress={onOpenImagePicker}
             disabled={!hasActiveAnimation || isPlaying}
-            accessibilityLabel="Import image as frame"
+            accessibilityLabel={strings.timeline.importImage}
           />
           <IconButton
             name="grid-on"
             onPress={onOpenFramePicker}
             disabled={!hasActiveAnimation || isPlaying}
-            accessibilityLabel="Open frame picker modal"
+            accessibilityLabel={strings.timeline.openFramePicker}
           />
           <View style={styles.timelineDivider} />
           <TimelineControls

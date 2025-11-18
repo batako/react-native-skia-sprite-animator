@@ -5,6 +5,7 @@ import type { SpriteAnimatorSource } from '../../SpriteAnimator';
 import type { DataSourceParam } from '@shopify/react-native-skia';
 import type { EditorIntegration } from '../hooks/useEditorIntegration';
 import { IconButton } from './IconButton';
+import { getEditorStrings } from '../localization';
 
 /**
  * Props for the {@link PreviewPlayer} component.
@@ -35,6 +36,7 @@ export const PreviewPlayer = ({
   height,
   centered = true,
 }: PreviewPlayerProps) => {
+  const strings = React.useMemo(() => getEditorStrings(), []);
   const {
     animatorRef,
     runtimeData,
@@ -191,13 +193,13 @@ export const PreviewPlayer = ({
             <IconButton
               name="zoom-out"
               onPress={() => adjustZoom(-0.25)}
-              accessibilityLabel="Zoom out"
+              accessibilityLabel={strings.general.zoomOut}
               style={styles.zoomButton}
             />
             <Pressable
               onPress={resetZoom}
               accessibilityRole="button"
-              accessibilityLabel="Reset zoom to 100%"
+              accessibilityLabel={strings.general.resetZoom}
               style={styles.zoomTextButton}
             >
               <Text style={styles.zoomLabel}>{Math.round(zoom * 100)}%</Text>
@@ -205,7 +207,7 @@ export const PreviewPlayer = ({
             <IconButton
               name="zoom-in"
               onPress={() => adjustZoom(0.25)}
-              accessibilityLabel="Zoom in"
+              accessibilityLabel={strings.general.zoomIn}
               style={styles.zoomButton}
             />
           </View>

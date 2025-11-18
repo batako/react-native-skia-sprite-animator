@@ -1,6 +1,7 @@
 import React from 'react';
 import { View } from 'react-native';
 import { IconButton } from './IconButton';
+import { getEditorStrings } from '../localization';
 
 /**
  * Props for the {@link TimelineControls} toolbar.
@@ -40,6 +41,7 @@ export const TimelineControls = ({
   onMoveRight,
   onRemove,
 }: TimelineControlsProps) => {
+  const strings = React.useMemo(() => getEditorStrings(), []);
   const canSelect = selectedTimelineIndex !== null;
   const canMoveLeft = canSelect && selectedTimelineIndex! > 0;
   const canMoveRight =
@@ -52,31 +54,31 @@ export const TimelineControls = ({
         name="content-copy"
         onPress={onCopy}
         disabled={disableActions || !canSelect}
-        accessibilityLabel="Copy timeline frame"
+        accessibilityLabel={strings.timelineControls.copyFrame}
       />
       <IconButton
         name="content-paste"
         onPress={onPaste}
         disabled={disableActions || !hasClipboard}
-        accessibilityLabel="Paste timeline frame"
+        accessibilityLabel={strings.timelineControls.pasteFrame}
       />
       <IconButton
         name="skip-previous"
         onPress={onMoveLeft}
         disabled={disableActions || !canMoveLeft}
-        accessibilityLabel="Move frame left"
+        accessibilityLabel={strings.timelineControls.moveLeft}
       />
       <IconButton
         name="skip-next"
         onPress={onMoveRight}
         disabled={disableActions || !canMoveRight}
-        accessibilityLabel="Move frame right"
+        accessibilityLabel={strings.timelineControls.moveRight}
       />
       <IconButton
         name="delete-forever"
         onPress={onRemove}
         disabled={disableActions || !canSelect}
-        accessibilityLabel="Remove timeline frame"
+        accessibilityLabel={strings.timelineControls.removeFrame}
       />
     </View>
   );

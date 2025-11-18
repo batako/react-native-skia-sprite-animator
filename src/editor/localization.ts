@@ -1,0 +1,543 @@
+import * as Localization from 'expo-localization';
+
+/** Allowed locales for the editor string bundle. */
+type SupportedLanguage = 'en' | 'ja';
+
+/* eslint-disable jsdoc/require-jsdoc */
+export type EditorStrings = {
+  general: {
+    zoomOut: string;
+    zoomIn: string;
+    resetZoom: string;
+    cancel: string;
+    delete: string;
+    errorTitle: string;
+    decreaseValue: string;
+    increaseValue: string;
+  };
+  frameGrid: {
+    primaryAxisLabel: string;
+    horizontalFirst: string;
+    verticalFirst: string;
+    horizontalLabel: string;
+    leftToRight: string;
+    rightToLeft: string;
+    verticalLabel: string;
+    topToBottom: string;
+    bottomToTop: string;
+    selectAll: string;
+    clearSelection: string;
+    emptyStateTitle: string;
+    emptyStateDescription: string;
+    horizontalCellsLabel: string;
+    verticalCellsLabel: string;
+    sizeXLabel: string;
+    sizeYLabel: string;
+    spacingXLabel: string;
+    spacingYLabel: string;
+    offsetXLabel: string;
+    offsetYLabel: string;
+    addSingleFrame: string;
+    addMultipleFrames: string;
+    noFramesSelected: string;
+  };
+  preview: {
+    framesMissing: string;
+    pausePreview: string;
+    playPreview: string;
+    stopPreview: string;
+  };
+  animationStudio: {
+    defaultStatusMessage: string;
+    requireNameMessage: string;
+    statusSaved: string;
+    statusLoaded: string;
+    needFramesBeforeSave: string;
+    saveSprite: string;
+    openStorageManager: string;
+    editMetadata: string;
+    openSpriteJsonTools: string;
+    addAnimation: string;
+    deleteAnimation: string;
+    disableLoop: string;
+    enableLoop: string;
+    disableAutoplay: string;
+    enableAutoplay: string;
+    renameMissing: string;
+    renameDuplicate: string;
+    importFailedTitle: string;
+    importFailedDescription: string;
+    deleteAnimationTitle: string;
+    deleteAnimationMessage: string;
+    templateExported: string;
+    templateImported: string;
+  };
+  metadataModal: {
+    title: string;
+    heading: string;
+    addEntry: string;
+    removeEntry: string;
+    apply: string;
+    keyLabel: string;
+    valueLabel: string;
+    keyPlaceholder: string;
+    valuePlaceholder: string;
+    helpText: string;
+  };
+  templateModal: {
+    title: string;
+    description: string;
+    exportButton: string;
+    importButton: string;
+    exportPreviewTitle: string;
+    exportPlaceholder: string;
+    importTitle: string;
+    importPlaceholder: string;
+  };
+  storagePanel: {
+    title: string;
+    defaultStatus: string;
+    spriteNameLabel: string;
+    spriteNamePlaceholder: string;
+    saveSprite: string;
+    loadSprite: string;
+    deleteSprite: string;
+    deleteSpriteTitle: string;
+    deleteSpriteMessage: string;
+    emptyList: string;
+    updatedPrefix: string;
+    statusSaved: string;
+    statusLoaded: string;
+    statusOverwritten: string;
+    statusRenamed: string;
+    statusDeleted: string;
+    statusNeedFrames: string;
+    statusMissing: string;
+    statusNameRequired: string;
+  };
+  timeline: {
+    multiplierLabel: string;
+    thumbPlaceholder: string;
+    pausePreview: string;
+    stopPreview: string;
+    restart: string;
+    restartReverse: string;
+    playPreview: string;
+    playReverse: string;
+    importImage: string;
+    openFramePicker: string;
+  };
+  timelineControls: {
+    copyFrame: string;
+    pasteFrame: string;
+    moveLeft: string;
+    moveRight: string;
+    removeFrame: string;
+  };
+  fileBrowser: {
+    title: string;
+    uploadButton: string;
+    deleteButton: string;
+    deleteConfirmTitle: string;
+    deleteConfirmMessage: string;
+    noFiles: string;
+    errorAccess: string;
+    errorLoad: string;
+    uploadFailedTitle: string;
+    uploadFailedMessage: string;
+    unsupportedFileTitle: string;
+    unsupportedFileMessage: string;
+    errorUpload: string;
+    errorDelete: string;
+    thumbnailLabel: string;
+  };
+  editorScreen: {
+    subtitle: string;
+  };
+  framePicker: {
+    title: string;
+    emptyMessage: string;
+  };
+};
+/* eslint-enable jsdoc/require-jsdoc */
+
+const translations: Record<SupportedLanguage, EditorStrings> = {
+  en: {
+    general: {
+      zoomOut: 'Zoom out',
+      zoomIn: 'Zoom in',
+      resetZoom: 'Reset zoom to 100%',
+      cancel: 'Cancel',
+      delete: 'Delete',
+      errorTitle: 'Error',
+      decreaseValue: 'Decrease {label}',
+      increaseValue: 'Increase {label}',
+    },
+    frameGrid: {
+      primaryAxisLabel: 'Primary axis',
+      horizontalFirst: 'Horizontal first',
+      verticalFirst: 'Vertical first',
+      horizontalLabel: 'Horizontal',
+      leftToRight: 'Left → Right',
+      rightToLeft: 'Right → Left',
+      verticalLabel: 'Vertical',
+      topToBottom: 'Top → Bottom',
+      bottomToTop: 'Bottom → Top',
+      selectAll: 'Select all cells',
+      clearSelection: 'Clear selection',
+      emptyStateTitle: 'Image not selected',
+      emptyStateDescription: 'Select a sprite image to preview it here.',
+      horizontalCellsLabel: 'Horizontal (cells)',
+      verticalCellsLabel: 'Vertical (cells)',
+      sizeXLabel: 'Size X (px)',
+      sizeYLabel: 'Size Y (px)',
+      spacingXLabel: 'Spacing X (px)',
+      spacingYLabel: 'Spacing Y (px)',
+      offsetXLabel: 'Offset X (px)',
+      offsetYLabel: 'Offset Y (px)',
+      addSingleFrame: 'Add 1 frame',
+      addMultipleFrames: 'Add {count} frames',
+      noFramesSelected: 'No frames selected',
+    },
+    preview: {
+      framesMissing:
+        'Frame images are missing. AnimatedSprite2D preview becomes available once each frame has its own image URI.',
+      pausePreview: 'Pause preview',
+      playPreview: 'Play preview',
+      stopPreview: 'Stop preview',
+    },
+    animationStudio: {
+      defaultStatusMessage: 'Manage saved sprites or import past work.',
+      requireNameMessage: 'Use Sprite Storage to name and save new sprites.',
+      statusSaved: 'Saved {name}',
+      statusLoaded: 'Loaded {name}',
+      needFramesBeforeSave: 'Add at least one frame before saving.',
+      saveSprite: 'Save sprite',
+      openStorageManager: 'Open storage manager',
+      editMetadata: 'Edit metadata',
+      openSpriteJsonTools: 'Open sprite JSON tools',
+      addAnimation: 'Add animation',
+      deleteAnimation: 'Delete animation',
+      disableLoop: 'Disable loop for animation',
+      enableLoop: 'Enable loop for animation',
+      disableAutoplay: 'Disable autoplay for this animation',
+      enableAutoplay: 'Enable autoplay for this animation',
+      renameMissing: 'Please enter a name',
+      renameDuplicate: 'An animation with the same name already exists',
+      importFailedTitle: 'Import failed',
+      importFailedDescription: 'Unable to load the selected image.',
+      deleteAnimationTitle: 'Delete animation?',
+      deleteAnimationMessage: 'Are you sure you want to remove this animation?',
+      templateExported: 'Exported spriteStorage-compatible JSON.',
+      templateImported: 'Import succeeded and editor history was reset.',
+    },
+    metadataModal: {
+      title: 'Metadata',
+      heading: 'Primitive keys are exported with the sprite.',
+      addEntry: 'Add metadata entry',
+      removeEntry: 'Remove metadata entry',
+      apply: 'Apply metadata',
+      keyLabel: 'Key',
+      valueLabel: 'Value',
+      keyPlaceholder: 'metadata key',
+      valuePlaceholder: 'value',
+      helpText: 'Saved metadata is included when exporting JSON or saving via Sprite Storage.',
+    },
+    templateModal: {
+      title: 'Sprite JSON',
+      description: 'Uses the same format consumed by the preview runtime and storage helpers.',
+      exportButton: 'Export sprite JSON',
+      importButton: 'Import sprite JSON',
+      exportPreviewTitle: 'Export Preview',
+      exportPlaceholder: 'Press Export to view the current payload',
+      importTitle: 'Import JSON',
+      importPlaceholder: 'Paste JSON here and press Import',
+    },
+    storagePanel: {
+      title: 'Sprite Storage',
+      defaultStatus: 'Manage saved sprites or import past work.',
+      spriteNameLabel: 'Sprite name',
+      spriteNamePlaceholder: 'Untitled Sprite',
+      saveSprite: 'Save sprite',
+      loadSprite: 'Load sprite',
+      deleteSprite: 'Delete sprite',
+      deleteSpriteTitle: 'Delete sprite?',
+      deleteSpriteMessage: 'Are you sure you want to remove "{name}" from storage?',
+      emptyList: 'No sprites saved yet. Use the form above to add one.',
+      updatedPrefix: 'Updated',
+      statusSaved: 'Saved sprite {name}.',
+      statusLoaded: 'Loaded sprite {name}.',
+      statusOverwritten: 'Overwrote sprite {name}.',
+      statusRenamed: 'Renamed sprite to {name}.',
+      statusDeleted: 'Deleted sprite {name}.',
+      statusNeedFrames: 'Add at least one frame before saving.',
+      statusMissing: 'Sprite not found on disk.',
+      statusNameRequired: 'Name cannot be empty.',
+    },
+    timeline: {
+      multiplierLabel: 'Multiplier',
+      thumbPlaceholder: 'No Image',
+      pausePreview: 'Pause animation preview',
+      stopPreview: 'Stop animation preview',
+      restart: 'Restart animation from beginning',
+      restartReverse: 'Restart animation in reverse from beginning',
+      playPreview: 'Play animation preview',
+      playReverse: 'Play animation in reverse',
+      importImage: 'Import image as frame',
+      openFramePicker: 'Open frame picker modal',
+    },
+    timelineControls: {
+      copyFrame: 'Copy timeline frame',
+      pasteFrame: 'Paste timeline frame',
+      moveLeft: 'Move frame left',
+      moveRight: 'Move frame right',
+      removeFrame: 'Remove timeline frame',
+    },
+    fileBrowser: {
+      title: 'File Browser',
+      uploadButton: 'Upload',
+      deleteButton: 'Delete',
+      deleteConfirmTitle: 'Delete File',
+      deleteConfirmMessage: 'Remove "{name}"?',
+      noFiles: 'No files uploaded yet.',
+      errorAccess: 'Failed to access app files directory.',
+      errorLoad: 'Failed to load files.',
+      uploadFailedTitle: 'Upload failed',
+      uploadFailedMessage: 'Could not access the selected file.',
+      unsupportedFileTitle: 'Unsupported file',
+      unsupportedFileMessage: 'The selected file type is not allowed.',
+      errorUpload: 'Failed to upload file.',
+      errorDelete: 'Failed to delete file.',
+      thumbnailLabel: 'FILE',
+    },
+    editorScreen: {
+      subtitle:
+        'Edit frames, play animations, preview with AnimatedSprite2D, and persist sprites to disk with a single screen.',
+    },
+    framePicker: {
+      title: 'Frame Picker',
+      emptyMessage: 'Select an image from the file browser to begin slicing.',
+    },
+  },
+  ja: {
+    general: {
+      zoomOut: 'ズームアウト',
+      zoomIn: 'ズームイン',
+      resetZoom: 'ズームを100%にリセット',
+      cancel: 'キャンセル',
+      delete: '削除',
+      errorTitle: 'エラー',
+      decreaseValue: '{label} を減らす',
+      increaseValue: '{label} を増やす',
+    },
+    frameGrid: {
+      primaryAxisLabel: '優先方向',
+      horizontalFirst: '横方向を優先',
+      verticalFirst: '縦方向を優先',
+      horizontalLabel: '横方向',
+      leftToRight: '左 → 右',
+      rightToLeft: '右 → 左',
+      verticalLabel: '縦方向',
+      topToBottom: '上 → 下',
+      bottomToTop: '下 → 上',
+      selectAll: '全フレームを選択',
+      clearSelection: '選択を解除',
+      emptyStateTitle: '画像が選択されていません',
+      emptyStateDescription: 'ここにプレビューするスプライト画像を選択してください。',
+      horizontalCellsLabel: '横方向（セル数）',
+      verticalCellsLabel: '縦方向（セル数）',
+      sizeXLabel: 'セル幅 (px)',
+      sizeYLabel: 'セル高さ (px)',
+      spacingXLabel: '横スペース (px)',
+      spacingYLabel: '縦スペース (px)',
+      offsetXLabel: 'Xオフセット (px)',
+      offsetYLabel: 'Yオフセット (px)',
+      addSingleFrame: '1フレームを追加',
+      addMultipleFrames: '{count}フレームを追加',
+      noFramesSelected: 'フレームが選択されていません',
+    },
+    preview: {
+      framesMissing:
+        'フレーム画像がありません。各フレームに画像URIを設定すると AnimatedSprite2D のプレビューが表示されます。',
+      pausePreview: 'プレビューを一時停止',
+      playPreview: 'プレビューを再生',
+      stopPreview: 'プレビューを停止',
+    },
+    animationStudio: {
+      defaultStatusMessage:
+        '保存済みのスプライトを管理するか、過去の作業をインポートしてください。',
+      requireNameMessage: 'スプライトストレージで名前を付けて保存してください。',
+      statusSaved: '{name} を保存しました',
+      statusLoaded: '{name} を読み込みました',
+      needFramesBeforeSave: '保存する前に少なくとも1フレーム追加してください。',
+      saveSprite: 'スプライトを保存',
+      openStorageManager: 'ストレージを開く',
+      editMetadata: 'メタデータを編集',
+      openSpriteJsonTools: 'Sprite JSON ツールを開く',
+      addAnimation: 'アニメーションを追加',
+      deleteAnimation: 'アニメーションを削除',
+      disableLoop: 'このアニメーションのループを無効化',
+      enableLoop: 'このアニメーションのループを有効化',
+      disableAutoplay: 'このアニメーションの自動再生を無効化',
+      enableAutoplay: 'このアニメーションの自動再生を有効化',
+      renameMissing: '名前を入力してください',
+      renameDuplicate: '同じ名前のアニメーションが既に存在します',
+      importFailedTitle: 'インポートに失敗しました',
+      importFailedDescription: '選択した画像を読み込めませんでした。',
+      deleteAnimationTitle: 'アニメーションを削除しますか？',
+      deleteAnimationMessage: 'このアニメーションを削除してもよろしいですか？',
+      templateExported: 'SpriteStorage 互換の JSON をエクスポートしました。',
+      templateImported: 'インポートが完了し、エディタ履歴をリセットしました。',
+    },
+    metadataModal: {
+      title: 'メタデータ',
+      heading: 'プリミティブのキーはスプライトと一緒にエクスポートされます。',
+      addEntry: 'メタデータを追加',
+      removeEntry: 'このメタデータを削除',
+      apply: 'メタデータを適用',
+      keyLabel: 'キー',
+      valueLabel: '値',
+      keyPlaceholder: 'メタデータキー',
+      valuePlaceholder: '値',
+      helpText:
+        '保存されたメタデータはJSONのエクスポートやスプライトストレージでの保存時に含まれます。',
+    },
+    templateModal: {
+      title: 'Sprite JSON',
+      description: 'プレビューランタイムとストレージ機能で使用している形式です。',
+      exportButton: 'Sprite JSON をエクスポート',
+      importButton: 'Sprite JSON をインポート',
+      exportPreviewTitle: 'エクスポートプレビュー',
+      exportPlaceholder: '「Export」を押すと現在のペイロードを表示します',
+      importTitle: 'JSONをインポート',
+      importPlaceholder: 'ここにJSONを貼り付けて「Import」を押してください',
+    },
+    storagePanel: {
+      title: 'スプライトストレージ',
+      defaultStatus: '保存済みのスプライトを管理するか、過去の作業をインポートしてください。',
+      spriteNameLabel: 'スプライト名',
+      spriteNamePlaceholder: '名称未設定のスプライト',
+      saveSprite: 'スプライトを保存',
+      loadSprite: 'スプライトを読み込み',
+      deleteSprite: 'スプライトを削除',
+      deleteSpriteTitle: 'スプライトを削除しますか？',
+      deleteSpriteMessage: '「{name}」をストレージから削除しますか？',
+      emptyList: 'まだスプライトが保存されていません。上のフォームから追加できます。',
+      updatedPrefix: '更新日',
+      statusSaved: 'スプライト {name} を保存しました。',
+      statusLoaded: 'スプライト {name} を読み込みました。',
+      statusOverwritten: 'スプライト {name} を上書きしました。',
+      statusRenamed: 'スプライト名を {name} に変更しました。',
+      statusDeleted: 'スプライト {name} を削除しました。',
+      statusNeedFrames: '保存する前に少なくとも1フレーム追加してください。',
+      statusMissing: 'ストレージ上にスプライトが見つかりません。',
+      statusNameRequired: '名前を入力してください。',
+    },
+    timeline: {
+      multiplierLabel: '倍率',
+      thumbPlaceholder: '画像なし',
+      pausePreview: 'アニメーションプレビューを一時停止',
+      stopPreview: 'アニメーションプレビューを停止',
+      restart: '最初から再生',
+      restartReverse: '逆再生を最初から実行',
+      playPreview: 'アニメーションプレビューを再生',
+      playReverse: 'アニメーションを逆再生',
+      importImage: '画像からフレームを追加',
+      openFramePicker: 'フレームピッカーを開く',
+    },
+    timelineControls: {
+      copyFrame: 'タイムラインのフレームをコピー',
+      pasteFrame: 'タイムラインのフレームを貼り付け',
+      moveLeft: 'フレームを左へ移動',
+      moveRight: 'フレームを右へ移動',
+      removeFrame: 'タイムラインのフレームを削除',
+    },
+    fileBrowser: {
+      title: 'ファイルブラウザー',
+      uploadButton: 'アップロード',
+      deleteButton: '削除',
+      deleteConfirmTitle: 'ファイルを削除',
+      deleteConfirmMessage: '「{name}」を削除しますか？',
+      noFiles: 'まだファイルがアップロードされていません。',
+      errorAccess: 'アプリのファイルディレクトリにアクセスできませんでした。',
+      errorLoad: 'ファイルを読み込めませんでした。',
+      uploadFailedTitle: 'アップロードに失敗しました',
+      uploadFailedMessage: '選択したファイルにアクセスできませんでした。',
+      unsupportedFileTitle: 'サポートされていないファイル',
+      unsupportedFileMessage: '選択したファイルタイプは許可されていません。',
+      errorUpload: 'ファイルをアップロードできませんでした。',
+      errorDelete: 'ファイルを削除できませんでした。',
+      thumbnailLabel: 'ファイル',
+    },
+    editorScreen: {
+      subtitle:
+        'フレーム編集・アニメーション再生・AnimatedSprite2Dでのプレビュー・ディスク保存をこの画面でまとめて行えます。',
+    },
+    framePicker: {
+      title: 'フレームピッカー',
+      emptyMessage: 'ファイルブラウザーから画像を選択すると分割を開始できます。',
+    },
+  },
+};
+
+/**
+ * Returns true when the provided locale hints should map to Japanese strings.
+ */
+const shouldUseJapanese = (languageCode?: string | null, regionCode?: string | null) => {
+  const normalizedLanguage = languageCode?.toLowerCase();
+  const normalizedRegion = regionCode?.toUpperCase();
+  if (normalizedLanguage === 'ja') {
+    return true;
+  }
+  if (normalizedRegion === 'JP') {
+    return true;
+  }
+  return false;
+};
+
+/**
+ * Resolves the best-fit editor language key based on the device locale.
+ */
+const getLanguageKey = (): SupportedLanguage => {
+  try {
+    if (typeof Localization.getLocales === 'function') {
+      const locales = Localization.getLocales();
+      if (Array.isArray(locales) && locales.length > 0) {
+        const primary = locales[0];
+        if (shouldUseJapanese(primary?.languageCode, primary?.regionCode)) {
+          return 'ja';
+        }
+        if (primary?.languageTag) {
+          const normalizedTag = primary.languageTag.replace(/_/g, '-');
+          const [languageTag, regionTag] = normalizedTag.split('-');
+          if (shouldUseJapanese(languageTag, regionTag)) {
+            return 'ja';
+          }
+        }
+      }
+    }
+  } catch {
+    // ignore errors
+  }
+  return 'en';
+};
+
+/**
+ * Returns the localized string table for the detected device language.
+ */
+export const getEditorStrings = (): EditorStrings => {
+  return translations[getLanguageKey()];
+};
+
+/**
+ * Performs placeholder substitution on a localized template string.
+ */
+export const formatEditorString = (
+  template: string,
+  values: Record<string, string | number>,
+): string => {
+  return template.replace(/\{(\w+)\}/g, (_, key: string) => {
+    const replacement = values[key];
+    return typeof replacement === 'undefined' ? '' : String(replacement);
+  });
+};

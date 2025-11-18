@@ -24,15 +24,15 @@
   - 上記が完了し、`integration.frameCursor` が AnimatedSprite2D ベースで更新されるようになったら `SpriteAnimatorDriver` を廃止する。
   - `SpriteAnimator` コンポーネントは公開 API として引き続き提供し、プロダクト利用者には互換性を保証する。エディタでは未使用としつつ、ドキュメントで「AnimatedSprite2D への移行を推奨・SpriteAnimator は将来的に非推奨予定」と明記する。
 
-> **メモ:** チェックが付いた項目は実施済み。未チェックの項目は今後の実装対象。README / editor_api.* / design docs でも同じタスク状況を反映させること。
+> **メモ:** チェックが付いた項目は実施済み。未チェックの項目は今後の実装対象。README / editor_api.\* / design docs でも同じタスク状況を反映させること。
 
 ## ドキュメント更新
 
-- README / editor_api.*: AnimatedSprite2D を公式プレビューとして強調し、同期モードと自走モードの違いを説明する。
+- README / editor_api.\*: AnimatedSprite2D を公式プレビューとして強調し、同期モードと自走モードの違いを説明する。
 - `docs/animated-sprite2d-design.md`: PreviewPlayer から AnimatedSprite2D への移行だけでなく、ticker 共通化→SpriteAnimator 非推奨化までのロードマップを追記する。
 - CHANGELOG / RELEASE_NOTES: SpriteAnimator が公開 API として残ること、ただし新機能は AnimatedSprite2D に集約することを案内する。
 
 ## 残タスク
 
 - 上記の「移行ステップ」を実際の開発 TODO として落とし込んだもの。優先度や担当者を割り振る際はこのリストを起点にする。
-- テスト＆ドキュメント整備（README / editor_api.* / design doc / release notes の更新）
+- テスト＆ドキュメント整備（README / editor_api.\* / design doc / release notes の更新）

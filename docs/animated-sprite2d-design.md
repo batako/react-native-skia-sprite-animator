@@ -39,7 +39,7 @@ interface AnimatedSpriteFrame {
 
 interface SpriteFramesResource {
   frames: AnimatedSpriteFrame[];
-  animations: Record<string, number[]>;           // frame indexes
+  animations: Record<string, number[]>; // frame indexes
   animationsMeta?: Record<string, { loop?: boolean; fps?: number; multipliers?: number[] }>;
   autoPlayAnimation?: string | null;
   meta?: Record<string, unknown>;
@@ -54,12 +54,12 @@ interface SpriteFramesResource {
 ```ts
 interface AnimatedSprite2DProps {
   frames: SpriteFramesResource;
-  animation?: string | null;      // 描画したいアニメーション名。未指定時は autoPlay → 先頭。
-  autoplay?: string | null;       // frames.autoPlayAnimation を上書きするだけ（プレビューUIの設定保存用）。
-  playing?: boolean;              // true: 再生, false: ポーズ。未指定なら内部 state。
-  frame?: number | null;          // 明示的に表示する frame index（playing=false 扱い）。
-  speedScale?: number;            // デフォルト 1.0。全体速度を倍率で調整。
-  centered?: boolean;             // true（既定）：最大幅/高さの中心に揃える。false: 左上基準。
+  animation?: string | null; // 描画したいアニメーション名。未指定時は autoPlay → 先頭。
+  autoplay?: string | null; // frames.autoPlayAnimation を上書きするだけ（プレビューUIの設定保存用）。
+  playing?: boolean; // true: 再生, false: ポーズ。未指定なら内部 state。
+  frame?: number | null; // 明示的に表示する frame index（playing=false 扱い）。
+  speedScale?: number; // デフォルト 1.0。全体速度を倍率で調整。
+  centered?: boolean; // true（既定）：最大幅/高さの中心に揃える。false: 左上基準。
   flipH?: boolean;
   flipV?: boolean;
   offset?: { x: number; y: number }; // 全体オフセット。frame.offset と加算。
@@ -152,7 +152,7 @@ AnimatedSprite2D (forwardRef)
 3. **描画コンポーネント**: `AnimatedSprite2DView` を用意し、Skia Canvas + flip/offset ロジックを集約。
 4. **コンテナ**: `AnimatedSprite2D.tsx` で props → controller → view を接続し、imperative handle を forward。
 5. **エディタ統合**: Standalone Editor (`AnimatedSprite2DPreview`, `AnimationStudio`, docs) を更新し、新コンポーネントを使用。
-6. **ドキュメント**: README / editor_api.* / Animation Studio docs に API 例と注意点を追記。
+6. **ドキュメント**: README / editor_api.\* / Animation Studio docs に API 例と注意点を追記。
 7. **テスト**: フレーム遷移・loop 解除・flip/offset を jest + storybook 的プレビューで検証し、`npx eslint` を通す。
 
 ## 8. 将来拡張

@@ -46,7 +46,8 @@
     "release": "npm ci && npm run build && npm publish --access public"
   },
   "dependencies": {
-    "expo-document-picker": "^14.0.7"
+    "expo-document-picker": "^14.0.7",
+    "expo-localization": "^17.0.7"
   },
   "devDependencies": {
     "@shopify/react-native-skia": "^2.3.10",

@@ -12,6 +12,7 @@ import type { DataSourceParam } from '@shopify/react-native-skia';
 import type { ImageSourcePropType } from 'react-native';
 import { IconButton } from './IconButton';
 import { SelectableTextInput } from './SelectableTextInput';
+import { getEditorStrings, formatEditorString, type EditorStrings } from '../localization';
 
 /**
  * Represents a selectable grid cell to be converted into sprite frames.
@@ -84,6 +85,16 @@ const normalizeImage = (value?: FrameGridImageProp): FrameGridImageDescriptor | 
   return { source: value as DataSourceParam };
 };
 
+const formatAddButtonLabel = (count: number, strings: EditorStrings) => {
+  if (count <= 0) {
+    return strings.frameGrid.noFramesSelected;
+  }
+  if (count === 1) {
+    return strings.frameGrid.addSingleFrame;
+  }
+  return formatEditorString(strings.frameGrid.addMultipleFrames, { count });
+};
+
 /**
  * Interactive grid overlay that helps slice sprite sheets into individual frames.
  */
@@ -93,8 +104,10 @@ export const FrameGridSelector = ({
   onAddFrames,
   defaultCellWidth = 32,
   defaultCellHeight = 32,
-  emptyMessage = 'Select a sprite image to preview it here.',
+  emptyMessage,
 }: FrameGridSelectorProps) => {
+  const strings = useMemo(() => getEditorStrings(), []);
+  const resolvedEmptyMessage = emptyMessage ?? strings.frameGrid.emptyStateDescription;
   const normalizedImage = useMemo(() => {
     const primary = normalizeImage(image);
     if (primary) {
@@ -303,6 +316,7 @@ export const FrameGridSelector = ({
   };
 
   const selectedCount = selectedIds.length;
+  const addButtonLabel = formatAddButtonLabel(selectedCount, strings);
 
   const changeScale = (delta: number) => {
     setScale((prev) => Math.max(0.05, parseFloat((prev + delta).toFixed(2))));
@@ -349,7 +363,7 @@ export const FrameGridSelector = ({
         <View style={styles.previewColumn}>
           <View style={[styles.orderRow, styles.orderToolbar]}>
             <View style={styles.orderField}>
-              <Text style={styles.orderLabel}>Primary axis</Text>
+              <Text style={styles.orderLabel}>{strings.frameGrid.primaryAxisLabel}</Text>
               <View style={styles.orderButtons}>
                 <TouchableOpacity
                   style={[
@@ -358,7 +372,7 @@ export const FrameGridSelector = ({
                   ]}
                   onPress={() => setPrimaryAxis('horizontal')}
                 >
-                  <Text style={styles.orderButtonText}>Horizontal first</Text>
+                  <Text style={styles.orderButtonText}>{strings.frameGrid.horizontalFirst}</Text>
                 </TouchableOpacity>
                 <TouchableOpacity
                   style={[
@@ -367,12 +381,12 @@ export const FrameGridSelector = ({
                   ]}
                   onPress={() => setPrimaryAxis('vertical')}
                 >
-                  <Text style={styles.orderButtonText}>Vertical first</Text>
+                  <Text style={styles.orderButtonText}>{strings.frameGrid.verticalFirst}</Text>
                 </TouchableOpacity>
               </View>
             </View>
             <View style={styles.orderField}>
-              <Text style={styles.orderLabel}>Horizontal</Text>
+              <Text style={styles.orderLabel}>{strings.frameGrid.horizontalLabel}</Text>
               <View style={styles.orderButtons}>
                 <TouchableOpacity
                   style={[
@@ -381,7 +395,7 @@ export const FrameGridSelector = ({
                   ]}
                   onPress={() => setHorizontalOrder('ltr')}
                 >
-                  <Text style={styles.orderButtonText}>Left → Right</Text>
+                  <Text style={styles.orderButtonText}>{strings.frameGrid.leftToRight}</Text>
                 </TouchableOpacity>
                 <TouchableOpacity
                   style={[
@@ -390,24 +404,24 @@ export const FrameGridSelector = ({
                   ]}
                   onPress={() => setHorizontalOrder('rtl')}
                 >
-                  <Text style={styles.orderButtonText}>Right → Left</Text>
+                  <Text style={styles.orderButtonText}>{strings.frameGrid.rightToLeft}</Text>
                 </TouchableOpacity>
               </View>
             </View>
             <View style={styles.orderField}>
-              <Text style={styles.orderLabel}>Vertical</Text>
+              <Text style={styles.orderLabel}>{strings.frameGrid.verticalLabel}</Text>
               <View style={styles.orderButtons}>
                 <TouchableOpacity
                   style={[styles.orderButton, verticalOrder === 'ttb' && styles.orderButtonActive]}
                   onPress={() => setVerticalOrder('ttb')}
                 >
-                  <Text style={styles.orderButtonText}>Top → Bottom</Text>
+                  <Text style={styles.orderButtonText}>{strings.frameGrid.topToBottom}</Text>
                 </TouchableOpacity>
                 <TouchableOpacity
                   style={[styles.orderButton, verticalOrder === 'btt' && styles.orderButtonActive]}
                   onPress={() => setVerticalOrder('btt')}
                 >
-                  <Text style={styles.orderButtonText}>Bottom → Top</Text>
+                  <Text style={styles.orderButtonText}>{strings.frameGrid.bottomToTop}</Text>
                 </TouchableOpacity>
               </View>
             </View>
@@ -417,7 +431,7 @@ export const FrameGridSelector = ({
                 name="select-all"
                 size={24}
                 onPress={selectAllCells}
-                accessibilityLabel="Select all cells"
+                accessibilityLabel={strings.frameGrid.selectAll}
                 style={styles.orderActionButton}
               />
               <IconButton
@@ -425,7 +439,7 @@ export const FrameGridSelector = ({
                 name="disabled-by-default"
                 size={24}
                 onPress={() => setSelectedIds([])}
-                accessibilityLabel="Clear selection"
+                accessibilityLabel={strings.frameGrid.clearSelection}
                 style={styles.orderActionButton}
               />
             </View>
@@ -442,13 +456,13 @@ export const FrameGridSelector = ({
                 <IconButton
                   name="zoom-out"
                   onPress={() => changeScale(-0.25)}
-                  accessibilityLabel="Zoom out"
+                  accessibilityLabel={strings.general.zoomOut}
                   style={styles.zoomButton}
                 />
                 <Pressable
                   onPress={resetScale}
                   accessibilityRole="button"
-                  accessibilityLabel="Reset zoom to 100%"
+                  accessibilityLabel={strings.general.resetZoom}
                   style={styles.zoomTextButton}
                 >
                   <Text style={styles.zoomLabel}>{Math.round(scale * 100)}%</Text>
@@ -456,7 +470,7 @@ export const FrameGridSelector = ({
                 <IconButton
                   name="zoom-in"
                   onPress={() => changeScale(0.25)}
-                  accessibilityLabel="Zoom in"
+                  accessibilityLabel={strings.general.zoomIn}
                   style={styles.zoomButton}
                 />
               </View>
@@ -545,8 +559,10 @@ export const FrameGridSelector = ({
                     </View>
                   ) : (
                     <View style={styles.emptyState}>
-                      <Text style={styles.emptyStateTitle}>Image not selected</Text>
-                      <Text style={styles.emptyStateText}>{emptyMessage}</Text>
+                      <Text style={styles.emptyStateTitle}>
+                        {strings.frameGrid.emptyStateTitle}
+                      </Text>
+                      <Text style={styles.emptyStateText}>{resolvedEmptyMessage}</Text>
                     </View>
                   )}
                 </View>
@@ -556,7 +572,7 @@ export const FrameGridSelector = ({
         </View>
         <View style={styles.controlsColumn}>
           <NumericInputField
-            label="Horizontal (cells)"
+            label={strings.frameGrid.horizontalCellsLabel}
             value={horizontal}
             onCommit={setHorizontal}
             sanitize={(val) => Math.max(1, Math.floor(val))}
@@ -564,7 +580,7 @@ export const FrameGridSelector = ({
             step={1}
           />
           <NumericInputField
-            label="Vertical (cells)"
+            label={strings.frameGrid.verticalCellsLabel}
             value={vertical}
             onCommit={setVertical}
             sanitize={(val) => Math.max(1, Math.floor(val))}
@@ -572,7 +588,7 @@ export const FrameGridSelector = ({
             step={1}
           />
           <NumericInputField
-            label="Size X (px)"
+            label={strings.frameGrid.sizeXLabel}
             value={cellWidth}
             onCommit={setCellWidth}
             sanitize={(val) => Math.max(1, val)}
@@ -580,7 +596,7 @@ export const FrameGridSelector = ({
             step={1}
           />
           <NumericInputField
-            label="Size Y (px)"
+            label={strings.frameGrid.sizeYLabel}
             value={cellHeight}
             onCommit={setCellHeight}
             sanitize={(val) => Math.max(1, val)}
@@ -588,7 +604,7 @@ export const FrameGridSelector = ({
             step={1}
           />
           <NumericInputField
-            label="Spacing X (px)"
+            label={strings.frameGrid.spacingXLabel}
             value={separationX}
             onCommit={setSeparationX}
             sanitize={(val) => Math.max(0, val)}
@@ -596,7 +612,7 @@ export const FrameGridSelector = ({
             step={1}
           />
           <NumericInputField
-            label="Spacing Y (px)"
+            label={strings.frameGrid.spacingYLabel}
             value={separationY}
             onCommit={setSeparationY}
             sanitize={(val) => Math.max(0, val)}
@@ -604,7 +620,7 @@ export const FrameGridSelector = ({
             step={1}
           />
           <NumericInputField
-            label="Offset X (px)"
+            label={strings.frameGrid.offsetXLabel}
             value={offsetX}
             onCommit={setOffsetX}
             allowNegative
@@ -612,7 +628,7 @@ export const FrameGridSelector = ({
             step={1}
           />
           <NumericInputField
-            label="Offset Y (px)"
+            label={strings.frameGrid.offsetYLabel}
             value={offsetY}
             onCommit={setOffsetY}
             allowNegative
@@ -626,11 +642,7 @@ export const FrameGridSelector = ({
         disabled={!selectedCount}
         onPress={handleAddFrames}
       >
-        <Text style={styles.addButtonText}>
-          {selectedCount
-            ? `Add ${selectedCount} frame${selectedCount > 1 ? 's' : ''}`
-            : 'No frames selected'}
-        </Text>
+        <Text style={styles.addButtonText}>{addButtonLabel}</Text>
       </TouchableOpacity>
     </View>
   );
@@ -910,6 +922,7 @@ const NumericInputField: React.FC<NumericInputFieldProps> = ({
 }) => {
   const [text, setText] = useState(String(value));
   const [isFocused, setIsFocused] = useState(false);
+  const strings = useMemo(() => getEditorStrings(), []);
 
   useEffect(() => {
     if (!isFocused) {
@@ -962,7 +975,7 @@ const NumericInputField: React.FC<NumericInputFieldProps> = ({
           <TouchableOpacity
             style={[styles.stepButton, styles.stepButtonLeft]}
             onPress={() => commitValue(value - step)}
-            accessibilityLabel={`Decrease ${label}`}
+            accessibilityLabel={formatEditorString(strings.general.decreaseValue, { label })}
           >
             <Text style={styles.stepButtonText}>-</Text>
           </TouchableOpacity>
@@ -980,7 +993,7 @@ const NumericInputField: React.FC<NumericInputFieldProps> = ({
           <TouchableOpacity
             style={[styles.stepButton, styles.stepButtonRight]}
             onPress={() => commitValue(value + step)}
-            accessibilityLabel={`Increase ${label}`}
+            accessibilityLabel={formatEditorString(strings.general.increaseValue, { label })}
           >
             <Text style={styles.stepButtonText}>+</Text>
           </TouchableOpacity>

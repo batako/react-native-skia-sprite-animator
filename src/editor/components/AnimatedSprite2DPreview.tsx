@@ -9,6 +9,7 @@ import { IconButton } from './IconButton';
 import type { DataSourceParam } from '@shopify/react-native-skia';
 import type { SpriteFramesResource } from '../animatedSprite2dTypes';
 import { useSpriteAnimationTicker } from '../../hooks/useSpriteAnimationTicker';
+import { getEditorStrings } from '../localization';
 
 interface AnimatedSprite2DPreviewProps {
   editor: SpriteEditorApi;
@@ -25,6 +26,7 @@ export const AnimatedSprite2DPreview = ({
   animationName,
   mode = 'timeline',
 }: AnimatedSprite2DPreviewProps) => {
+  const strings = useMemo(() => getEditorStrings(), []);
   const resource = useMemo(
     () =>
       buildAnimatedSpriteFrames(editor.state, image, {
@@ -196,13 +198,13 @@ export const AnimatedSprite2DPreview = ({
               <IconButton
                 name="zoom-out"
                 onPress={() => adjustZoom(-0.25)}
-                accessibilityLabel="Zoom out"
+                accessibilityLabel={strings.general.zoomOut}
                 style={styles.zoomButton}
               />
               <Pressable
                 onPress={resetZoom}
                 accessibilityRole="button"
-                accessibilityLabel="Reset zoom to 100%"
+                accessibilityLabel={strings.general.resetZoom}
                 style={styles.zoomTextButton}
               >
                 <Text style={styles.zoomLabel}>{Math.round(zoom * 100)}%</Text>
@@ -210,7 +212,7 @@ export const AnimatedSprite2DPreview = ({
               <IconButton
                 name="zoom-in"
                 onPress={() => adjustZoom(0.25)}
-                accessibilityLabel="Zoom in"
+                accessibilityLabel={strings.general.zoomIn}
                 style={styles.zoomButton}
               />
             </View>
@@ -245,23 +247,22 @@ export const AnimatedSprite2DPreview = ({
             </View>
           </View>
         ) : (
-          <Text style={styles.placeholderText}>
-            Frame images are missing. AnimatedSprite2D preview becomes available once each frame has
-            its own image URI.
-          </Text>
+          <Text style={styles.placeholderText}>{strings.preview.framesMissing}</Text>
         )}
         {isSelfDriven ? (
           <View style={styles.playbackControls}>
             <IconButton
               name={selfPlaying ? 'pause' : 'play-arrow'}
               onPress={handleSelfToggle}
-              accessibilityLabel={selfPlaying ? 'Pause preview' : 'Play preview'}
+              accessibilityLabel={
+                selfPlaying ? strings.preview.pausePreview : strings.preview.playPreview
+              }
               style={styles.zoomButton}
             />
             <IconButton
               name="stop"
               onPress={selfStop}
-              accessibilityLabel="Stop preview"
+              accessibilityLabel={strings.preview.stopPreview}
               style={styles.zoomButton}
             />
           </View>
