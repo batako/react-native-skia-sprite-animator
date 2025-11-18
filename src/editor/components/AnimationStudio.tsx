@@ -712,6 +712,8 @@ export const AnimationStudio = ({
     });
   }, [animations, currentAnimationName, setTimelineSelection]);
 
+  const skipTimelineSelectionSeekRef = useRef(false);
+
   useEffect(() => {
     if (timelineCursor === null) {
       return;
@@ -719,13 +721,12 @@ export const AnimationStudio = ({
     if (timelineCursor < 0 || timelineCursor >= currentSequence.length) {
       return;
     }
-    setTimelineSelection((prev) => {
-      if (prev === timelineCursor) {
-        return prev;
-      }
-      return timelineCursor;
-    });
-  }, [currentSequence.length, setTimelineSelection, timelineCursor]);
+    if (selectedTimelineIndex === timelineCursor) {
+      return;
+    }
+    skipTimelineSelectionSeekRef.current = true;
+    setTimelineSelection(timelineCursor);
+  }, [currentSequence.length, selectedTimelineIndex, setTimelineSelection, timelineCursor]);
 
   const resolvePlaybackStartCursor = useCallback(
     (direction: 'forward' | 'reverse' = 'forward') => {
@@ -1197,6 +1198,10 @@ export const AnimationStudio = ({
 
   useEffect(() => {
     if (selectedTimelineIndex === null) {
+      return;
+    }
+    if (skipTimelineSelectionSeekRef.current) {
+      skipTimelineSelectionSeekRef.current = false;
       return;
     }
     const frameIndex = currentSequence[selectedTimelineIndex];
