@@ -6,6 +6,7 @@ export * from './editor/hooks/useTimelineEditor';
 export * from './editor/hooks/useMetadataManager';
 export * from './editor/hooks/useSpriteStorage';
 export * from './editor/hooks/useEditorIntegration';
+export * from './editor/hooks/animatedSprite2d';
 export * from './editor/templates/DefaultSpriteTemplate';
 export * from './editor/utils/SpriteEditUtils';
 export * from './editor/utils/cleanSpriteData';
