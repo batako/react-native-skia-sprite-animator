@@ -105,7 +105,10 @@ export const cleanSpriteData = <TFrame extends SpriteFrame>(
     });
   });
 
-  const keepAllFrames = referencedRawIndexes.size === 0;
+  const keepAllFrames =
+    referencedRawIndexes.size === 0 &&
+    data.frames.length === 0 &&
+    Object.keys(animations).length === 0;
   const frameKey = (frame: SpriteFrame) =>
     `${frame.x}|${frame.y}|${frame.w}|${frame.h}|${frame.duration ?? ''}|${frame.imageUri ?? ''}`;
 

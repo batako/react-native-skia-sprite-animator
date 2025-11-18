@@ -14,6 +14,8 @@ import {
   type SpriteSummary,
   type StoredSprite,
 } from '../../storage/spriteStorage';
+import { cleanSpriteData } from '../utils/cleanSpriteData';
+import { SPRITE_SHEET_META_KEY } from '../constants/spriteSheetMeta';
 
 /**
  * Adapter interface used to inject custom sprite storage implementations.
@@ -65,6 +67,8 @@ export interface UseSpriteStorageResult {
   renameSprite: (id: string, name: string) => Promise<SpriteSummary | null>;
   /** Deletes a sprite and reports success. */
   deleteSpriteById: (id: string, displayName: string) => Promise<boolean>;
+  /** Loads the full sprite payload without mutating editor state (for previews). */
+  fetchSpriteById: (id: string) => Promise<StoredSprite | null>;
 }
 
 const toSummary = (stored: StoredSprite): SpriteSummary => ({
@@ -127,7 +131,7 @@ export const useSpriteStorage = ({
       const trimmedName = name.trim() || 'Untitled Sprite';
       setIsBusy(true);
       try {
-        const payload = editor.exportJSON();
+        const payload = cleanSpriteData(editor.exportJSON() as any);
         const now = Date.now();
         const stored = await storage.saveSprite({
           sprite: {
@@ -165,7 +169,18 @@ export const useSpriteStorage = ({
           setStatus('Sprite not found on disk.');
           return null;
         }
-        editor.importJSON(toSpriteData(stored));
+        const data = toSpriteData(stored);
+        editor.importJSON(data);
+        if (typeof stored.autoPlayAnimation === 'string') {
+          editor.setAutoPlayAnimation(stored.autoPlayAnimation);
+        }
+        const displayName =
+          typeof stored.meta?.displayName === 'string' ? stored.meta.displayName : 'Loaded sprite';
+        editor.updateMeta({
+          displayName,
+          [SPRITE_SHEET_META_KEY]:
+            stored.meta?.[SPRITE_SHEET_META_KEY] ?? editor.state.meta?.[SPRITE_SHEET_META_KEY],
+        });
         const summary = toSummary(stored);
         setStatus(`Loaded sprite ${stored.meta.displayName}.`);
         onSpriteLoaded?.(summary);
@@ -188,7 +203,7 @@ export const useSpriteStorage = ({
       }
       setIsBusy(true);
       try {
-        const payload = editor.exportJSON();
+        const payload = cleanSpriteData(editor.exportJSON() as any);
         const stored = await storage.loadSprite(id);
         if (!stored) {
           setStatus('Sprite not found on disk.');
@@ -277,6 +292,18 @@ export const useSpriteStorage = ({
     [refresh, storage],
   );
 
+  const fetchSpriteById = useCallback(
+    async (id: string) => {
+      try {
+        return await storage.loadSprite(id);
+      } catch (error) {
+        setStatus((error as Error).message);
+        return null;
+      }
+    },
+    [storage],
+  );
+
   return {
     sprites,
     status,
@@ -287,5 +314,6 @@ export const useSpriteStorage = ({
     overwriteSprite,
     renameSprite,
     deleteSpriteById,
+    fetchSpriteById,
   };
 };

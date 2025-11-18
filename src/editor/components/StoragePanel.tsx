@@ -1,6 +1,7 @@
 import React from 'react';
 import {
   Alert,
+  Image,
   Modal,
   ScrollView,
   StyleSheet,
@@ -11,10 +12,12 @@ import {
 } from 'react-native';
 import type { SpriteEditorApi } from '../hooks/useSpriteEditor';
 import { useSpriteStorage, type SpriteStorageController } from '../hooks/useSpriteStorage';
-import type { SpriteSummary } from '../../storage/spriteStorage';
+import type { SpriteSummary, StoredSprite } from '../../storage/spriteStorage';
 import { IconButton } from './IconButton';
 import { MacWindow } from './MacWindow';
 import { getEditorStrings, formatEditorString } from '../localization';
+
+const THUMB_SIZE = 56;
 
 /**
  * Props for the {@link StoragePanel} modal.
@@ -61,18 +64,113 @@ export const StoragePanel = ({
     loadSpriteById,
     renameSprite,
     deleteSpriteById,
+    fetchSpriteById,
   } = useSpriteStorage({
     editor,
     controller: storageApi,
     onSpriteLoaded,
     onSpriteSaved,
   });
+  const [thumbnails, setThumbnails] = React.useState<Record<string, SpriteThumbnail>>({});
+  const thumbnailsRef = React.useRef(thumbnails);
+  React.useEffect(() => {
+    thumbnailsRef.current = thumbnails;
+  }, [thumbnails]);
+  const [imageInfos, setImageInfos] = React.useState<Record<string, ImageInfo>>({});
+  const imageInfosRef = React.useRef(imageInfos);
+  React.useEffect(() => {
+    imageInfosRef.current = imageInfos;
+  }, [imageInfos]);
 
   React.useEffect(() => {
     if (visible) {
       refresh();
     }
   }, [refresh, visible]);
+
+  const ensureImageInfo = React.useCallback((uri: string) => {
+    if (imageInfosRef.current[uri]?.ready) {
+      return;
+    }
+    Image.getSize(
+      uri,
+      (width, height) => {
+        setImageInfos((prev) => ({
+          ...prev,
+          [uri]: { width, height, ready: true },
+        }));
+      },
+      () => {
+        setImageInfos((prev) => ({
+          ...prev,
+          [uri]: { width: 0, height: 0, ready: false },
+        }));
+      },
+    );
+  }, []);
+
+  const resolvePreviewFrameIndex = React.useCallback((stored: StoredSpriteForThumb) => {
+    const autoName = typeof stored.autoPlayAnimation === 'string' ? stored.autoPlayAnimation : null;
+    if (autoName && stored.animations?.[autoName]?.length) {
+      const candidate = stored.animations[autoName][0];
+      if (typeof candidate === 'number' && stored.frames[candidate]) {
+        return candidate;
+      }
+    }
+    return 0;
+  }, []);
+
+  const fetchThumbnail = React.useCallback(
+    async (spriteId: string) => {
+      const snapshot = (await fetchSpriteById(spriteId)) as StoredSpriteForThumb | null;
+      if (
+        !snapshot ||
+        !snapshot.frames ||
+        !Array.isArray(snapshot.frames) ||
+        snapshot.frames.length === 0
+      ) {
+        return;
+      }
+      const frames = snapshot.frames as StoredSpriteFrame[];
+      const frameIndex = resolvePreviewFrameIndex(snapshot);
+      const frame = frames[frameIndex] ?? frames[0];
+      const frameUri = frame?.imageUri;
+      if (!frame || !frameUri) {
+        setThumbnails((prev) => {
+          if (prev[spriteId]) {
+            return prev;
+          }
+          return prev;
+        });
+        return;
+      }
+      ensureImageInfo(frameUri);
+      setThumbnails((prev) => {
+        if (prev[spriteId]) {
+          return prev;
+        }
+        const { x, y, w, h } = frame;
+        return w > 0 && h > 0
+          ? {
+              ...prev,
+              [spriteId]: {
+                uri: frameUri,
+                frame: { x, y, w, h },
+              },
+            }
+          : prev;
+      });
+    },
+    [ensureImageInfo, fetchSpriteById, resolvePreviewFrameIndex],
+  );
+
+  React.useEffect(() => {
+    sprites.forEach((sprite) => {
+      if (!thumbnailsRef.current[sprite.id]) {
+        fetchThumbnail(sprite.id);
+      }
+    });
+  }, [fetchThumbnail, sprites]);
 
   const handleSave = async () => {
     const summary = await saveSpriteAs(saveName);
@@ -178,6 +276,57 @@ export const StoragePanel = ({
   );
   const translatedStatus = React.useMemo(() => localizeStatus(status), [localizeStatus, status]);
 
+  const renderThumbnail = React.useCallback(
+    (spriteId: string) => {
+      const thumb = thumbnails[spriteId];
+      if (!thumb) {
+        return null;
+      }
+      const info = imageInfos[thumb.uri];
+      if (!info?.ready || !info.width || !info.height) {
+        return null;
+      }
+      const frame = thumb.frame;
+      if (!frame || frame.w <= 0 || frame.h <= 0) {
+        return null;
+      }
+      const scale = Math.min(THUMB_SIZE / frame.w, THUMB_SIZE / frame.h);
+      if (!Number.isFinite(scale) || scale <= 0) {
+        return null;
+      }
+      const boxWidth = frame.w * scale;
+      const boxHeight = frame.h * scale;
+      if (boxWidth <= 0 || boxHeight <= 0) {
+        return null;
+      }
+      const imageWidth = info.width * scale;
+      const imageHeight = info.height * scale;
+      if (imageWidth <= 0 || imageHeight <= 0) {
+        return null;
+      }
+      return (
+        <View style={styles.thumbContainer}>
+          <View style={[styles.thumbFrame, { width: boxWidth, height: boxHeight }]}>
+            <Image
+              source={{ uri: thumb.uri }}
+              style={[
+                styles.thumbFrameImage,
+                {
+                  width: imageWidth,
+                  height: imageHeight,
+                  left: -frame.x * scale,
+                  top: -frame.y * scale,
+                },
+              ]}
+              resizeMode="cover"
+            />
+          </View>
+        </View>
+      );
+    },
+    [imageInfos, thumbnails],
+  );
+
   if (!visible) {
     return null;
   }
@@ -219,57 +368,62 @@ export const StoragePanel = ({
               />
             </View>
           </View>
-          <ScrollView style={styles.list} contentContainerStyle={styles.listContent}>
-            {sprites.map((sprite) => (
-              <View key={sprite.id} style={styles.spriteRow}>
-                <View style={{ flex: 1 }}>
-                  {editingId === sprite.id ? (
-                    <TextInput
-                      style={styles.renameInput}
-                      value={renameDraft}
-                      onChangeText={setRenameDraft}
-                      autoFocus
-                      onSubmitEditing={() => handleRename(sprite.id, renameDraft)}
-                      onBlur={() => handleRename(sprite.id, renameDraft)}
-                      editable={!isBusy}
-                    />
-                  ) : (
-                    <TouchableOpacity
-                      style={styles.renameDisplay}
-                      onPress={() => {
-                        setEditingId(sprite.id);
-                        setRenameDraft(sprite.displayName);
-                      }}
+          <View style={styles.listContainer}>
+            <ScrollView style={styles.list} contentContainerStyle={styles.listContent}>
+              {sprites.map((sprite) => (
+                <View key={sprite.id} style={styles.spriteRow}>
+                  <View style={styles.thumbnailSlot}>{renderThumbnail(sprite.id)}</View>
+                  <View style={{ flex: 1 }}>
+                    {editingId === sprite.id ? (
+                      <TextInput
+                        style={styles.renameInput}
+                        value={renameDraft}
+                        onChangeText={setRenameDraft}
+                        autoFocus
+                        onSubmitEditing={() => handleRename(sprite.id, renameDraft)}
+                        onBlur={() => handleRename(sprite.id, renameDraft)}
+                        editable={!isBusy}
+                      />
+                    ) : (
+                      <TouchableOpacity
+                        style={styles.renameDisplay}
+                        onPress={() => {
+                          setEditingId(sprite.id);
+                          setRenameDraft(sprite.displayName);
+                        }}
+                        disabled={isBusy}
+                      >
+                        <Text style={styles.spriteName}>{sprite.displayName}</Text>
+                        <Text style={styles.spriteMeta}>
+                          {strings.storagePanel.updatedPrefix}{' '}
+                          {new Date(sprite.updatedAt).toLocaleString()}
+                        </Text>
+                      </TouchableOpacity>
+                    )}
+                  </View>
+                  <View style={styles.rowButtons}>
+                    <IconButton
+                      iconFamily="material"
+                      name="file-upload"
+                      onPress={() => handleLoad(sprite.id)}
                       disabled={isBusy}
-                    >
-                      <Text style={styles.spriteName}>{sprite.displayName}</Text>
-                      <Text style={styles.spriteMeta}>
-                        {strings.storagePanel.updatedPrefix}{' '}
-                        {new Date(sprite.updatedAt).toLocaleString()}
-                      </Text>
-                    </TouchableOpacity>
-                  )}
+                      accessibilityLabel={strings.storagePanel.loadSprite}
+                    />
+                    <IconButton
+                      iconFamily="material"
+                      name="delete"
+                      onPress={() => handleDelete(sprite.id, sprite.displayName)}
+                      disabled={isBusy}
+                      accessibilityLabel={strings.storagePanel.deleteSprite}
+                    />
+                  </View>
                 </View>
-                <View style={styles.rowButtons}>
-                  <IconButton
-                    iconFamily="material"
-                    name="file-upload"
-                    onPress={() => handleLoad(sprite.id)}
-                    disabled={isBusy}
-                    accessibilityLabel={strings.storagePanel.loadSprite}
-                  />
-                  <IconButton
-                    iconFamily="material"
-                    name="delete"
-                    onPress={() => handleDelete(sprite.id, sprite.displayName)}
-                    disabled={isBusy}
-                    accessibilityLabel={strings.storagePanel.deleteSprite}
-                  />
-                </View>
-              </View>
-            ))}
-            {!sprites.length && <Text style={styles.empty}>{strings.storagePanel.emptyList}</Text>}
-          </ScrollView>
+              ))}
+              {!sprites.length && (
+                <Text style={styles.empty}>{strings.storagePanel.emptyList}</Text>
+              )}
+            </ScrollView>
+          </View>
         </MacWindow>
       </View>
     </Modal>
@@ -287,6 +441,10 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     paddingTop: 2,
     paddingBottom: 12,
+  },
+  listContainer: {
+    flex: 1,
+    width: '100%',
   },
   toolbarContent: {
     flexDirection: 'row',
@@ -331,7 +489,7 @@ const styles = StyleSheet.create({
   },
   list: {
     marginTop: 6,
-    maxHeight: 360,
+    flexGrow: 1,
   },
   listContent: {
     paddingBottom: 12,
@@ -343,6 +501,13 @@ const styles = StyleSheet.create({
     paddingBottom: 10,
     borderBottomWidth: StyleSheet.hairlineWidth,
     borderBottomColor: '#202837',
+  },
+  thumbnailSlot: {
+    width: THUMB_SIZE,
+    height: THUMB_SIZE,
+    marginRight: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   spriteName: {
     color: '#dfe5ff',
@@ -374,4 +539,56 @@ const styles = StyleSheet.create({
   empty: {
     color: '#606984',
   },
+  thumbContainer: {
+    width: THUMB_SIZE,
+    height: THUMB_SIZE,
+    borderRadius: 8,
+    backgroundColor: '#111520',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.08)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    overflow: 'hidden',
+  },
+  thumbFrame: {
+    borderRadius: 6,
+    overflow: 'hidden',
+    position: 'relative',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  thumbFrameImage: {
+    position: 'absolute',
+  },
 });
+
+type SpriteThumbnail = {
+  uri: string;
+  frame: {
+    x: number;
+    y: number;
+    w: number;
+    h: number;
+  };
+};
+
+type StoredSpriteFrame = {
+  x: number;
+  y: number;
+  w: number;
+  h: number;
+  imageUri?: string | null;
+};
+
+type ImageInfo = {
+  width: number;
+  height: number;
+  ready: boolean;
+};
+
+type StoredSpriteForThumb = StoredSprite & {
+  animations?: Record<string, number[]>;
+  frames: StoredSpriteFrame[];
+  autoPlayAnimation?: string | null;
+  meta?: Record<string, unknown>;
+};
