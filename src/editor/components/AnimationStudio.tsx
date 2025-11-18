@@ -1760,15 +1760,17 @@ const resolveReactNativeImageSource = (
 
 const styles = StyleSheet.create({
   container: {
-    marginTop: 16,
-    padding: 16,
+    marginTop: 8,
+    marginBottom: 8,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
     borderRadius: 16,
     backgroundColor: '#10141d',
     borderWidth: 1,
     borderColor: '#1f2430',
   },
   headerRow: {
-    marginBottom: 12,
+    marginBottom: 8,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
@@ -1794,10 +1796,13 @@ const styles = StyleSheet.create({
     minWidth: 140,
     flexShrink: 1,
     alignItems: 'flex-start',
+    marginTop: -2,
   },
   fileStatusText: {
     color: '#7f8aac',
     fontSize: 11,
+    lineHeight: 13,
+    marginBottom: 0,
   },
   fileStatusHidden: {
     opacity: 0,
@@ -1828,17 +1833,17 @@ const styles = StyleSheet.create({
     lineHeight: 12,
   },
   previewSection: {
-    marginTop: 12,
+    marginTop: 8,
     width: '100%',
     borderRadius: 16,
     borderWidth: 1,
     borderColor: '#1f2436',
     backgroundColor: '#151b2a',
-    padding: 16,
+    padding: 12,
     alignItems: 'center',
   },
   body: {
-    marginTop: 16,
+    marginTop: 12,
     width: '100%',
   },
   metaModalContent: {

@@ -89,7 +89,7 @@ export const EditorScreen = () => {
           <Text style={styles.title}>Sprite Editor</Text>
         </View>
         <Text style={styles.subtitle}>
-          Edit frames, play animations, preview with SpriteAnimator, and persist sprites to disk
+          Edit frames, play animations, preview with AnimatedSprite2D, and persist sprites to disk
           with a single screen.
         </Text>
         <AnimationStudio editor={editor} integration={integration} image={imageSource} />
