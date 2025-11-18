@@ -81,7 +81,7 @@ export const EditorScreen = () => {
   const editor = useSpriteEditor({
     historyLimit: 100,
     trackSelectionInHistory: true,
-    initialState: SAMPLE_INITIAL_STATE,
+    initialState: __DEV__ ? SAMPLE_INITIAL_STATE : undefined,
   });
   const integration = useEditorIntegration({ editor });
   const strings = React.useMemo(() => getEditorStrings(), []);
@@ -104,6 +104,9 @@ export const EditorScreen = () => {
   }, [editor]);
 
   React.useEffect(() => {
+    if (!__DEV__) {
+      return;
+    }
     let mounted = true;
     const loadSample = async () => {
       const asset = Asset.fromModule(SAMPLE_SPRITE);
