@@ -1,15 +1,6 @@
 import React from 'react';
 import { Asset } from 'expo-asset';
-import {
-  Linking,
-  Pressable,
-  SafeAreaView,
-  ScrollView,
-  StatusBar,
-  StyleSheet,
-  Text,
-  View,
-} from 'react-native';
+import { Linking, Pressable, SafeAreaView, StatusBar, StyleSheet, Text, View } from 'react-native';
 import {
   type SpriteEditorFrame,
   type SpriteEditorState,
@@ -141,7 +132,7 @@ export const EditorScreen = () => {
   return (
     <SafeAreaView style={styles.safeArea}>
       <StatusBar barStyle="light-content" />
-      <ScrollView contentContainerStyle={styles.scroll}>
+      <View style={styles.content}>
         <View style={styles.headerRow}>
           <View style={styles.titleRow}>
             <Text style={styles.title}>React Native Skia Sprite Animator</Text>
@@ -156,7 +147,7 @@ export const EditorScreen = () => {
         </View>
         <Text style={styles.subtitle}>{strings.editorScreen.subtitle}</Text>
         <AnimationStudio editor={editor} integration={integration} image={imageSource} />
-      </ScrollView>
+      </View>
       <LegalModal
         title={legalStrings.infoCenterTitle}
         visible={legalModal === 'overview'}
@@ -260,8 +251,8 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#080b12',
   },
-  scroll: {
-    padding: 16,
+  content: {
+    padding: 20,
   },
   headerRow: {
     flexDirection: 'row',
@@ -326,13 +317,13 @@ const styles = StyleSheet.create({
   },
   versionMetaLabel: {
     color: '#9aa2c5',
-    fontSize: 12,
+    fontSize: 11,
     fontWeight: '600',
     marginBottom: 4,
   },
   versionMetaValue: {
     color: '#f4f6ff',
-    fontSize: 16,
+    fontSize: 13,
     fontWeight: '600',
   },
   legalParagraph: {
