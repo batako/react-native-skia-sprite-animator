@@ -558,6 +558,7 @@ export const AnimationStudio = ({
     () => (currentAnimationName ? (animations[currentAnimationName] ?? []) : []),
     [animations, currentAnimationName],
   );
+  const hasCurrentAnimationFrames = currentSequence.length > 0;
   const currentAnimationFps = currentAnimationName
     ? clampFps(animationsMeta[currentAnimationName]?.fps ?? DEFAULT_ANIMATION_FPS)
     : DEFAULT_ANIMATION_FPS;
@@ -1085,6 +1086,9 @@ export const AnimationStudio = ({
   );
 
   const handleAddAnimation = () => {
+    if (isPlaying) {
+      stop();
+    }
     let counter = animationNames.length + 1;
     let name = `animation_${counter}`;
     while (animations[name]) {
@@ -1398,6 +1402,7 @@ export const AnimationStudio = ({
           integration={integration}
           image={image}
           animationName={currentAnimationName}
+          allowRendering={hasCurrentAnimationFrames}
         />
       </View>
       <View style={styles.body}>

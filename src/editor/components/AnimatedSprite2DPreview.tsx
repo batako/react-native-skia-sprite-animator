@@ -17,6 +17,7 @@ interface AnimatedSprite2DPreviewProps {
   image: DataSourceParam;
   animationName: string | null;
   mode?: 'timeline' | 'self';
+  allowRendering?: boolean;
 }
 
 export const AnimatedSprite2DPreview = ({
@@ -25,9 +26,10 @@ export const AnimatedSprite2DPreview = ({
   image,
   animationName,
   mode = 'timeline',
+  allowRendering = true,
 }: AnimatedSprite2DPreviewProps) => {
   const strings = useMemo(() => getEditorStrings(), []);
-  const resource = useMemo(
+  const rawResource = useMemo(
     () =>
       buildAnimatedSpriteFrames(editor.state, image, {
         animations: integration.runtimeData.animations ?? editor.state.animations,
@@ -35,6 +37,7 @@ export const AnimatedSprite2DPreview = ({
       }),
     [editor.state, image, integration.animationsMeta, integration.runtimeData.animations],
   );
+  const resource = allowRendering ? rawResource : null;
   const resolvedResource: SpriteFramesResource = useMemo(() => {
     if (resource) {
       return resource;
@@ -218,13 +221,13 @@ export const AnimatedSprite2DPreview = ({
             </View>
           </View>
         ) : null}
-        {resource ? (
-          <View
-            style={[
-              styles.canvasViewport,
-              { height: displayHeight, width: '100%', maxWidth: displayWidth },
-            ]}
-          >
+        <View
+          style={[
+            styles.canvasViewport,
+            { height: displayHeight, width: '100%', maxWidth: displayWidth },
+          ]}
+        >
+          {resource ? (
             <View style={styles.canvasInner}>
               <View
                 style={{
@@ -245,10 +248,12 @@ export const AnimatedSprite2DPreview = ({
                 />
               </View>
             </View>
-          </View>
-        ) : (
-          <Text style={styles.placeholderText}>{strings.preview.framesMissing}</Text>
-        )}
+          ) : (
+            <View style={styles.placeholderContainer}>
+              <Text style={styles.placeholderText}>{strings.preview.framesMissing}</Text>
+            </View>
+          )}
+        </View>
         {isSelfDriven ? (
           <View style={styles.playbackControls}>
             <IconButton
@@ -306,6 +311,11 @@ const styles = StyleSheet.create({
   placeholderText: {
     color: '#9ca9c7',
     textAlign: 'center',
+  },
+  placeholderContainer: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   zoomOverlay: {
     position: 'absolute',
