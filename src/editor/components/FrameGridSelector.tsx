@@ -347,7 +347,7 @@ export const FrameGridSelector = ({
     <View style={styles.wrapper}>
       <View style={styles.selectorRow}>
         <View style={styles.previewColumn}>
-          <View style={styles.orderRow}>
+          <View style={[styles.orderRow, styles.orderToolbar]}>
             <View style={styles.orderField}>
               <Text style={styles.orderLabel}>Primary axis</Text>
               <View style={styles.orderButtons}>
@@ -412,15 +412,22 @@ export const FrameGridSelector = ({
               </View>
             </View>
             <View style={styles.orderActions}>
-              <TouchableOpacity style={styles.autoSelectButton} onPress={selectAllCells}>
-                <Text style={styles.autoSelectText}>Select all</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={[styles.autoSelectButton, styles.clearButton]}
+              <IconButton
+                iconFamily="material"
+                name="select-all"
+                size={24}
+                onPress={selectAllCells}
+                accessibilityLabel="Select all cells"
+                style={styles.orderActionButton}
+              />
+              <IconButton
+                iconFamily="material"
+                name="disabled-by-default"
+                size={24}
                 onPress={() => setSelectedIds([])}
-              >
-                <Text style={styles.autoSelectText}>Clear selection</Text>
-              </TouchableOpacity>
+                accessibilityLabel="Clear selection"
+                style={styles.orderActionButton}
+              />
             </View>
           </View>
           <View
@@ -667,7 +674,10 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     flexWrap: 'wrap',
     alignItems: 'center',
-    marginBottom: 4,
+    marginBottom: 12,
+  },
+  orderToolbar: {
+    marginBottom: 16,
   },
   orderField: {
     marginRight: 12,
@@ -696,17 +706,12 @@ const styles = StyleSheet.create({
   },
   orderActions: {
     flexDirection: 'row',
+    alignItems: 'flex-end',
     gap: 8,
   },
-  autoSelectButton: {
-    paddingVertical: 6,
-    paddingHorizontal: 12,
-  },
-  clearButton: {},
-  autoSelectText: {
-    color: '#fff',
-    fontSize: 12,
-    fontWeight: '600',
+  orderActionButton: {
+    marginHorizontal: 0,
+    marginBottom: 0,
   },
   scrollWrapper: {
     flex: 1,
