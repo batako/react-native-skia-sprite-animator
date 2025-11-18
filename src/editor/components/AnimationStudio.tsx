@@ -30,6 +30,7 @@ import { MaterialIcons } from '@expo/vector-icons';
 import { IconButton } from './IconButton';
 import { MacWindow, type MacWindowVariant } from './MacWindow';
 import { PreviewPlayer } from './PreviewPlayer';
+import { AnimatedSprite2DPreview } from './AnimatedSprite2DPreview';
 import {
   FrameGridSelector,
   type FrameGridCell,
@@ -1315,6 +1316,7 @@ export const AnimationStudio = ({
           <Text style={styles.sectionTitle}>Animation Preview</Text>
         </View>
         <PreviewPlayer integration={integration} image={image} title="" />
+        <AnimatedSprite2DPreview editor={editor} integration={integration} />
       </View>
       <View style={styles.body}>
         <View style={styles.sequenceGroup}>

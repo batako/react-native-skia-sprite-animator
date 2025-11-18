@@ -9,6 +9,7 @@ export * from './editor/hooks/useEditorIntegration';
 export * from './editor/hooks/animatedSprite2d';
 export { AnimatedSprite2DView, type AnimatedSprite2DViewProps } from './AnimatedSprite2DView';
 export { AnimatedSprite2D } from './AnimatedSprite2D';
+export { AnimatedSprite2DPreview } from './editor/components/AnimatedSprite2DPreview';
 export * from './editor/templates/DefaultSpriteTemplate';
 export * from './editor/utils/SpriteEditUtils';
 export * from './editor/utils/cleanSpriteData';
