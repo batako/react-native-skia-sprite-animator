@@ -512,15 +512,32 @@ export const FrameGridSelector = ({
                                 top,
                                 width,
                                 height,
-                                borderColor: isSelected ? '#4f8dff' : 'rgba(255,255,255,0.35)',
-                                backgroundColor: isSelected
-                                  ? 'rgba(79,141,255,0.15)'
-                                  : 'transparent',
                               },
                             ]}
                             onPress={() => toggleSelection(cell.id)}
                             activeOpacity={0.7}
                           >
+                            <View
+                              pointerEvents="none"
+                              style={[styles.cellOutline, styles.cellOutlineOuter]}
+                            />
+                            <View
+                              pointerEvents="none"
+                              style={[
+                                styles.cellOutline,
+                                styles.cellOutlineMiddle,
+                                {
+                                  borderColor: isSelected ? '#4f8dff' : 'rgba(255,255,255,0.35)',
+                                  backgroundColor: isSelected
+                                    ? 'rgba(79,141,255,0.15)'
+                                    : 'transparent',
+                                },
+                              ]}
+                            />
+                            <View
+                              pointerEvents="none"
+                              style={[styles.cellOutline, styles.cellOutlineInner]}
+                            />
                             {isSelected && <Text style={styles.orderText}>{order}</Text>}
                           </TouchableOpacity>
                         );
@@ -776,10 +793,32 @@ const styles = StyleSheet.create({
   },
   cell: {
     position: 'absolute',
-    borderWidth: 1,
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: 'transparent',
+    overflow: 'hidden',
+  },
+  cellOutline: {
+    ...StyleSheet.absoluteFillObject,
+  },
+  cellOutlineOuter: {
+    borderWidth: 1,
+    borderColor: '#0c0c0c',
+  },
+  cellOutlineMiddle: {
+    top: 1,
+    bottom: 1,
+    left: 1,
+    right: 1,
+    borderWidth: 5,
+  },
+  cellOutlineInner: {
+    top: 6,
+    bottom: 6,
+    left: 6,
+    right: 6,
+    borderWidth: 1,
+    borderColor: '#0c0c0c',
   },
   orderText: {
     color: '#fff',
