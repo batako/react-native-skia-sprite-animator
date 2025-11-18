@@ -1,13 +1,12 @@
 /* eslint-disable jsdoc/require-jsdoc */
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo } from 'react';
 import type {
   AnimatedSprite2DProps,
   AnimatedSpriteFrame,
-  AnimatedSpriteFrameChangeEvent,
   SpriteFramesResource,
 } from '../../animatedSprite2dTypes';
-import { buildSequence, pickInitialAnimation, resolveFrameIndex } from './helpers';
-import { useTicker } from './useTicker';
+import { pickInitialAnimation, resolveFrameIndex } from './helpers';
+import { useSpriteAnimationTicker } from '../../../hooks/useSpriteAnimationTicker';
 
 export interface UseAnimationStateOptions extends Omit<AnimatedSprite2DProps, 'style' | 'frames'> {
   frames: SpriteFramesResource;
@@ -39,28 +38,35 @@ export const useAnimationState = (options: UseAnimationStateOptions): UseAnimati
     onFrameChanged,
   } = options;
 
-  const [internalAnimation, setInternalAnimation] = useState<string | null>(() =>
-    pickInitialAnimation(frames, animation, autoplay),
+  const initialAnimation = useMemo(
+    () => pickInitialAnimation(frames, animation, autoplay),
+    [animation, autoplay, frames],
   );
-  const [internalPlaying, setInternalPlaying] = useState(true);
-  const lastReportedFrame = useRef<number | null>(null);
 
-  const resolvedAnimation = animation ?? internalAnimation;
-  const sequence = useMemo(
-    () => buildSequence(frames, resolvedAnimation),
-    [frames, resolvedAnimation],
-  );
-  const forcedFrameIndex = resolveFrameIndex(frame, frames.frames.length);
-  const resolvedPlaying =
-    typeof forcedFrameIndex === 'number' ? false : (playing ?? internalPlaying);
+  const {
+    animationName: tickerAnimationName,
+    setAnimationName: setTickerAnimationName,
+    playing: tickerPlaying,
+    setPlaying: setTickerPlaying,
+    sequence,
+    timelineCursor,
+    setTimelineCursor,
+    resetTimelineAccumulator,
+    frameIndex: tickerFrameIndex,
+  } = useSpriteAnimationTicker({
+    frames,
+    initialAnimation,
+    initialPlaying: playing ?? true,
+    speedScale,
+    onAnimationFinished,
+    onFrameChanged: frame === undefined ? onFrameChanged : undefined,
+  });
 
   useEffect(() => {
     if (animation !== undefined) {
-      setInternalAnimation(animation ?? null);
-      return;
+      setTickerAnimationName(animation ?? null);
     }
-    setInternalAnimation((prev) => prev ?? pickInitialAnimation(frames, undefined, autoplay));
-  }, [animation, autoplay, frames]);
+  }, [animation, setTickerAnimationName]);
 
   useEffect(() => {
     if (autoplay === undefined) {
@@ -72,83 +78,78 @@ export const useAnimationState = (options: UseAnimationStateOptions): UseAnimati
     }
   }, [autoplay, frames]);
 
-  const haltPlayback = useCallback(() => {
-    if (playing === undefined) {
-      setInternalPlaying(false);
+  const forcedFrameIndex = resolveFrameIndex(frame, frames.frames.length);
+
+  const desiredPlaying = useMemo(() => {
+    if (typeof forcedFrameIndex === 'number') {
+      return false;
     }
-  }, [playing]);
+    if (playing === undefined) {
+      return tickerPlaying;
+    }
+    return playing;
+  }, [forcedFrameIndex, playing, tickerPlaying]);
 
-  const { cursor, setCursor, resetAccumulator } = useTicker({
-    frames,
-    sequence,
-    animationName: resolvedAnimation,
-    playing: resolvedPlaying,
-    speedScale,
-    forcedFrameIndex,
-    onAnimationFinished,
-    onPlaybackHalted: haltPlayback,
-  });
+  useEffect(() => {
+    setTickerPlaying(desiredPlaying);
+  }, [desiredPlaying, setTickerPlaying]);
 
-  const sequenceFrameIndex = sequence.length
-    ? (sequence[Math.min(cursor, sequence.length - 1)] ?? 0)
-    : 0;
+  const resolvedAnimation = animation ?? tickerAnimationName;
   const resolvedFrameIndex =
-    typeof forcedFrameIndex === 'number' ? forcedFrameIndex : sequenceFrameIndex;
+    typeof forcedFrameIndex === 'number' ? forcedFrameIndex : tickerFrameIndex;
   const currentFrame = frames.frames[resolvedFrameIndex] ?? null;
 
   useEffect(() => {
-    if (lastReportedFrame.current === resolvedFrameIndex) {
+    if (frame === undefined) {
       return;
     }
-    lastReportedFrame.current = resolvedFrameIndex;
-    const payload: AnimatedSpriteFrameChangeEvent = {
-      animationName: resolvedAnimation ?? null,
-      frameIndex: resolvedFrameIndex,
-    };
-    onFrameChanged?.(payload);
-  }, [onFrameChanged, resolvedAnimation, resolvedFrameIndex]);
+    if (typeof resolvedFrameIndex !== 'number') {
+      return;
+    }
+    onFrameChanged?.({ animationName: resolvedAnimation ?? null, frameIndex: resolvedFrameIndex });
+  }, [frame, onFrameChanged, resolvedAnimation, resolvedFrameIndex]);
 
   const setAnimationName = useCallback(
     (next: string | null) => {
       if (animation === undefined) {
-        setInternalAnimation(next);
+        setTickerAnimationName(next);
       }
     },
-    [animation],
+    [animation, setTickerAnimationName],
   );
 
   const setPlayingState = useCallback(
     (next: boolean) => {
       if (playing === undefined) {
-        setInternalPlaying(next);
+        setTickerPlaying(next);
       }
     },
-    [playing],
+    [playing, setTickerPlaying],
   );
 
-  const setTimelineCursor = useCallback(
+  const setTimelineCursorClamped = useCallback(
     (next: number) => {
       if (!sequence.length) {
-        setCursor(0);
-        resetAccumulator();
+        setTimelineCursor(0);
+        resetTimelineAccumulator();
         return;
       }
       const clamped = Math.max(0, Math.min(sequence.length - 1, Math.floor(next)));
-      setCursor(clamped);
-      resetAccumulator();
+      setTimelineCursor(clamped);
+      resetTimelineAccumulator();
     },
-    [resetAccumulator, sequence.length, setCursor],
+    [resetTimelineAccumulator, sequence.length, setTimelineCursor],
   );
 
   return {
     animationName: resolvedAnimation ?? null,
     setAnimationName,
-    playing: resolvedPlaying,
+    playing: desiredPlaying,
     setPlaying: setPlayingState,
     sequence,
-    timelineCursor: cursor,
-    setTimelineCursor,
-    resetTimelineAccumulator: resetAccumulator,
+    timelineCursor,
+    setTimelineCursor: setTimelineCursorClamped,
+    resetTimelineAccumulator,
     forcedFrameIndex,
     resolvedFrameIndex,
     currentFrame,
