@@ -21,6 +21,7 @@ import type { DataSourceParam } from '@shopify/react-native-skia';
 import { AnimationStudio } from '../components/AnimationStudio';
 import { useEditorIntegration } from '../hooks/useEditorIntegration';
 import { LegalModal } from '../components/LegalModal';
+import { IconButton } from '../components/IconButton';
 
 const SAMPLE_SPRITE = require('../../assets/sample-sprite.png');
 type LicenseEntry = {
@@ -31,8 +32,31 @@ type LicenseEntry = {
   publisher?: string;
 };
 const licenseEntries = require('../licenses/licenses.json') as LicenseEntry[];
+type ExpoManifest = {
+  expo?: {
+    version?: string;
+    ios?: {
+      buildNumber?: string;
+    };
+    android?: {
+      versionCode?: number;
+    };
+  };
+};
+const expoManifest = require('../../app.json') as ExpoManifest;
 const HELP_FORM_URL = 'https://forms.gle/qYn7Dza4rXuSa1498';
 const GITHUB_URL = 'https://github.com/batako/react-native-skia-sprite-animator';
+const VERSION_SUMMARY = (() => {
+  const appVersion = expoManifest?.expo?.version ?? '0.0.0';
+  const iosBuildNumber = expoManifest?.expo?.ios?.buildNumber ?? '1';
+  const androidCode =
+    expoManifest?.expo?.android?.versionCode !== undefined
+      ? String(expoManifest.expo?.android?.versionCode)
+      : '1';
+  const builds = Array.from(new Set([iosBuildNumber, androidCode].filter(Boolean)));
+  const buildLabel = builds.join(' / ');
+  return `v${appVersion} (${buildLabel})`;
+})();
 
 const SAMPLE_FRAMES: SpriteEditorFrame[] = [
   { id: 'sample-0', x: 0, y: 0, w: 32, h: 32, duration: 80 },
@@ -74,7 +98,9 @@ export const EditorScreen = () => {
 
   const [imageSource, setImageSource] = React.useState<DataSourceParam>(SAMPLE_SPRITE);
   const editorRef = React.useRef(editor);
-  const [legalModal, setLegalModal] = React.useState<'terms' | 'privacy' | 'licenses' | null>(null);
+  const [legalModal, setLegalModal] = React.useState<
+    'overview' | 'terms' | 'privacy' | 'licenses' | null
+  >(null);
 
   const handleOpenLink = React.useCallback((url: string) => {
     Linking.openURL(url).catch(() => {
@@ -121,59 +147,80 @@ export const EditorScreen = () => {
             <Text style={styles.title}>React Native Skia Sprite Animator</Text>
             <Text style={styles.versionLabel}>{`v${SPRITE_ANIMATOR_VERSION}`}</Text>
           </View>
+          <IconButton
+            iconFamily="material"
+            name="info-outline"
+            onPress={() => setLegalModal('overview')}
+            accessibilityLabel={legalStrings.infoCenterTitle}
+          />
         </View>
         <Text style={styles.subtitle}>{strings.editorScreen.subtitle}</Text>
         <AnimationStudio editor={editor} integration={integration} image={imageSource} />
-        <View style={styles.legalLinks}>
-          <Text style={styles.legalHeading}>{legalStrings.legalHeading}</Text>
-          <View style={styles.legalButtons}>
-            <Pressable
-              style={styles.legalButton}
-              onPress={() => setLegalModal('terms')}
-              accessibilityRole="button"
-            >
-              <Text style={styles.legalButtonText}>{legalStrings.termsTitle}</Text>
-            </Pressable>
-            <Pressable
-              style={styles.legalButton}
-              onPress={() => setLegalModal('privacy')}
-              accessibilityRole="button"
-            >
-              <Text style={styles.legalButtonText}>{legalStrings.privacyTitle}</Text>
-            </Pressable>
-            <Pressable
-              style={styles.legalButton}
-              onPress={() => setLegalModal('licenses')}
-              accessibilityRole="button"
-            >
-              <Text style={styles.legalButtonText}>{legalStrings.licensesTitle}</Text>
-            </Pressable>
-          </View>
-        </View>
-        <View style={styles.helpLinks}>
-          <Text style={styles.legalHeading}>{legalStrings.helpHeading}</Text>
-          <View style={styles.legalButtons}>
-            <Pressable
-              style={styles.legalButton}
-              onPress={() => handleOpenLink(HELP_FORM_URL)}
-              accessibilityRole="link"
-            >
-              <Text style={styles.legalButtonText}>{legalStrings.contactLinkLabel}</Text>
-            </Pressable>
-            <Pressable
-              style={styles.legalButton}
-              onPress={() => handleOpenLink(GITHUB_URL)}
-              accessibilityRole="link"
-            >
-              <Text style={styles.legalButtonText}>{legalStrings.githubLinkLabel}</Text>
-            </Pressable>
-          </View>
-        </View>
       </ScrollView>
+      <LegalModal
+        title={legalStrings.infoCenterTitle}
+        visible={legalModal === 'overview'}
+        onClose={() => setLegalModal(null)}
+      >
+        <Text style={styles.modalSectionHeading}>{legalStrings.legalHeading}</Text>
+        <Text style={styles.legalParagraph}>{legalStrings.legalOverviewIntro}</Text>
+        <View style={styles.inlineLinks}>
+          <Pressable
+            style={styles.inlineLink}
+            onPress={() => setLegalModal('terms')}
+            accessibilityRole="button"
+          >
+            <Text style={styles.inlineLinkLabel}>{legalStrings.termsTitle}</Text>
+            <Text style={styles.inlineLinkArrow}>›</Text>
+          </Pressable>
+          <Pressable
+            style={styles.inlineLink}
+            onPress={() => setLegalModal('privacy')}
+            accessibilityRole="button"
+          >
+            <Text style={styles.inlineLinkLabel}>{legalStrings.privacyTitle}</Text>
+            <Text style={styles.inlineLinkArrow}>›</Text>
+          </Pressable>
+          <Pressable
+            style={styles.inlineLink}
+            onPress={() => setLegalModal('licenses')}
+            accessibilityRole="button"
+          >
+            <Text style={styles.inlineLinkLabel}>{legalStrings.licensesTitle}</Text>
+            <Text style={styles.inlineLinkArrow}>›</Text>
+          </Pressable>
+        </View>
+        <Text style={[styles.modalSectionHeading, styles.helpSectionHeading]}>
+          {legalStrings.helpHeading}
+        </Text>
+        <Text style={styles.legalParagraph}>{legalStrings.helpOverviewIntro}</Text>
+        <View style={styles.inlineLinks}>
+          <Pressable
+            style={styles.inlineLink}
+            onPress={() => handleOpenLink(HELP_FORM_URL)}
+            accessibilityRole="link"
+          >
+            <Text style={styles.inlineLinkLabel}>{legalStrings.contactLinkLabel}</Text>
+            <Text style={styles.inlineLinkArrow}>↗</Text>
+          </Pressable>
+          <Pressable
+            style={styles.inlineLink}
+            onPress={() => handleOpenLink(GITHUB_URL)}
+            accessibilityRole="link"
+          >
+            <Text style={styles.inlineLinkLabel}>{legalStrings.githubLinkLabel}</Text>
+            <Text style={styles.inlineLinkArrow}>↗</Text>
+          </Pressable>
+        </View>
+        <View style={styles.versionMetaWrapper}>
+          <Text style={styles.versionMetaLabel}>{legalStrings.appVersionLabel}</Text>
+          <Text style={styles.versionMetaValue}>{VERSION_SUMMARY}</Text>
+        </View>
+      </LegalModal>
       <LegalModal
         title={legalStrings.termsTitle}
         visible={legalModal === 'terms'}
-        onClose={() => setLegalModal(null)}
+        onClose={() => setLegalModal('overview')}
       >
         <Text style={styles.legalParagraph}>{legalStrings.termsBodyIntro}</Text>
         <Text style={styles.legalParagraph}>{legalStrings.termsBodyUse}</Text>
@@ -182,7 +229,7 @@ export const EditorScreen = () => {
       <LegalModal
         title={legalStrings.privacyTitle}
         visible={legalModal === 'privacy'}
-        onClose={() => setLegalModal(null)}
+        onClose={() => setLegalModal('overview')}
       >
         <Text style={styles.legalParagraph}>{legalStrings.privacyBodyIntro}</Text>
         <Text style={styles.legalParagraph}>{legalStrings.privacyBodyContact}</Text>
@@ -190,16 +237,14 @@ export const EditorScreen = () => {
       <LegalModal
         title={legalStrings.licensesTitle}
         visible={legalModal === 'licenses'}
-        onClose={() => setLegalModal(null)}
+        onClose={() => setLegalModal('overview')}
       >
         <Text style={styles.legalParagraph}>{legalStrings.licensesIntro}</Text>
         {licenseEntries.map((entry) => (
           <View key={`${entry.name}@${entry.version}`} style={styles.licenseRow}>
             <View style={{ flex: 1 }}>
               <Text style={styles.licenseName}>{`${entry.name}@${entry.version}`}</Text>
-              {!!entry.repository && (
-                <Text style={styles.licenseMeta}>{entry.repository}</Text>
-              )}
+              {!!entry.repository && <Text style={styles.licenseMeta}>{entry.repository}</Text>}
               {!!entry.licenses && <Text style={styles.licenseMeta}>{entry.licenses}</Text>}
             </View>
             {!!entry.publisher && <Text style={styles.licenseVersion}>{entry.publisher}</Text>}
@@ -245,33 +290,51 @@ const styles = StyleSheet.create({
     marginTop: 4,
     marginBottom: 4,
   },
-  legalLinks: {
-    marginTop: 24,
-  },
-  helpLinks: {
-    marginTop: 24,
-  },
-  legalHeading: {
-    color: '#f0f4ff',
+  modalSectionHeading: {
+    color: '#d9dff8',
     fontWeight: '600',
-    marginBottom: 8,
+    marginTop: 4,
+    marginBottom: 6,
   },
-  legalButtons: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
+  helpSectionHeading: {
+    marginTop: 16,
+  },
+  inlineLinks: {
     gap: 8,
   },
-  legalButton: {
+  inlineLink: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
     paddingHorizontal: 14,
-    paddingVertical: 8,
-    borderRadius: 999,
+    paddingVertical: 10,
+    borderRadius: 12,
     borderWidth: 1,
-    borderColor: '#2c354a',
-    backgroundColor: '#161c2a',
+    borderColor: '#242c3c',
+    backgroundColor: '#111725',
   },
-  legalButtonText: {
-    color: '#c7d0ec',
+  inlineLinkLabel: {
+    color: '#dfe6ff',
     fontWeight: '500',
+  },
+  inlineLinkArrow: {
+    color: '#8c95b6',
+    fontSize: 18,
+  },
+  versionMetaWrapper: {
+    alignItems: 'center',
+    marginTop: 20,
+  },
+  versionMetaLabel: {
+    color: '#9aa2c5',
+    fontSize: 12,
+    fontWeight: '600',
+    marginBottom: 4,
+  },
+  versionMetaValue: {
+    color: '#f4f6ff',
+    fontSize: 16,
+    fontWeight: '600',
   },
   legalParagraph: {
     color: '#d8deff',

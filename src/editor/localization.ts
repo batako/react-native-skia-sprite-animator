@@ -157,6 +157,9 @@ export type EditorStrings = {
   editorScreen: {
     subtitle: string;
     legalHeading: string;
+    infoCenterTitle: string;
+    appVersionLabel: string;
+    legalOverviewIntro: string;
     termsTitle: string;
     privacyTitle: string;
     licensesTitle: string;
@@ -167,6 +170,7 @@ export type EditorStrings = {
     privacyBodyContact: string;
     licensesIntro: string;
     helpHeading: string;
+    helpOverviewIntro: string;
     contactLinkLabel: string;
     githubLinkLabel: string;
   };
@@ -333,6 +337,10 @@ const translations: Record<SupportedLanguage, EditorStrings> = {
       subtitle:
         'Edit frames, play animations, preview with AnimatedSprite2D, and persist sprites to disk with a single screen.',
       legalHeading: 'Policies & Notices',
+      infoCenterTitle: 'Info & Support',
+      appVersionLabel: 'App Version',
+      legalOverviewIntro:
+        'Review the policies covering usage, privacy, and open-source software packaged with the app.',
       termsTitle: 'Terms of Service',
       privacyTitle: 'Privacy Policy',
       licensesTitle: 'Open Source Licenses',
@@ -349,6 +357,8 @@ const translations: Record<SupportedLanguage, EditorStrings> = {
       licensesIntro:
         'React Native Skia Sprite Animator uses the open-source modules listed below. Refer to each project for complete license texts.',
       helpHeading: 'Help & Links',
+      helpOverviewIntro:
+        'Share feedback or explore the latest project updates using the links below.',
       contactLinkLabel: 'Contact Form',
       githubLinkLabel: 'GitHub Repository',
     },
@@ -514,6 +524,9 @@ const translations: Record<SupportedLanguage, EditorStrings> = {
       subtitle:
         'フレーム編集・アニメーション再生・AnimatedSprite2Dでのプレビュー・ディスク保存をこの画面でまとめて行えます。',
       legalHeading: '利用規約・ポリシー',
+      infoCenterTitle: 'インフォメーション',
+      legalOverviewIntro:
+        '本アプリに適用される利用規約・プライバシーポリシー・オープンソースライセンスはこちらから確認できます。',
       termsTitle: '利用規約',
       privacyTitle: 'プライバシーポリシー',
       licensesTitle: 'オープンソースライセンス',
@@ -530,6 +543,8 @@ const translations: Record<SupportedLanguage, EditorStrings> = {
       licensesIntro:
         'React Native Skia Sprite Animator は以下のオープンソースモジュールを利用しています。各プロジェクトのライセンス文を参照してください。',
       helpHeading: 'サポート情報',
+      appVersionLabel: 'アプリバージョン',
+      helpOverviewIntro: 'ご意見・ご要望や最新の開発状況は以下のリンクからご覧いただけます。',
       contactLinkLabel: 'お問い合わせフォーム',
       githubLinkLabel: 'GitHub リポジトリ',
     },

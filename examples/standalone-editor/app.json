@@ -14,9 +14,11 @@
     "assetBundlePatterns": ["**/*"],
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.batako.standalone-editor"
+      "bundleIdentifier": "com.batako.standalone-editor",
+      "buildNumber": "1"
     },
     "android": {
+      "versionCode": 1,
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#1f1f1f"
