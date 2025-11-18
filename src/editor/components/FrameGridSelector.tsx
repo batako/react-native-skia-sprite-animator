@@ -191,6 +191,22 @@ export const FrameGridSelector = ({
   }, [rnImageSource, normalizedImage?.width, normalizedImage?.height]);
 
   useEffect(() => {
+    if (horizontal <= 0 || imageWidth <= 0) {
+      return;
+    }
+    const nextWidth = Math.max(1, Math.floor(imageWidth / horizontal));
+    setCellWidth((prev) => (prev === nextWidth ? prev : nextWidth));
+  }, [horizontal, imageWidth]);
+
+  useEffect(() => {
+    if (vertical <= 0 || imageHeight <= 0) {
+      return;
+    }
+    const nextHeight = Math.max(1, Math.floor(imageHeight / vertical));
+    setCellHeight((prev) => (prev === nextHeight ? prev : nextHeight));
+  }, [vertical, imageHeight]);
+
+  useEffect(() => {
     if (!rnImageSource) {
       return;
     }
