@@ -1,5 +1,6 @@
 /* eslint-disable jsdoc/require-jsdoc */
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import type { SpriteAnimatorDirection } from '../SpriteAnimator';
 import type {
   AnimatedSpriteFrameChangeEvent,
   SpriteFramesResource,
@@ -18,6 +19,7 @@ export interface UseSpriteAnimationTickerOptions {
   speedScale?: number;
   onAnimationFinished?: (name: string | null) => void;
   onFrameChanged?: (event: AnimatedSpriteFrameChangeEvent) => void;
+  direction?: SpriteAnimatorDirection;
 }
 
 export interface SpriteAnimationTickerResult {
@@ -46,6 +48,7 @@ export const useSpriteAnimationTicker = (
     speedScale = 1,
     onAnimationFinished,
     onFrameChanged,
+    direction = 'forward',
   } = options;
 
   const resolveInitialAnimation = useCallback(
@@ -68,10 +71,14 @@ export const useSpriteAnimationTicker = (
   }, [frames, resolveInitialAnimation]);
 
   const sequence = useMemo(() => buildSequence(frames, animationName), [frames, animationName]);
+  const effectiveSequence = useMemo(
+    () => (direction === 'reverse' ? [...sequence].reverse() : sequence),
+    [direction, sequence],
+  );
 
   const { cursor, setCursor, resetAccumulator } = useTicker({
     frames,
-    sequence,
+    sequence: effectiveSequence,
     animationName,
     playing,
     speedScale,
@@ -79,12 +86,23 @@ export const useSpriteAnimationTicker = (
     onAnimationFinished,
   });
 
+  const timelineCursor = useMemo(() => {
+    if (!sequence.length) {
+      return 0;
+    }
+    const clamped = Math.max(0, Math.min(sequence.length - 1, cursor));
+    if (direction === 'reverse') {
+      return sequence.length - 1 - clamped;
+    }
+    return clamped;
+  }, [cursor, direction, sequence.length]);
+
   const frameIndex = useMemo(() => {
     if (!sequence.length) {
       return 0;
     }
-    return sequence[Math.min(cursor, sequence.length - 1)] ?? 0;
-  }, [cursor, sequence]);
+    return sequence[Math.min(timelineCursor, sequence.length - 1)] ?? 0;
+  }, [sequence, timelineCursor]);
 
   const lastFrameRef = useRef<number | null>(null);
   useEffect(() => {
@@ -98,7 +116,7 @@ export const useSpriteAnimationTicker = (
   useEffect(() => {
     setCursor(0);
     resetAccumulator();
-  }, [animationName, sequence, resetAccumulator, setCursor]);
+  }, [animationName, direction, sequence, resetAccumulator, setCursor]);
 
   const play = useCallback(
     (name?: string | null) => {
@@ -129,10 +147,13 @@ export const useSpriteAnimationTicker = (
         return;
       }
       const sequenceIndex = sequence.findIndex((value) => value === clamped);
-      setCursor(sequenceIndex >= 0 ? sequenceIndex : 0);
+      const timelineIndex = sequenceIndex >= 0 ? sequenceIndex : 0;
+      const effectiveIndex =
+        direction === 'reverse' ? sequence.length - 1 - timelineIndex : timelineIndex;
+      setCursor(effectiveIndex);
       resetAccumulator();
     },
-    [frames.frames.length, resetAccumulator, sequence, setCursor],
+    [direction, frames.frames.length, resetAccumulator, sequence, setCursor],
   );
 
   return {
@@ -141,8 +162,18 @@ export const useSpriteAnimationTicker = (
     playing,
     setPlaying: setPlayingState,
     sequence,
-    timelineCursor: cursor,
-    setTimelineCursor: setCursor,
+    timelineCursor,
+    setTimelineCursor: (next: number) => {
+      if (!sequence.length) {
+        setCursor(0);
+        resetAccumulator();
+        return;
+      }
+      const clamped = Math.max(0, Math.min(sequence.length - 1, Math.floor(next)));
+      const effectiveIndex = direction === 'reverse' ? sequence.length - 1 - clamped : clamped;
+      setCursor(effectiveIndex);
+      resetAccumulator();
+    },
     resetTimelineAccumulator: resetAccumulator,
     frameIndex,
     play,

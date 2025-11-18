@@ -1,3 +1,4 @@
+/* eslint-disable jsdoc/require-jsdoc */
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type {
   SpriteAnimatorDirection,
@@ -5,6 +6,8 @@ import type {
   SpriteAnimatorHandle,
   SpriteData,
 } from '../../SpriteAnimator';
+import type { SpriteFramesResource } from '../animatedSprite2dTypes';
+import { useSpriteAnimationTicker } from '../../hooks/useSpriteAnimationTicker';
 import type { SpriteEditorApi } from './useSpriteEditor';
 
 /**
@@ -29,14 +32,26 @@ interface PlayOptions {
 /**
  * Ties the SpriteEditor state to the SpriteAnimator runtime.
  */
+const buildTickerResource = (state: SpriteEditorApi['state']): SpriteFramesResource => ({
+  frames: state.frames.map((frame, index) => ({
+    id: frame.id ?? `frame-${index}`,
+    width: frame.w,
+    height: frame.h,
+    duration: frame.duration,
+    image: frame.imageUri ? { type: 'uri', uri: frame.imageUri } : { type: 'uri', uri: '' },
+  })),
+  animations: state.animations ?? {},
+  animationsMeta: state.animationsMeta,
+  autoPlayAnimation: state.autoPlayAnimation ?? null,
+  meta: state.meta ?? {},
+});
+
 export const useEditorIntegration = ({ editor }: UseEditorIntegrationOptions) => {
   const animatorRef = useRef<SpriteAnimatorHandle>(null);
   const [speedScale, setSpeedScale] = useState(1);
-  const [activeAnimation, setActiveAnimation] = useState<string | null>(null);
-  const [isPlaying, setIsPlaying] = useState(false);
+  const [playDirection, setPlayDirection] = useState<SpriteAnimatorDirection>('forward');
   const [frameCursor, setFrameCursor] = useState(0);
   const [timelineCursor, setTimelineCursor] = useState<number | null>(null);
-  const [playDirection, setPlayDirection] = useState<SpriteAnimatorDirection>('forward');
   const endedAnimationRef = useRef<string | null>(null);
 
   const animationsState = useMemo(() => editor.state.animations ?? {}, [editor.state.animations]);
@@ -62,122 +77,133 @@ export const useEditorIntegration = ({ editor }: UseEditorIntegrationOptions) =>
     [editor.state.animations, runtimeData.animations],
   );
 
+  const tickerResource = useMemo(() => buildTickerResource(editor.state), [editor.state]);
+
+  const {
+    animationName: tickerAnimationName,
+    setAnimationName: setTickerAnimationName,
+    playing: tickerPlaying,
+    setPlaying: setTickerPlaying,
+    sequence,
+    timelineCursor: tickerTimelineCursor,
+    setTimelineCursor: controlTimelineCursor,
+    frameIndex,
+    seekFrame: tickerSeekFrame,
+  } = useSpriteAnimationTicker({
+    frames: tickerResource,
+    initialAnimation: editor.state.autoPlayAnimation ?? null,
+    initialPlaying: false,
+    speedScale,
+    onAnimationFinished: (name) => {
+      endedAnimationRef.current = name ?? null;
+      setTickerPlaying(false);
+    },
+    onFrameChanged: ({ frameIndex: index, animationName }) => {
+      setFrameCursor(index);
+      const sequenceForName = getSequence(animationName);
+      if (!sequenceForName.length) {
+        setTimelineCursor(null);
+        return;
+      }
+      const nextCursor = sequenceForName.findIndex((value) => value === index);
+      setTimelineCursor(nextCursor >= 0 ? nextCursor : null);
+    },
+    direction: playDirection,
+  });
+
   useEffect(() => {
-    const animator = animatorRef.current;
-    animator?.pause();
-    endedAnimationRef.current = null;
-    setIsPlaying(false);
-    setFrameCursor((prev) => {
-      if (!runtimeData.frames.length) {
-        return 0;
-      }
-      if (!Number.isFinite(prev) || prev < 0) {
-        return 0;
-      }
-      const maxFrame = runtimeData.frames.length - 1;
-      if (prev > maxFrame) {
-        return maxFrame;
-      }
-      return prev;
-    });
-    setTimelineCursor((prev) => {
-      const activeName = animator?.getCurrentAnimation?.() ?? null;
-      const sequence =
-        activeName && runtimeData.animations ? (runtimeData.animations[activeName] ?? []) : [];
-      if (!sequence.length) {
-        return null;
-      }
-      if (prev === null || !Number.isFinite(prev) || prev < 0) {
-        return 0;
-      }
-      const maxCursor = sequence.length - 1;
-      if (prev > maxCursor) {
-        return maxCursor;
-      }
-      return prev;
-    });
-  }, [runtimeData.animations, runtimeData.frames]);
+    if (!sequence.length) {
+      setTimelineCursor(null);
+      return;
+    }
+    setTimelineCursor(tickerTimelineCursor);
+  }, [sequence.length, tickerTimelineCursor]);
+
+  useEffect(() => {
+    setFrameCursor(frameIndex);
+  }, [frameIndex]);
+
+  const activeAnimation = tickerAnimationName;
+  const setActiveAnimation = setTickerAnimationName;
+  const isPlaying = tickerPlaying;
 
   const play = useCallback(
     (name?: string | null, opts?: PlayOptions) => {
-      if (!animatorRef.current) {
-        return;
-      }
-      const targetName = name ?? activeAnimation ?? null;
-      const sequence = getSequence(targetName);
+      const targetName = name ?? tickerAnimationName ?? null;
+      const sequenceForTarget = getSequence(targetName);
       const requestedFrame =
         typeof opts?.fromFrame === 'number' && Number.isFinite(opts.fromFrame)
           ? Math.max(0, Math.floor(opts.fromFrame))
           : undefined;
       const isAtEnd =
-        sequence.length > 0 &&
-        (frameCursor === sequence[sequence.length - 1] ||
-          frameCursor >= editor.state.frames.length - 1);
+        sequenceForTarget.length > 0 &&
+        frameCursor === sequenceForTarget[sequenceForTarget.length - 1];
       const hasEnded = targetName && endedAnimationRef.current === targetName;
       const shouldRestart =
         requestedFrame !== undefined
           ? true
-          : (!isPlaying && targetName && sequence.length > 0 && isAtEnd) || hasEnded;
+          : (!tickerPlaying && targetName && sequenceForTarget.length > 0 && isAtEnd) || hasEnded;
       const resolvedDirection: SpriteAnimatorDirection =
         opts?.direction === 'reverse' || opts?.direction === 'forward'
           ? opts.direction
           : playDirection;
-      const options =
-        requestedFrame !== undefined
-          ? { speedScale, fromFrame: requestedFrame, direction: resolvedDirection }
-          : shouldRestart && sequence.length > 0
-            ? {
-                speedScale,
-                fromFrame: resolvedDirection === 'reverse' ? sequence.length - 1 : 0,
-                direction: resolvedDirection,
-              }
-            : { speedScale, direction: resolvedDirection };
-      animatorRef.current.play(targetName ?? undefined, options);
-      setActiveAnimation(targetName);
-      setIsPlaying(true);
       setPlayDirection(resolvedDirection);
-      if (requestedFrame !== undefined) {
-        setFrameCursor(requestedFrame);
-      } else if (shouldRestart && sequence.length > 0) {
-        const restartFrame =
-          resolvedDirection === 'reverse' ? sequence[sequence.length - 1] : sequence[0];
-        setFrameCursor(restartFrame);
+      if (targetName !== null && targetName !== tickerAnimationName) {
+        setTickerAnimationName(targetName);
       }
+      if (requestedFrame !== undefined) {
+        tickerSeekFrame(requestedFrame);
+      } else if (shouldRestart && sequenceForTarget.length > 0) {
+        const restartFrame =
+          resolvedDirection === 'reverse'
+            ? sequenceForTarget[sequenceForTarget.length - 1]
+            : sequenceForTarget[0];
+        tickerSeekFrame(restartFrame);
+      }
+      setTickerPlaying(true);
       if (hasEnded || requestedFrame !== undefined) {
         endedAnimationRef.current = null;
       }
+      animatorRef.current?.play(targetName ?? undefined, {
+        speedScale,
+        fromFrame: requestedFrame,
+        direction: resolvedDirection,
+      });
     },
     [
-      activeAnimation,
-      editor.state.frames.length,
       frameCursor,
       getSequence,
-      isPlaying,
       playDirection,
+      setPlayDirection,
+      setTickerAnimationName,
+      setTickerPlaying,
       speedScale,
+      tickerAnimationName,
+      tickerPlaying,
+      tickerSeekFrame,
     ],
   );
 
   const stop = useCallback(() => {
+    setTickerPlaying(false);
+    tickerSeekFrame(0);
     animatorRef.current?.stop();
-    setIsPlaying(false);
-    setFrameCursor(0);
-  }, []);
+  }, [tickerSeekFrame, setTickerPlaying]);
 
   const pause = useCallback(() => {
+    setTickerPlaying(false);
     animatorRef.current?.pause();
-    setIsPlaying(false);
-  }, []);
+  }, [setTickerPlaying]);
 
   const togglePlayback = useCallback(
     (name?: string | null) => {
-      if (isPlaying) {
+      if (tickerPlaying) {
         pause();
         return;
       }
       play(name);
     },
-    [isPlaying, pause, play],
+    [pause, play, tickerPlaying],
   );
 
   const playForward = useCallback(
@@ -196,57 +222,51 @@ export const useEditorIntegration = ({ editor }: UseEditorIntegrationOptions) =>
 
   const seekFrame = useCallback(
     (frameIndex: number, opts?: SeekFrameOptions) => {
-      const animator = animatorRef.current;
       const fallbackFrameIndex = Number.isFinite(frameIndex)
         ? Math.max(0, Math.floor(frameIndex))
         : 0;
-      const targetAnimation =
-        opts?.animationName ?? animator?.getCurrentAnimation?.() ?? activeAnimation ?? null;
+      const targetAnimation = opts?.animationName ?? tickerAnimationName ?? null;
       const sequenceOverride = Array.isArray(opts?.sequenceOverride) ? opts.sequenceOverride : null;
-      const sequence = sequenceOverride ?? getSequence(targetAnimation);
+      const sequenceForTarget = sequenceOverride ?? getSequence(targetAnimation);
       const clampCursor = (value: number) => {
-        if (!sequence.length) {
+        if (!sequenceForTarget.length) {
           return 0;
         }
         const intValue = Math.floor(value);
         if (intValue < 0) {
           return 0;
         }
-        if (intValue > sequence.length - 1) {
-          return sequence.length - 1;
+        if (intValue > sequenceForTarget.length - 1) {
+          return sequenceForTarget.length - 1;
         }
         return intValue;
       };
-
-      if (!sequence.length) {
-        if (animator) {
-          animator.setFrame(Math.max(0, Math.floor(fallbackFrameIndex)), {
-            animationName: targetAnimation ?? null,
-          });
-        }
+      if (!sequenceForTarget.length) {
+        tickerSeekFrame(fallbackFrameIndex);
         setFrameCursor(fallbackFrameIndex);
         setTimelineCursor(null);
+        animatorRef.current?.setFrame?.(fallbackFrameIndex, {
+          animationName: targetAnimation ?? null,
+        });
         return;
       }
-
       let cursorIndex: number | null =
         typeof opts?.cursor === 'number' ? clampCursor(opts.cursor) : null;
       if (cursorIndex === null) {
-        cursorIndex = sequence.findIndex((value) => value === fallbackFrameIndex);
+        cursorIndex = sequenceForTarget.findIndex((value) => value === fallbackFrameIndex);
         if (cursorIndex < 0) {
           cursorIndex = clampCursor(fallbackFrameIndex);
         }
       }
-
       const resolvedCursor = clampCursor(cursorIndex);
-      if (animator) {
-        animator.setFrame(resolvedCursor, { animationName: targetAnimation ?? null });
-      }
-      const resolvedFrameIndex = sequence[resolvedCursor] ?? fallbackFrameIndex;
-      setFrameCursor(resolvedFrameIndex);
-      setTimelineCursor(resolvedCursor);
+      const resolvedFrameIndex = sequenceForTarget[resolvedCursor] ?? fallbackFrameIndex;
+      controlTimelineCursor(resolvedCursor);
+      tickerSeekFrame(resolvedFrameIndex);
+      animatorRef.current?.setFrame?.(resolvedCursor, {
+        animationName: targetAnimation ?? null,
+      });
     },
-    [activeAnimation, getSequence],
+    [controlTimelineCursor, getSequence, tickerAnimationName, tickerSeekFrame],
   );
 
   const onFrameChange = useCallback((event: SpriteAnimatorFrameChangeEvent) => {
@@ -256,18 +276,18 @@ export const useEditorIntegration = ({ editor }: UseEditorIntegrationOptions) =>
 
   const onAnimationEnd = useCallback(
     (name: string | null) => {
-      setIsPlaying(false);
       endedAnimationRef.current = name ?? null;
-      const sequence = getSequence(name);
-      if (!sequence.length) {
+      setTickerPlaying(false);
+      const sequenceForName = getSequence(name);
+      if (!sequenceForName.length) {
         return;
       }
-      const cursor = playDirection === 'reverse' ? 0 : Math.max(0, sequence.length - 1);
-      const frameIndex = sequence[cursor];
+      const cursor = playDirection === 'reverse' ? 0 : Math.max(0, sequenceForName.length - 1);
+      const frameIndex = sequenceForName[cursor];
       setFrameCursor(frameIndex);
       setTimelineCursor(cursor);
     },
-    [getSequence, playDirection],
+    [getSequence, playDirection, setTickerPlaying],
   );
 
   const availableAnimations = useMemo(
@@ -277,9 +297,9 @@ export const useEditorIntegration = ({ editor }: UseEditorIntegrationOptions) =>
 
   useEffect(() => {
     if (activeAnimation && !availableAnimations.includes(activeAnimation)) {
-      setActiveAnimation(null);
+      setTickerAnimationName(null);
     }
-  }, [activeAnimation, availableAnimations]);
+  }, [activeAnimation, availableAnimations, setTickerAnimationName]);
 
   const selectedFrameIndex = useMemo(() => {
     if (!editor.state.selected.length) {

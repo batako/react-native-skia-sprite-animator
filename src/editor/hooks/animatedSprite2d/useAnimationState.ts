@@ -60,6 +60,7 @@ export const useAnimationState = (options: UseAnimationStateOptions): UseAnimati
     speedScale,
     onAnimationFinished,
     onFrameChanged: frame === undefined ? onFrameChanged : undefined,
+    direction: 'forward',
   });
 
   useEffect(() => {
