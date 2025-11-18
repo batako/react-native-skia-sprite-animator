@@ -39,3 +39,4 @@ export {
 } from './editor/components/TimelinePanel';
 export { TimelineControls, type TimelineControlsProps } from './editor/components/TimelineControls';
 export { getEditorStrings, type EditorStrings, formatEditorString } from './editor/localization';
+export { SPRITE_ANIMATOR_VERSION } from './version';

@@ -6,6 +6,7 @@ import {
   type SpriteEditorState,
   useSpriteEditor,
   getEditorStrings,
+  SPRITE_ANIMATOR_VERSION,
 } from 'react-native-skia-sprite-animator';
 import type { DataSourceParam } from '@shopify/react-native-skia';
 import { AnimationStudio } from '../components/AnimationStudio';
@@ -88,7 +89,10 @@ export const EditorScreen = () => {
       <StatusBar barStyle="light-content" />
       <ScrollView contentContainerStyle={styles.scroll}>
         <View style={styles.headerRow}>
-          <Text style={styles.title}>React Native Skia Sprite Animator</Text>
+          <View style={styles.titleRow}>
+            <Text style={styles.title}>React Native Skia Sprite Animator</Text>
+            <Text style={styles.versionLabel}>{`v${SPRITE_ANIMATOR_VERSION}`}</Text>
+          </View>
         </View>
         <Text style={styles.subtitle}>{strings.editorScreen.subtitle}</Text>
         <AnimationStudio editor={editor} integration={integration} image={imageSource} />
@@ -112,10 +116,20 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     gap: 12,
   },
+  titleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
   title: {
     color: 'white',
     fontSize: 24,
     fontWeight: '700',
+  },
+  versionLabel: {
+    color: '#9ba5bf',
+    fontSize: 13,
+    fontWeight: '600',
   },
   subtitle: {
     color: '#9ba5bf',
