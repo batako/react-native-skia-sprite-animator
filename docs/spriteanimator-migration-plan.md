@@ -20,7 +20,7 @@
   - `AnimatedSprite2DPreview` に同期描画モードと自走モードを両立させ、Studio では前者・アプリでは後者を使えるようにする。
   - AnimatedSprite2D コンポーネント単体が fps/multiplier/loop を正しく再生することをテスト手順として明記する。
 
-- [ ] **SpriteAnimatorDriver の削除 / SpriteAnimator の非推奨化**
+- [x] **SpriteAnimatorDriver の削除 / SpriteAnimator の非推奨化**
   - 上記が完了し、`integration.frameCursor` が AnimatedSprite2D ベースで更新されるようになったら `SpriteAnimatorDriver` を廃止する。
   - `SpriteAnimator` コンポーネントは公開 API として引き続き提供し、プロダクト利用者には互換性を保証する。エディタでは未使用としつつ、ドキュメントで「AnimatedSprite2D への移行を推奨・SpriteAnimator は将来的に非推奨予定」と明記する。
 
@@ -35,7 +35,4 @@
 ## 残タスク
 
 - 上記の「移行ステップ」を実際の開発 TODO として落とし込んだもの。優先度や担当者を割り振る際はこのリストを起点にする。
-- ticker 抽出＋ `useEditorIntegration` 更新
-- `AnimatedSprite2DPreview` の自走モード追加
-- `SpriteAnimatorDriver` / PreviewPlayer の完全削除
-- テスト＆ドキュメント整備
+- テスト＆ドキュメント整備（README / editor_api.* / design doc / release notes の更新）

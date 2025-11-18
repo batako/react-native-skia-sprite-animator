@@ -5,10 +5,10 @@
 ## 0. コンポーネントのゴール
 
 - **完全独立**: `SpriteAnimator` に依存せず、ステート管理・タイミング・描画を `AnimatedSprite2D` 単体で完結させる。
-- **フレーム毎の画像差異**: 各フレームは別 URI/require/SkImage を参照でき、PreviewPlayer と同じ「最大フレームサイズ = Canvas サイズ」を尊重する。
+- **フレーム毎の画像差異**: 各フレームは別 URI/require/SkImage を参照でき、旧 PreviewPlayer と同じ「最大フレームサイズ = Canvas サイズ」を尊重する。
 - **Godot ライクな API**: `playing`/`animation`/`frame`/`speedScale`/`centered`/`flipH`/`flipV`/`offset` を持ち、imperative handle で `play`/`stop`/`pause`/`seekFrame` を制御できる。
 - **JSON 互換**: Animation Studio (`cleanSpriteData`) が吐く `SpriteFramesResource` をそのまま渡せる。`autoplay` prop は JSON の `autoPlayAnimation` を書き換えるだけで描画には影響させない。
-- **スタンドアロンエディタとの整合**: PreviewPlayer の見た目・centered ロジックを完全再現し、「Editor で見たままの挙動」を利用アプリでも保証する。
+- **スタンドアロンエディタとの整合**: AnimatedSprite2DPreview（同期モード/自走モードを切り替え可能なプレビュー）で「Editor で見たままの挙動」を保証する。
 
 ## 1. 非ゴール
 
@@ -143,7 +143,7 @@ AnimatedSprite2D (forwardRef)
 1. Studio で JSON を作成し `editor.exportJSON()` → `cleanSpriteData` に通す。
 2. `AnimatedSprite2D` に `frames={resource}` を渡し、`animation`/`playing` 等を UI から操作。
 3. Studio UI の `autoplay` トグルを動かすと `frames.autoPlayAnimation` に即時反映され、保存時に JSON へ書き戻される。
-4. Standalone Editor のプレビュー画面は `PreviewPlayer` から `AnimatedSprite2D` に置き換え、実際のランタイム挙動をリアルタイムで確認できるようにする。
+4. Standalone Editor のプレビュー画面は `AnimatedSprite2DPreview`（同期/自走モード）のみで構成し、実際のランタイム挙動をリアルタイムで確認できるようにする。
 
 ## 7. 実装ステップ
 
@@ -151,7 +151,7 @@ AnimatedSprite2D (forwardRef)
 2. **フック実装**: `useAnimationState` / `useFrameCache` / `useTicker` / `useSceneBounds` を `src/editor/hooks/animatedSprite2d` 階層に作成。
 3. **描画コンポーネント**: `AnimatedSprite2DView` を用意し、Skia Canvas + flip/offset ロジックを集約。
 4. **コンテナ**: `AnimatedSprite2D.tsx` で props → controller → view を接続し、imperative handle を forward。
-5. **エディタ統合**: Standalone Editor (`PreviewPlayer`, `AnimationStudio`, docs) を更新し、新コンポーネントを使用。
+5. **エディタ統合**: Standalone Editor (`AnimatedSprite2DPreview`, `AnimationStudio`, docs) を更新し、新コンポーネントを使用。
 6. **ドキュメント**: README / editor_api.* / Animation Studio docs に API 例と注意点を追記。
 7. **テスト**: フレーム遷移・loop 解除・flip/offset を jest + storybook 的プレビューで検証し、`npx eslint` を通す。
 
