@@ -92,10 +92,11 @@ export type EditorStrings = {
     description: string;
     exportButton: string;
     importButton: string;
-    exportPreviewTitle: string;
     exportPlaceholder: string;
-    importTitle: string;
     importPlaceholder: string;
+    downloadedMessage: string;
+    downloadFailedMessage: string;
+    shareDialogTitle: string;
   };
   storagePanel: {
     title: string;
@@ -269,12 +270,13 @@ const translations: Record<SupportedLanguage, EditorStrings> = {
     templateModal: {
       title: 'Sprite JSON',
       description: 'Uses the same format consumed by the preview runtime and storage helpers.',
-      exportButton: 'Export sprite JSON',
-      importButton: 'Import sprite JSON',
-      exportPreviewTitle: 'Export Preview',
+      exportButton: 'Export',
+      importButton: 'Import',
       exportPlaceholder: 'Press Export to view the current payload',
-      importTitle: 'Import JSON',
       importPlaceholder: 'Paste JSON here and press Import',
+      downloadedMessage: 'Sprite JSON exported. Share or save when the picker appears.',
+      downloadFailedMessage: 'Could not generate the sprite JSON file.',
+      shareDialogTitle: 'Share exported sprite JSON',
     },
     storagePanel: {
       title: 'Sprite Storage',
@@ -454,14 +456,15 @@ const translations: Record<SupportedLanguage, EditorStrings> = {
         '保存されたメタデータはJSONのエクスポートやスプライトストレージでの保存時に含まれます。',
     },
     templateModal: {
-      title: 'Sprite JSON',
-      description: 'プレビューランタイムとストレージ機能で使用している形式です。',
-      exportButton: 'Sprite JSON をエクスポート',
-      importButton: 'Sprite JSON をインポート',
-      exportPreviewTitle: 'エクスポートプレビュー',
-      exportPlaceholder: '「Export」を押すと現在のペイロードを表示します',
-      importTitle: 'JSONをインポート',
-      importPlaceholder: 'ここにJSONを貼り付けて「Import」を押してください',
+      title: 'スプライトJSON',
+      description: 'プレビューランタイムやストレージ機能と同じフォーマットで書き出します。',
+      exportButton: 'エクスポート',
+      importButton: 'インポート',
+      exportPlaceholder: '「エクスポート」を押すと現在の内容が表示されます',
+      importPlaceholder: 'JSONを貼り付けて「インポート」を押してください',
+      downloadedMessage: 'スプライトJSONを書き出しました。共有メニューから保存してください。',
+      downloadFailedMessage: 'スプライトJSONファイルを作成できませんでした。',
+      shareDialogTitle: 'スプライトJSONを共有',
     },
     storagePanel: {
       title: 'スプライトストレージ',

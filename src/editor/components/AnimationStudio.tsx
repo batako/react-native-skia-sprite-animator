@@ -2,7 +2,9 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import {
   Alert,
   Image,
+  Linking,
   Modal,
+  Platform,
   ScrollView,
   StyleSheet,
   Text,
@@ -11,6 +13,8 @@ import {
   View,
 } from 'react-native';
 import type { ImageSourcePropType, ViewStyle } from 'react-native';
+import * as FileSystem from 'expo-file-system/legacy';
+import * as Sharing from 'expo-sharing';
 import { cleanSpriteData } from '../utils/cleanSpriteData';
 import {
   saveSprite,
@@ -260,6 +264,7 @@ export const AnimationStudio = ({
   const [templateStatus, setTemplateStatus] = useState<string | null>(null);
   const [isMetaModalVisible, setMetaModalVisible] = useState(false);
   const [isTemplateModalVisible, setTemplateModalVisible] = useState(false);
+  const [templateModalVariant, setTemplateModalVariant] = useState<MacWindowVariant>('default');
   const storageApi = storageController ?? defaultStorageController;
 
   useEffect(() => {
@@ -313,11 +318,55 @@ export const AnimationStudio = ({
     resetMeta();
   }, [editor.state.meta, resetMeta]);
 
-  const handleExportTemplate = useCallback(() => {
+  const buildExportPreview = useCallback(() => {
     const payload = cleanSpriteData(editor.exportJSON() as any);
-    setExportPreview(JSON.stringify(payload, null, 2));
-    setTemplateStatus(strings.animationStudio.templateExported);
-  }, [editor, strings.animationStudio.templateExported]);
+    const json = JSON.stringify(payload, null, 2);
+    setExportPreview(json);
+    return json;
+  }, [editor]);
+
+  const handleExportTemplate = useCallback(async () => {
+    try {
+      const json = buildExportPreview();
+      setTemplateStatus(strings.animationStudio.templateExported);
+      if (Platform.OS === 'web') {
+        const dataUrl = `data:application/json;charset=utf-8,${encodeURIComponent(json)}`;
+        const supported = await Linking.canOpenURL(dataUrl);
+        if (supported) {
+          await Linking.openURL(dataUrl);
+          setTemplateStatus(strings.templateModal.downloadedMessage);
+        } else {
+          setTemplateStatus(strings.templateModal.downloadFailedMessage);
+        }
+        return;
+      }
+      const directory = FileSystem.cacheDirectory ?? FileSystem.documentDirectory;
+      if (!directory) {
+        setTemplateStatus(strings.templateModal.downloadFailedMessage);
+        return;
+      }
+      const fileUri = `${directory}sprite-${Date.now()}.json`;
+      await FileSystem.writeAsStringAsync(fileUri, json, {
+        encoding: FileSystem.EncodingType.UTF8,
+      });
+      const canShare = await Sharing.isAvailableAsync();
+      if (canShare) {
+        await Sharing.shareAsync(fileUri, {
+          mimeType: 'application/json',
+          dialogTitle: strings.templateModal.shareDialogTitle,
+        });
+      }
+      setTemplateStatus(strings.templateModal.downloadedMessage);
+    } catch {
+      setTemplateStatus(strings.templateModal.downloadFailedMessage);
+    }
+  }, [
+    buildExportPreview,
+    strings.animationStudio.templateExported,
+    strings.templateModal.downloadFailedMessage,
+    strings.templateModal.downloadedMessage,
+    strings.templateModal.shareDialogTitle,
+  ]);
 
   const handleImportTemplate = useCallback(() => {
     try {
@@ -341,12 +390,19 @@ export const AnimationStudio = ({
   }, [resetMeta]);
 
   const handleOpenTemplateModal = useCallback(() => {
+    setTemplateStatus(null);
+    setImportText('');
+    buildExportPreview();
+    setTemplateModalVariant('default');
     setTemplateModalVisible(true);
-  }, []);
+  }, [buildExportPreview]);
 
   const handleCloseTemplateModal = useCallback(() => {
     setTemplateModalVisible(false);
+    setTemplateModalVariant('default');
   }, []);
+
+  const templateModalExpanded = templateModalVariant === 'fullscreen';
 
   const updateAnimationMetaEntry = useCallback(
     (name: string, mutator: (draft: SpriteAnimationMeta) => void) => {
@@ -1685,52 +1741,76 @@ export const AnimationStudio = ({
             onClose={handleCloseTemplateModal}
             contentStyle={styles.templateModalContent}
             enableCompact={false}
+            onVariantChange={setTemplateModalVariant}
             style={styles.templateModalWindow}
           >
             <View style={styles.templateContent}>
               <Text style={styles.templateDescription}>{strings.templateModal.description}</Text>
-              <View style={styles.templateButtonRow}>
-                <IconButton
-                  name="file-download"
-                  onPress={handleExportTemplate}
-                  accessibilityLabel={strings.templateModal.exportButton}
-                />
-                <IconButton
-                  name="file-upload"
-                  onPress={handleImportTemplate}
-                  disabled={!importText.trim()}
-                  accessibilityLabel={strings.templateModal.importButton}
+              <View
+                style={[
+                  styles.templateSection,
+                  templateModalExpanded && styles.templateSectionExpanded,
+                ]}
+              >
+                <View style={styles.templateFieldHeader}>
+                  <TouchableOpacity
+                    style={styles.templateFieldButton}
+                    onPress={handleExportTemplate}
+                    accessibilityRole="button"
+                    accessibilityLabel={strings.templateModal.exportButton}
+                  >
+                    <MaterialIcons name="file-download" size={18} color="#e6ebff" />
+                    <Text style={styles.templateFieldButtonLabel}>
+                      {strings.templateModal.exportButton}
+                    </Text>
+                  </TouchableOpacity>
+                </View>
+                <SelectableTextInput
+                  style={[
+                    styles.templateTextArea,
+                    templateModalExpanded && styles.templateTextAreaExpanded,
+                    styles.templateTextAreaFixed,
+                  ]}
+                  multiline
+                  value={exportPreview}
+                  onChangeText={() => {}}
+                  placeholder={strings.templateModal.exportPlaceholder}
                 />
               </View>
-              <View style={styles.templateRows}>
-                <View style={styles.templateHalf}>
-                  <View style={styles.templateStack}>
-                    <Text style={styles.templateSubheading}>
-                      {strings.templateModal.exportPreviewTitle}
+              <View
+                style={[
+                  styles.templateSection,
+                  templateModalExpanded && styles.templateSectionExpanded,
+                ]}
+              >
+                <View style={styles.templateFieldHeader}>
+                  <TouchableOpacity
+                    style={[
+                      styles.templateFieldButton,
+                      !importText.trim() && styles.templateFieldButtonDisabled,
+                    ]}
+                    onPress={handleImportTemplate}
+                    disabled={!importText.trim()}
+                    accessibilityRole="button"
+                    accessibilityLabel={strings.templateModal.importButton}
+                  >
+                    <MaterialIcons name="file-upload" size={18} color="#e6ebff" />
+                    <Text style={styles.templateFieldButtonLabel}>
+                      {strings.templateModal.importButton}
                     </Text>
-                    <SelectableTextInput
-                      style={[styles.templateTextArea, styles.templateTextAreaFixed]}
-                      multiline
-                      value={exportPreview}
-                      onChangeText={() => {}}
-                      placeholder={strings.templateModal.exportPlaceholder}
-                    />
-                  </View>
+                  </TouchableOpacity>
                 </View>
-                <View style={styles.templateHalf}>
-                  <View style={styles.templateStack}>
-                    <Text style={styles.templateSubheading}>
-                      {strings.templateModal.importTitle}
-                    </Text>
-                    <TextInput
-                      style={[styles.templateTextArea, styles.templateTextAreaFixed]}
-                      multiline
-                      value={importText}
-                      onChangeText={setImportText}
-                      placeholder={strings.templateModal.importPlaceholder}
-                    />
-                  </View>
-                </View>
+                <TextInput
+                  style={[
+                    styles.templateTextArea,
+                    templateModalExpanded && styles.templateTextAreaExpanded,
+                    styles.templateTextAreaFixed,
+                  ]}
+                  multiline
+                  value={importText}
+                  onChangeText={setImportText}
+                  placeholder={strings.templateModal.importPlaceholder}
+                />
               </View>
               {templateStatus ? <Text style={styles.templateStatus}>{templateStatus}</Text> : null}
             </View>
@@ -2013,31 +2093,39 @@ const styles = StyleSheet.create({
     color: '#9aa4bd',
     fontSize: 12,
   },
-  templateButtonRow: {
+  templateFieldHeader: {
     flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'flex-start',
+    marginBottom: 8,
     gap: 8,
-    marginTop: 8,
   },
-  templateRows: {
-    flex: 1,
-    flexDirection: 'column',
-    gap: 12,
+  templateFieldButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 999,
+    borderWidth: 1,
+    borderColor: '#2e3545',
+    backgroundColor: '#13192b',
+  },
+  templateFieldButtonDisabled: {
+    opacity: 0.4,
+  },
+  templateFieldButtonLabel: {
+    color: '#f1f5ff',
+    fontWeight: '600',
+    fontSize: 12,
+  },
+  templateSection: {
     marginTop: 12,
   },
-  templateHalf: {
+  templateSectionExpanded: {
     flex: 1,
     minHeight: 0,
     justifyContent: 'flex-start',
-  },
-  templateStack: {
-    flex: 1,
-    minHeight: 0,
-  },
-  templateSubheading: {
-    color: '#9ea8c0',
-    fontWeight: '500',
-    fontSize: 12,
-    marginBottom: 4,
   },
   templateTextArea: {
     marginTop: 4,
@@ -2048,11 +2136,15 @@ const styles = StyleSheet.create({
     color: '#f6f7ff',
     fontFamily: 'Courier',
     width: '100%',
+    height: 150,
   },
   templateTextAreaFixed: {
-    flex: 1,
-    minHeight: 0,
     textAlignVertical: 'top',
+  },
+  templateTextAreaExpanded: {
+    height: undefined,
+    minHeight: 150,
+    flex: 1,
   },
   templateStatus: {
     marginTop: 4,
