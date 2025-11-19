@@ -1905,14 +1905,14 @@
   },
   {
     "name": "expo",
-    "version": "54.0.23",
+    "version": "54.0.25",
     "licenses": "MIT",
     "repository": "https://github.com/expo/expo",
     "publisher": "Expo"
   },
   {
     "name": "expo-asset",
-    "version": "12.0.9",
+    "version": "12.0.10",
     "licenses": "MIT",
     "repository": "https://github.com/expo/expo",
     "publisher": "650 Industries, Inc."
@@ -1933,7 +1933,7 @@
   },
   {
     "name": "expo-file-system",
-    "version": "19.0.17",
+    "version": "19.0.19",
     "licenses": "MIT",
     "repository": "https://github.com/expo/expo",
     "publisher": "650 Industries, Inc."
@@ -1941,6 +1941,20 @@
   {
     "name": "expo-font",
     "version": "14.0.9",
+    "licenses": "MIT",
+    "repository": "https://github.com/expo/expo",
+    "publisher": "650 Industries, Inc."
+  },
+  {
+    "name": "expo-image-loader",
+    "version": "6.0.0",
+    "licenses": "MIT",
+    "repository": "https://github.com/expo/expo",
+    "publisher": "650 Industries, Inc."
+  },
+  {
+    "name": "expo-image-manipulator",
+    "version": "14.0.7",
     "licenses": "MIT",
     "repository": "https://github.com/expo/expo",
     "publisher": "650 Industries, Inc."
@@ -1961,14 +1975,14 @@
   },
   {
     "name": "expo-modules-autolinking",
-    "version": "3.0.21",
+    "version": "3.0.22",
     "licenses": "MIT",
     "repository": "https://github.com/expo/expo",
     "publisher": "650 Industries, Inc."
   },
   {
     "name": "expo-modules-core",
-    "version": "3.0.25",
+    "version": "3.0.26",
     "licenses": "MIT",
     "repository": "https://github.com/expo/expo",
     "publisher": "650 Industries, Inc."
@@ -1979,6 +1993,13 @@
     "licenses": "MIT",
     "repository": "https://github.com/expo/expo",
     "publisher": ""
+  },
+  {
+    "name": "expo-sharing",
+    "version": "14.0.7",
+    "licenses": "MIT",
+    "repository": "https://github.com/expo/expo",
+    "publisher": "650 Industries, Inc."
   },
   {
     "name": "exponential-backoff",
