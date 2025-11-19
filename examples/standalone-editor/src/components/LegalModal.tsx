@@ -67,9 +67,7 @@ export const LegalModal = ({ title, visible, onClose, children }: LegalModalProp
   return (
     <Modal visible={shouldRender} transparent animationType="none" onRequestClose={onClose}>
       <View style={styles.modalRoot}>
-        <Animated.View
-          style={[styles.slideWrapper, { transform: [{ translateX: slideAnim }] }]}
-        >
+        <Animated.View style={[styles.slideWrapper, { transform: [{ translateX: slideAnim }] }]}>
           <SafeAreaView style={styles.container}>
             <View style={styles.header}>
               <Text style={styles.title}>{title}</Text>

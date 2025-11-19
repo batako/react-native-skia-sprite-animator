@@ -9,12 +9,19 @@ import {
 } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 
+/**
+ * Props for {@link InlineConfirmButton}, mirroring minimal accessibility + layout controls.
+ */
 interface InlineConfirmButtonProps extends Pick<AccessibilityProps, 'accessibilityLabel'> {
   visible: boolean;
   onPress: () => void;
   containerStyle?: StyleProp<ViewStyle>;
 }
 
+/**
+ * A floating confirm button rendered inline next to numeric inputs and other controls
+ * that require explicit confirmation.
+ */
 export const InlineConfirmButton = ({
   visible,
   onPress,
