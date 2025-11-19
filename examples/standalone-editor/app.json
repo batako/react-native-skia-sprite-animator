@@ -1,21 +1,32 @@
 {
   "expo": {
     "name": "React Native Skia Sprite Animator",
-    "slug": "standalone-editor",
+    "slug": "react-native-skia-sprite-animator",
     "version": "0.1.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "automatic",
     "splash": {
       "image": "./assets/splash.png",
+      "tabletImage": "./assets/splash-tablet.png",
       "resizeMode": "contain",
       "backgroundColor": "#1f1f1f"
     },
     "assetBundlePatterns": ["**/*"],
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.batako.standalone-editor",
-      "buildNumber": "1"
+      "bundleIdentifier": "net.batako.react-native-skia-sprite-animator",
+      "requireFullScreen": false,
+      "buildNumber": "1",
+      "infoPlist": {
+        "UISupportedInterfaceOrientations": ["UIInterfaceOrientationPortrait"],
+        "UISupportedInterfaceOrientations~ipad": [
+          "UIInterfaceOrientationPortrait",
+          "UIInterfaceOrientationPortraitUpsideDown",
+          "UIInterfaceOrientationLandscapeLeft",
+          "UIInterfaceOrientationLandscapeRight"
+        ]
+      }
     },
     "android": {
       "versionCode": 1,
