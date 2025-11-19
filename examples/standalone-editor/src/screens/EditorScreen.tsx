@@ -20,7 +20,9 @@ type LicenseEntry = {
   version: string;
   licenses: string;
   repository?: string;
+  homepage?: string;
   publisher?: string;
+  email?: string;
 };
 const licenseEntries = require('../licenses/licenses.json') as LicenseEntry[];
 type ExpoManifest = {
@@ -138,16 +140,76 @@ export const EditorScreen = () => {
         return (
           <>
             <Text style={styles.legalParagraph}>{legalStrings.licensesIntro}</Text>
-            {licenseEntries.map((entry) => (
-              <View key={`${entry.name}@${entry.version}`} style={styles.licenseRow}>
-                <View style={{ flex: 1 }}>
-                  <Text style={styles.licenseName}>{`${entry.name}@${entry.version}`}</Text>
-                  {!!entry.repository && <Text style={styles.licenseMeta}>{entry.repository}</Text>}
-                  {!!entry.licenses && <Text style={styles.licenseMeta}>{entry.licenses}</Text>}
-                </View>
-                {!!entry.publisher && <Text style={styles.licenseVersion}>{entry.publisher}</Text>}
-              </View>
-            ))}
+            <View style={styles.licenseList}>
+              {licenseEntries.map((entry) => {
+                const repository = entry.repository?.trim() ?? '';
+                const homepage = entry.homepage?.trim() ?? '';
+                const showHomepage = Boolean(homepage && homepage !== repository);
+                const publisher = entry.publisher?.trim() ?? '';
+                const email = entry.email?.trim() ?? '';
+                const contactLine = [publisher, email ? `<${email}>` : '']
+                  .filter(Boolean)
+                  .join(' ');
+                const licenseTokens = entry.licenses
+                  ? entry.licenses.split(',').map((token) => token.trim()).filter(Boolean)
+                  : [];
+                return (
+                  <View key={`${entry.name}@${entry.version}`} style={styles.licenseCard}>
+                    <View style={styles.licenseCardHeader}>
+                      <Text style={styles.licenseName}>
+                        {entry.name}
+                        <Text style={styles.licenseVersion}>{` v${entry.version}`}</Text>
+                      </Text>
+                      {licenseTokens.length > 0 && (
+                        <View style={styles.licenseBadges}>
+                          {licenseTokens.map((token, index) => (
+                            <View
+                              key={`${entry.name}-${token}-${index}`}
+                              style={styles.licenseBadge}
+                            >
+                              <Text style={styles.licenseBadgeLabel}>{token}</Text>
+                            </View>
+                          ))}
+                        </View>
+                      )}
+                    </View>
+                    {!!contactLine && (
+                      <Text style={styles.licenseContactLine} numberOfLines={1}>
+                        {contactLine}
+                      </Text>
+                    )}
+                    {(repository || showHomepage) && (
+                      <View style={styles.licenseLinks}>
+                        {!!repository && (
+                          <Pressable
+                            style={styles.licenseLinkButton}
+                            onPress={() => handleOpenLink(repository)}
+                            accessibilityRole="link"
+                          >
+                            <Text style={styles.licenseLinkLabel} numberOfLines={1}>
+                              {repository}
+                            </Text>
+                            <Text style={styles.licenseLinkArrow}>↗</Text>
+                          </Pressable>
+                        )}
+                        {!!showHomepage && homepage && (
+                          <Pressable
+                            style={styles.licenseLinkButton}
+                            onPress={() => handleOpenLink(homepage)}
+                            accessibilityRole="link"
+                          >
+                            <Text style={styles.licenseLinkLabel} numberOfLines={1}>
+                              {homepage}
+                            </Text>
+                            <Text style={styles.licenseLinkArrow}>↗</Text>
+                          </Pressable>
+                        )}
+                      </View>
+                    )}
+                  </View>
+                );
+              })}
+            </View>
           </>
         );
       case 'overview':
@@ -365,18 +427,86 @@ const styles = StyleSheet.create({
     marginBottom: 12,
     lineHeight: 20,
   },
-  licenseRow: {
+  licenseList: {
+    gap: 12,
+  },
+  licenseCard: {
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: '#1b2438',
+    backgroundColor: '#0d1422',
+    padding: 14,
+    shadowColor: '#000',
+    shadowOpacity: 0.22,
+    shadowRadius: 10,
+    shadowOffset: { width: 0, height: 4 },
+    elevation: 3,
+  },
+  licenseCardHeader: {
     flexDirection: 'row',
+    alignItems: 'center',
     justifyContent: 'space-between',
-    paddingVertical: 6,
-    borderBottomWidth: 1,
-    borderBottomColor: '#1f2434',
+    gap: 12,
   },
   licenseName: {
-    color: '#eff1ff',
-    fontWeight: '500',
+    color: '#f3f6ff',
+    fontSize: 15,
+    fontWeight: '600',
+    flex: 1,
   },
   licenseVersion: {
-    color: '#9ba3c5',
+    color: '#9ba5c7',
+    fontSize: 12,
+    fontWeight: '600',
+  },
+  licenseBadges: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 6,
+    justifyContent: 'flex-end',
+    maxWidth: '40%',
+  },
+  licenseBadge: {
+    borderRadius: 999,
+    borderWidth: 1,
+    borderColor: '#273552',
+    paddingHorizontal: 10,
+    paddingVertical: 2,
+    backgroundColor: '#151f33',
+  },
+  licenseBadgeLabel: {
+    color: '#a9c2ff',
+    fontSize: 11,
+    fontWeight: '500',
+  },
+  licenseContactLine: {
+    marginTop: 10,
+    color: '#9aa3c9',
+    fontSize: 12,
+  },
+  licenseLinks: {
+    marginTop: 12,
+    gap: 8,
+  },
+  licenseLinkButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 999,
+    borderWidth: 1,
+    borderColor: '#25344f',
+    backgroundColor: '#121b2c',
+    gap: 8,
+  },
+  licenseLinkLabel: {
+    color: '#8ac1ff',
+    fontSize: 12,
+    flex: 1,
+  },
+  licenseLinkArrow: {
+    color: '#8ac1ff',
+    fontSize: 12,
   },
 });
