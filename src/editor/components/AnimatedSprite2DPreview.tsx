@@ -1,6 +1,13 @@
 /* eslint-disable jsdoc/require-jsdoc */
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { LayoutChangeEvent, Pressable, StyleSheet, Text, View } from 'react-native';
+import {
+  LayoutChangeEvent,
+  Pressable,
+  StyleSheet,
+  Text,
+  View,
+  useWindowDimensions,
+} from 'react-native';
 import { AnimatedSprite2D } from '../../AnimatedSprite2D';
 import type { SpriteEditorApi } from '../hooks/useSpriteEditor';
 import type { EditorIntegration } from '../hooks/useEditorIntegration';
@@ -10,6 +17,11 @@ import type { DataSourceParam } from '@shopify/react-native-skia';
 import type { SpriteFramesResource } from '../animatedSprite2dTypes';
 import { useSpriteAnimationTicker } from '../../hooks/useSpriteAnimationTicker';
 import { getEditorStrings } from '../localization';
+
+const MIN_PREVIEW_HEIGHT = 420;
+const MIN_ZOOM = 0.05;
+const MIN_VIEWPORT_HEIGHT = 260;
+const VERTICAL_RESERVE = 320;
 
 interface AnimatedSprite2DPreviewProps {
   editor: SpriteEditorApi;
@@ -58,7 +70,11 @@ export const AnimatedSprite2DPreview = ({
     );
   }, [resolvedResource.frames]);
 
-  const MIN_PREVIEW_HEIGHT = 420;
+  const windowSize = useWindowDimensions();
+  const previewHeight = useMemo(() => {
+    const availableHeight = Math.max(MIN_VIEWPORT_HEIGHT, windowSize.height - VERTICAL_RESERVE);
+    return Math.min(MIN_PREVIEW_HEIGHT, availableHeight);
+  }, [windowSize.height]);
 
   const [viewportWidth, setViewportWidth] = useState<number | null>(null);
   const [zoom, setZoom] = useState(1);
@@ -67,7 +83,7 @@ export const AnimatedSprite2DPreview = ({
     targetWidth: number;
     maxWidth: number | null;
     previewHeight: number;
-  }>({ targetWidth: 0, maxWidth: null, previewHeight: MIN_PREVIEW_HEIGHT });
+  }>({ targetWidth: 0, maxWidth: null, previewHeight });
 
   const baseWidth = sceneBounds.width || 64;
   const baseHeight = sceneBounds.height || 64;
@@ -75,7 +91,7 @@ export const AnimatedSprite2DPreview = ({
   const clampZoom = useCallback((value: number, maxZoom: number) => {
     const rounded = parseFloat(value.toFixed(2));
     const upper = maxZoom > 0 ? maxZoom : Number.POSITIVE_INFINITY;
-    return Math.max(0.25, Math.min(rounded, upper));
+    return Math.max(MIN_ZOOM, Math.min(rounded, upper));
   }, []);
 
   const handleLayout = useCallback((event: LayoutChangeEvent) => {
@@ -91,18 +107,16 @@ export const AnimatedSprite2DPreview = ({
     if (
       deps.targetWidth !== baseWidth ||
       deps.maxWidth !== maxWidth ||
-      deps.previewHeight !== MIN_PREVIEW_HEIGHT
+      deps.previewHeight !== previewHeight
     ) {
       autoZoomDeps.current = {
         targetWidth: baseWidth,
         maxWidth,
-        previewHeight: MIN_PREVIEW_HEIGHT,
+        previewHeight,
       };
       setAutoZoomed(false);
     }
-  }, [baseWidth, viewportWidth]);
-
-  const previewHeight = MIN_PREVIEW_HEIGHT;
+  }, [baseWidth, previewHeight, viewportWidth]);
   const maxWidth = viewportWidth ? Math.max(200, viewportWidth - 16) : null;
 
   let targetWidth = baseWidth;
@@ -301,6 +315,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     width: '100%',
+    overflow: 'hidden',
   },
   canvasInner: {
     width: '100%',
