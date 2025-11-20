@@ -11,6 +11,7 @@
     "generate:licenses": "node scripts/generate-licenses.cjs",
     "expo:login": "npx eas login",
     "expo:configure": "npx eas build:configure --platform ios",
+    "expo:prebuild:ios": "npx expo prebuild --platform ios",
     "expo:build:ios": "npx eas build --platform ios --profile production",
     "expo:submit:ios": "npx eas submit --platform ios --profile production",
     "expo:release:ios": "npm run expo:build:ios && npm run expo:submit:ios"
