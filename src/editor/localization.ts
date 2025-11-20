@@ -365,7 +365,7 @@ const translations: Record<SupportedLanguage, EditorStrings> = {
       infoAppSectionHeading: 'App Info',
       infoAppHeading: 'App Overview',
       infoAppDescription:
-        'This app is built directly with react-native-skia-sprite-animator. The on-screen Animation Studio, Sprite Storage workflow, and AnimatedSprite2D preview are the same components exported by the library.',
+        'This app is built directly with the react-native-skia-sprite-animator npm package. The on-screen Animation Studio, Sprite Storage workflow, and AnimatedSprite2D preview are the same components exported by the library.',
       infoAppModuleNote:
         'Combining these pieces lets you slice sprite sheets, edit animation timelines, manage metadata, and preview results without bespoke tooling, and you can embed or customize them to match your editor.',
       infoAppCustomization: '',
@@ -576,7 +576,7 @@ const translations: Record<SupportedLanguage, EditorStrings> = {
       infoAppSectionHeading: 'アプリ情報',
       infoAppHeading: 'アプリ概要',
       infoAppDescription:
-        'このアプリは react-native-skia-sprite-animator をそのまま使って構築したサンプルです。Animation Studio、Sprite Storage のワークフロー、AnimatedSprite2D のプレビューは、ライブラリが公開するコンポーネントを組み合わせて実装しています。',
+        'このアプリは npm モジュール react-native-skia-sprite-animator をそのまま使って構築したサンプルです。Animation Studio、Sprite Storage のワークフロー、AnimatedSprite2D のプレビューは、ライブラリが公開するコンポーネントを組み合わせて実装しています。',
       infoAppModuleNote:
         'これらのコンポーネントを組み合わせれば、スプライトシートの切り出しやアニメーションタイムラインの編集、メタデータ管理、再生プレビューまでを独自ツールなしで行えます。既存のエディタに組み込んだり、用途に応じてカスタマイズすることも可能です。',
       infoAppCustomization: '',
