@@ -88,6 +88,9 @@ export const StoragePanel = ({
   React.useEffect(() => {
     if (visible) {
       refresh();
+    } else {
+      setEditingId(null);
+      setRenameDraft('');
     }
   }, [refresh, visible]);
 
