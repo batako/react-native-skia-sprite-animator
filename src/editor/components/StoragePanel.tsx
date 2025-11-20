@@ -403,6 +403,7 @@ export const StoragePanel = ({
             </View>
           </View>
           <View style={styles.listContainer}>
+            {translatedStatus ? <Text style={styles.statusText}>{translatedStatus}</Text> : null}
             <ScrollView style={styles.list} contentContainerStyle={styles.listContent}>
               {sprites.map((sprite) => (
                 <View key={sprite.id} style={styles.spriteRow}>
@@ -479,6 +480,11 @@ const styles = StyleSheet.create({
   listContainer: {
     flex: 1,
     width: '100%',
+  },
+  statusText: {
+    color: '#9ea4bc',
+    fontSize: 12,
+    marginBottom: 6,
   },
   formRow: {
     flexDirection: 'row',

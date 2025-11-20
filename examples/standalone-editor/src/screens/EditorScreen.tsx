@@ -179,14 +179,14 @@ export const EditorScreen = () => {
             <Text style={styles.legalParagraph}>{legalStrings.infoAppJsonUsage}</Text>
             <Text style={styles.modalSectionHeading}>{legalStrings.infoAppSampleHeading}</Text>
             <View style={styles.sampleCard}>
-      <Text style={styles.sampleCardDescription}>
-        {legalStrings.infoAppSampleDescription}
-      </Text>
-      <Text style={styles.sampleLabel}>{legalStrings.infoAppSampleCodeLabel}</Text>
-      <View style={styles.codeBlock}>
-        <Text style={styles.codeText}>{legalStrings.infoAppSampleCode}</Text>
-      </View>
-      <Text style={styles.sampleLabel}>{legalStrings.infoAppSamplePreviewLabel}</Text>
+              <Text style={styles.sampleCardDescription}>
+                {legalStrings.infoAppSampleDescription}
+              </Text>
+              <Text style={styles.sampleLabel}>{legalStrings.infoAppSampleCodeLabel}</Text>
+              <View style={styles.codeBlock}>
+                <Text style={styles.codeText}>{legalStrings.infoAppSampleCode}</Text>
+              </View>
+              <Text style={styles.sampleLabel}>{legalStrings.infoAppSamplePreviewLabel}</Text>
               <View style={styles.samplePreview}>
                 <AnimatedSprite2D
                   frames={ABOUT_SAMPLE_RESOURCE}
@@ -228,7 +228,10 @@ export const EditorScreen = () => {
                   .filter(Boolean)
                   .join(' ');
                 const licenseTokens = entry.licenses
-                  ? entry.licenses.split(',').map((token) => token.trim()).filter(Boolean)
+                  ? entry.licenses
+                      .split(',')
+                      .map((token) => token.trim())
+                      .filter(Boolean)
                   : [];
                 return (
                   <View key={`${entry.name}@${entry.version}`} style={styles.licenseCard}>

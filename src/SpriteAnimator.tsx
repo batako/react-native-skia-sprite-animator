@@ -197,7 +197,7 @@ const DEFAULT_LOOP_BEHAVIOR = true;
 
 let hasWarnedSpriteAnimator = false;
 const warnSpriteAnimatorDeprecation = () => {
-  if (__DEV__ && !hasWarnedSpriteAnimator) {
+  if (typeof __DEV__ !== 'undefined' && __DEV__ && !hasWarnedSpriteAnimator) {
     hasWarnedSpriteAnimator = true;
     console.warn(
       '[DEPRECATED] SpriteAnimator will be removed after v0.4.0. Please migrate to AnimatedSprite2D.',

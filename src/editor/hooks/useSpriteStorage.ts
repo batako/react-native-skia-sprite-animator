@@ -217,16 +217,16 @@ export const useSpriteStorage = ({
         }
         const now = Date.now();
         const result = await storage.saveSprite({
-            sprite: {
-              ...payload,
-              id,
-              meta: {
-                ...(payload.meta ?? {}),
-                displayName,
-                createdAt: coerceTimestamp(stored.meta.createdAt) ?? now,
-                updatedAt: now,
-              },
+          sprite: {
+            ...payload,
+            id,
+            meta: {
+              ...(payload.meta ?? {}),
+              displayName,
+              createdAt: coerceTimestamp(stored.meta.createdAt) ?? now,
+              updatedAt: now,
             },
+          },
         });
         const summary = toSummary(result);
         editor.updateMeta({
@@ -271,7 +271,8 @@ export const useSpriteStorage = ({
             meta: {
               ...stored.meta,
               displayName: trimmed,
-              createdAt: coerceTimestamp(stored.meta.createdAt) ?? stored.meta.createdAt ?? Date.now(),
+              createdAt:
+                coerceTimestamp(stored.meta.createdAt) ?? stored.meta.createdAt ?? Date.now(),
               updatedAt: Date.now(),
             },
           },

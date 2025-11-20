@@ -964,12 +964,7 @@ export const AnimationStudio = ({
     }
     skipTimelineSelectionSeekRef.current = true;
     setTimelineSelection(timelineCursor);
-  }, [
-    currentSequence.length,
-    selectedTimelineIndex,
-    setTimelineSelection,
-    timelineCursor,
-  ]);
+  }, [currentSequence.length, selectedTimelineIndex, setTimelineSelection, timelineCursor]);
 
   const resolvePlaybackStartCursor = useCallback(
     (direction: 'forward' | 'reverse' = 'forward') => {
@@ -1568,10 +1563,7 @@ export const AnimationStudio = ({
           </View>
           <View style={styles.fileStatusSlot}>
             <Text
-              style={[
-                styles.fileStatusText,
-                !fileActionMessage && styles.fileStatusHidden,
-              ]}
+              style={[styles.fileStatusText, !fileActionMessage && styles.fileStatusHidden]}
               numberOfLines={1}
             >
               {fileActionMessage ?? ' '}
@@ -1861,34 +1853,34 @@ export const AnimationStudio = ({
                     <View style={styles.metaField}>
                       <Text style={styles.metaLabel}>{strings.metadataModal.keyLabel}</Text>
                       <TextInput
-                      value={entry.key}
-                      onChangeText={(text) => updateEntry(entry.id, 'key', text)}
-                      style={styles.metaInput}
-                      editable={!entry.readOnly}
-                      placeholder={strings.metadataModal.keyPlaceholder}
-                    />
+                        value={entry.key}
+                        onChangeText={(text) => updateEntry(entry.id, 'key', text)}
+                        style={styles.metaInput}
+                        editable={!entry.readOnly}
+                        placeholder={strings.metadataModal.keyPlaceholder}
+                      />
+                    </View>
+                    <View style={styles.metaField}>
+                      <Text style={styles.metaLabel}>{strings.metadataModal.valueLabel}</Text>
+                      <TextInput
+                        value={entry.value}
+                        onChangeText={(text) => updateEntry(entry.id, 'value', text)}
+                        style={styles.metaInput}
+                        editable={!entry.readOnly}
+                        placeholder={strings.metadataModal.valuePlaceholder}
+                      />
+                    </View>
+                    {entry.readOnly ? (
+                      <View style={styles.metaDeleteSpacer} />
+                    ) : (
+                      <IconButton
+                        name="delete"
+                        onPress={() => removeEntry(entry.id)}
+                        accessibilityLabel={strings.metadataModal.removeEntry}
+                      />
+                    )}
                   </View>
-                  <View style={styles.metaField}>
-                    <Text style={styles.metaLabel}>{strings.metadataModal.valueLabel}</Text>
-                    <TextInput
-                      value={entry.value}
-                      onChangeText={(text) => updateEntry(entry.id, 'value', text)}
-                      style={styles.metaInput}
-                      editable={!entry.readOnly}
-                      placeholder={strings.metadataModal.valuePlaceholder}
-                    />
-                  </View>
-                  {entry.readOnly ? (
-                    <View style={styles.metaDeleteSpacer} />
-                  ) : (
-                    <IconButton
-                      name="delete"
-                      onPress={() => removeEntry(entry.id)}
-                      accessibilityLabel={strings.metadataModal.removeEntry}
-                    />
-                  )}
-                </View>
-              ))}
+                ))}
                 <View
                   style={styles.metaAddRow}
                   onLayout={(event) => {
@@ -1948,7 +1940,9 @@ export const AnimationStudio = ({
                     accessibilityLabel={strings.templateModal.exportButton}
                   >
                     <MaterialIcons name="file-download" size={18} color="#0f172a" />
-                    <Text style={[styles.templateFieldButtonLabel, styles.templateFieldButtonLabelDark]}>
+                    <Text
+                      style={[styles.templateFieldButtonLabel, styles.templateFieldButtonLabelDark]}
+                    >
                       {strings.templateModal.exportButton}
                     </Text>
                   </TouchableOpacity>
@@ -2023,7 +2017,6 @@ interface AnimationFpsFieldProps {
 }
 
 const AnimationFpsField = ({ value, onSubmit, disabled = false }: AnimationFpsFieldProps) => {
-  const strings = useMemo(() => getEditorStrings(), []);
   const [text, setText] = useState(String(value));
   const [isFocused, setFocused] = useState(false);
   const baseValue = String(value);

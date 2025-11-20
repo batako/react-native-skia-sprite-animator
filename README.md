@@ -5,7 +5,7 @@
 ## Feature Overview
 
 - **AnimatedSprite2D** – lightweight runtime that consumes the same JSON as the editor/template helpers. Supports autoplay, timeline overrides, flips, and imperative control through `AnimatedSprite2DHandle`.
-- **SpriteAnimator** *(legacy, deprecated as of v0.4.0 and removed in v0.4.1+)* – declarative + imperative playback with Skia rendering. New code should prefer `AnimatedSprite2D`.
+- **SpriteAnimator** _(legacy, deprecated as of v0.4.0 and removed in v0.4.1+)_ – declarative + imperative playback with Skia rendering. New code should prefer `AnimatedSprite2D`.
 - **spriteStorage** – `saveSprite`, `loadSprite`, `listSprites`, `deleteSprite`, and storage configuration helpers so sprites plus metadata persist on device using Expo File System.
 - **Editor APIs** – `useSpriteEditor` (frame CRUD, selection, clipboard, undo/redo, metadata updates), editor-agnostic hooks like `useTimelineEditor` / `useMetadataManager` / `useSpriteStorage`, plus `DefaultSpriteTemplate` helpers (import/export) and `SpriteEditUtils` (grid snapping, rect merging, hit-testing).
 - **Standalone Expo editor** – an example app under `examples/standalone-editor/` that combines every API (canvas editing, real-time playback, storage, templates, metadata) to serve as the canonical feature showcase.
@@ -52,7 +52,7 @@ export function HeroPreview() {
 
 `AnimatedSprite2D` consumes the `SpriteFramesResource` shape produced by `cleanSpriteData`, `buildAnimatedSpriteFrames`, and the Animation Studio export. It exposes the same imperative handle as `SpriteAnimator` (`play`, `pause`, `seekFrame`, etc.) while avoiding extra Skia plumbing.
 
-## Using SpriteAnimator *(deprecated after v0.4.0)*
+## Using SpriteAnimator _(deprecated after v0.4.0)_
 
 ```tsx
 import { SpriteAnimator, type SpriteData } from 'react-native-skia-sprite-animator';
