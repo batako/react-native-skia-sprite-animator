@@ -7,10 +7,10 @@
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "automatic",
     "splash": {
-      "image": "./assets/splash.png",
+      "image": "./assets/splash-tablet.png",
       "tabletImage": "./assets/splash-tablet.png",
       "resizeMode": "contain",
-      "backgroundColor": "#1f1f1f"
+      "backgroundColor": "#05070f"
     },
     "assetBundlePatterns": ["**/*"],
     "ios": {
@@ -36,8 +36,8 @@
     "android": {
       "versionCode": 1,
       "adaptiveIcon": {
-        "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#1f1f1f"
+        "foregroundImage": "./assets/icon.png",
+        "backgroundColor": "#05070f"
       }
     },
     "web": {
