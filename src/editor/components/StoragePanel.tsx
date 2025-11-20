@@ -33,6 +33,10 @@ interface StoragePanelProps {
   onSpriteSaved?: (summary: SpriteSummary) => void;
   /** Callback fired when a sprite is loaded. */
   onSpriteLoaded?: (summary: SpriteSummary) => void;
+  /** Callback fired after deleting a sprite. */
+  onSpriteDeleted?: (payload: { id: string; name: string }) => void;
+  /** Callback fired when a sprite is renamed. */
+  onSpriteRenamed?: (summary: SpriteSummary) => void;
   /** Custom storage API injection. */
   storageApi?: SpriteStorageController;
 }
@@ -46,6 +50,8 @@ export const StoragePanel = ({
   onClose,
   onSpriteSaved,
   onSpriteLoaded,
+  onSpriteDeleted,
+  onSpriteRenamed,
   storageApi,
 }: StoragePanelProps) => {
   const strings = React.useMemo(() => getEditorStrings(), []);
@@ -225,7 +231,10 @@ export const StoragePanel = ({
           text: strings.general.delete,
           style: 'destructive',
           onPress: async () => {
-            await deleteSpriteById(id, name);
+            const success = await deleteSpriteById(id, name);
+            if (success) {
+              onSpriteDeleted?.({ id, name });
+            }
           },
         },
       ],
@@ -247,6 +256,7 @@ export const StoragePanel = ({
     }
     const result = await renameSprite(id, trimmed);
     if (result) {
+      onSpriteRenamed?.(result);
       onClose();
     }
     setEditingId(null);

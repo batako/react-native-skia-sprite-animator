@@ -55,6 +55,7 @@ export type EditorStrings = {
     animationFramesTitle: string;
     statusSaved: string;
     statusLoaded: string;
+    statusCleared: string;
     needFramesBeforeSave: string;
     saveSprite: string;
     openStorageManager: string;
@@ -74,6 +75,7 @@ export type EditorStrings = {
     deleteAnimationMessage: string;
     templateExported: string;
     templateImported: string;
+    clearActiveSprite: string;
   };
   metadataModal: {
     title: string;
@@ -238,6 +240,7 @@ const translations: Record<SupportedLanguage, EditorStrings> = {
       animationFramesTitle: 'Animation Frames',
       statusSaved: 'Saved {name}',
       statusLoaded: 'Loaded {name}',
+      statusCleared: 'Started a new sprite',
       needFramesBeforeSave: 'Add at least one frame before saving.',
       saveSprite: 'Save sprite',
       openStorageManager: 'Open storage manager',
@@ -257,6 +260,7 @@ const translations: Record<SupportedLanguage, EditorStrings> = {
       deleteAnimationMessage: 'Are you sure you want to remove this animation?',
       templateExported: 'Exported spriteStorage-compatible JSON.',
       templateImported: 'Import succeeded and editor history was reset.',
+      clearActiveSprite: 'Close current sprite',
     },
     metadataModal: {
       title: 'Metadata',
@@ -428,6 +432,7 @@ const translations: Record<SupportedLanguage, EditorStrings> = {
       animationFramesTitle: 'アニメーションフレーム',
       statusSaved: '{name} を保存しました',
       statusLoaded: '{name} を読み込みました',
+      statusCleared: '新規スプライトを開始しました',
       needFramesBeforeSave: '保存する前に少なくとも1フレーム追加してください。',
       saveSprite: 'スプライトを保存',
       openStorageManager: 'ストレージを開く',
@@ -447,6 +452,7 @@ const translations: Record<SupportedLanguage, EditorStrings> = {
       deleteAnimationMessage: 'このアニメーションを削除してもよろしいですか？',
       templateExported: 'スプライトストレージ互換の JSON をエクスポートしました。',
       templateImported: 'インポートが完了し、エディタ履歴をリセットしました。',
+      clearActiveSprite: '現在のスプライトを閉じる',
     },
     metadataModal: {
       title: 'メタデータ',

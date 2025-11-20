@@ -262,6 +262,24 @@ export const AnimationStudio = ({
   const [isTemplateModalVisible, setTemplateModalVisible] = useState(false);
   const [templateModalVariant, setTemplateModalVariant] = useState<MacWindowVariant>('default');
   const storageApi = storageController ?? defaultStorageController;
+  const activeSpriteName = useMemo(() => {
+    if (!lastStoredSummary) {
+      return null;
+    }
+    const trimmed = lastStoredSummary.displayName?.trim();
+    if (trimmed?.length) {
+      return trimmed;
+    }
+    const fallback =
+      strings.storagePanel.spriteNamePlaceholder?.trim() ||
+      strings.storagePanel.spriteNameLabel?.trim() ||
+      null;
+    return fallback && fallback.length ? fallback : null;
+  }, [
+    lastStoredSummary,
+    strings.storagePanel.spriteNameLabel,
+    strings.storagePanel.spriteNamePlaceholder,
+  ]);
   const metaRowsViewportHeightRef = useRef(0);
   const metaRowsScrollOffsetRef = useRef(0);
   const metaRowsScrollRef = useRef<ScrollView | null>(null);
@@ -605,6 +623,66 @@ export const AnimationStudio = ({
       setTimelineSelection,
       stop,
       strings.animationStudio.statusLoaded,
+    ],
+  );
+
+  const handleClearActiveSprite = useCallback(() => {
+    stop();
+    setActiveAnimation(null);
+    setTimelineSelection(null);
+    editor.reset();
+    setLastStoredSummary(null);
+    setFileActionMessage(strings.animationStudio.statusCleared);
+  }, [
+    editor,
+    setActiveAnimation,
+    setTimelineSelection,
+    stop,
+    strings.animationStudio.statusCleared,
+  ]);
+
+  const handleSpriteRenamed = useCallback(
+    (summary: SpriteSummary) => {
+      setLastStoredSummary((prev) => {
+        if (prev?.id !== summary.id) {
+          return prev;
+        }
+        return summary;
+      });
+      if (lastStoredSummary?.id !== summary.id) {
+        return;
+      }
+      editor.updateMeta({
+        displayName: summary.displayName,
+        createdAt: summary.createdAt,
+        updatedAt: summary.updatedAt,
+      });
+      setFileActionMessage(
+        formatEditorString(strings.storagePanel.statusRenamed, { name: summary.displayName }),
+      );
+    },
+    [editor, lastStoredSummary?.id, strings.storagePanel.statusRenamed],
+  );
+
+  const handleSpriteDeleted = useCallback(
+    ({ id, name }: { id: string; name: string }) => {
+      if (lastStoredSummary?.id !== id) {
+        return;
+      }
+      stop();
+      setActiveAnimation(null);
+      setTimelineSelection(null);
+      editor.reset();
+      setLastStoredSummary(null);
+      setFileActionMessage(formatEditorString(strings.storagePanel.statusDeleted, { name }));
+    },
+    [
+      editor,
+      lastStoredSummary?.id,
+      setActiveAnimation,
+      setTimelineSelection,
+      stop,
+      strings.storagePanel.statusDeleted,
     ],
   );
 
@@ -1468,16 +1546,35 @@ export const AnimationStudio = ({
     <View style={styles.container}>
       <View style={styles.headerRow}>
         <View style={styles.headerLeft}>
-          <Text style={styles.title}>Animation Studio</Text>
+          <View style={styles.titleGroup}>
+            <Text style={styles.title}>Animation Studio</Text>
+            {activeSpriteName ? (
+              <View style={styles.activeSpriteChip}>
+                <MaterialIcons name="folder-open" size={14} color="#cfd7ff" />
+                <Text style={styles.activeSpriteName} numberOfLines={1}>
+                  {activeSpriteName}
+                </Text>
+                <TouchableOpacity
+                  accessibilityRole="button"
+                  accessibilityLabel={strings.animationStudio.clearActiveSprite}
+                  onPress={handleClearActiveSprite}
+                  hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                  style={styles.activeSpriteCloseButton}
+                >
+                  <MaterialIcons name="close" size={12} color="#aebdff" />
+                </TouchableOpacity>
+              </View>
+            ) : null}
+          </View>
           <View style={styles.fileStatusSlot}>
             <Text
               style={[
                 styles.fileStatusText,
-                !(lastStoredSummary && fileActionMessage) && styles.fileStatusHidden,
+                !fileActionMessage && styles.fileStatusHidden,
               ]}
               numberOfLines={1}
             >
-              {lastStoredSummary && fileActionMessage ? fileActionMessage : ' '}
+              {fileActionMessage ?? ' '}
             </Text>
           </View>
         </View>
@@ -1711,6 +1808,8 @@ export const AnimationStudio = ({
         onClose={handleCloseStorageManager}
         onSpriteLoaded={handleStorageLoaded}
         onSpriteSaved={handleStorageSaved}
+        onSpriteDeleted={handleSpriteDeleted}
+        onSpriteRenamed={handleSpriteRenamed}
         storageApi={{
           listSprites: storageApi.listSprites,
           loadSprite: storageApi.loadSprite,
@@ -2062,10 +2161,40 @@ const styles = StyleSheet.create({
     gap: 8,
     flex: 1,
   },
+  titleGroup: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    flexShrink: 1,
+    minWidth: 0,
+  },
   title: {
     color: '#f1f5ff',
     fontSize: 18,
     fontWeight: '700',
+  },
+  activeSpriteChip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 999,
+    borderWidth: 1,
+    borderColor: '#2a3147',
+    backgroundColor: '#151c2e',
+    flexShrink: 1,
+    minWidth: 0,
+  },
+  activeSpriteName: {
+    color: '#e6ebff',
+    fontSize: 13,
+    flexShrink: 1,
+    minWidth: 0,
+    maxWidth: 220,
+  },
+  activeSpriteCloseButton: {
+    padding: 2,
   },
   actionButtons: {
     flexDirection: 'row',
