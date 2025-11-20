@@ -261,7 +261,7 @@ const translations: Record<SupportedLanguage, EditorStrings> = {
     metadataModal: {
       title: 'Metadata',
       heading: 'Primitive keys are exported with the sprite.',
-      addEntry: 'Add metadata entry',
+      addEntry: 'Add entry',
       removeEntry: 'Remove metadata entry',
       apply: 'Apply metadata',
       keyLabel: 'Key',
@@ -451,7 +451,7 @@ const translations: Record<SupportedLanguage, EditorStrings> = {
     metadataModal: {
       title: 'メタデータ',
       heading: 'プリミティブのキーはスプライトと一緒にエクスポートされます。',
-      addEntry: 'メタデータを追加',
+      addEntry: '追加',
       removeEntry: 'このメタデータを削除',
       apply: 'メタデータを適用',
       keyLabel: 'キー',

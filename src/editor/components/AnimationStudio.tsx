@@ -12,7 +12,12 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import type { ImageSourcePropType, ViewStyle } from 'react-native';
+import type {
+  ImageSourcePropType,
+  NativeScrollEvent,
+  NativeSyntheticEvent,
+  ViewStyle,
+} from 'react-native';
 import * as FileSystem from 'expo-file-system/legacy';
 import * as Sharing from 'expo-sharing';
 import { cleanSpriteData } from '../utils/cleanSpriteData';
@@ -257,6 +262,69 @@ export const AnimationStudio = ({
   const [isTemplateModalVisible, setTemplateModalVisible] = useState(false);
   const [templateModalVariant, setTemplateModalVariant] = useState<MacWindowVariant>('default');
   const storageApi = storageController ?? defaultStorageController;
+  const metaRowsViewportHeightRef = useRef(0);
+  const metaRowsScrollOffsetRef = useRef(0);
+  const metaRowsScrollRef = useRef<ScrollView | null>(null);
+  const metaAddRowLayoutRef = useRef<{ y: number; height: number }>({ y: 0, height: 0 });
+  const [isMetaAddStickyVisible, setMetaAddStickyVisible] = useState(false);
+
+  const evaluateMetaAddSticky = useCallback(
+    (offsetY?: number) => {
+      const viewportHeight = metaRowsViewportHeightRef.current;
+      const { y, height } = metaAddRowLayoutRef.current;
+      if (!viewportHeight || !height) {
+        if (isMetaAddStickyVisible) {
+          setMetaAddStickyVisible(false);
+        }
+        return;
+      }
+      const effectiveOffsetY = offsetY ?? metaRowsScrollOffsetRef.current;
+      const viewportBottom = effectiveOffsetY + viewportHeight;
+      const buttonBottom = y + height;
+      const shouldStick = buttonBottom - 12 > viewportBottom;
+      if (shouldStick !== isMetaAddStickyVisible) {
+        setMetaAddStickyVisible(shouldStick);
+      }
+    },
+    [isMetaAddStickyVisible],
+  );
+
+  const handleMetaRowsScroll = useCallback(
+    (event: NativeSyntheticEvent<NativeScrollEvent>) => {
+      const offsetY = event.nativeEvent.contentOffset.y;
+      metaRowsScrollOffsetRef.current = offsetY;
+      evaluateMetaAddSticky(offsetY);
+    },
+    [evaluateMetaAddSticky],
+  );
+
+  const scrollMetaRowsToEnd = useCallback(() => {
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        metaRowsScrollRef.current?.scrollToEnd?.({ animated: true });
+      });
+    });
+  }, []);
+
+  const handleAddMetaEntry = useCallback(() => {
+    addEntry();
+    scrollMetaRowsToEnd();
+  }, [addEntry, scrollMetaRowsToEnd]);
+
+  const renderMetaAddButton = useCallback(
+    () => (
+      <TouchableOpacity
+        style={styles.metaAddButton}
+        onPress={handleAddMetaEntry}
+        accessibilityRole="button"
+        accessibilityLabel={strings.metadataModal.addEntry}
+      >
+        <MaterialIcons name="add" size={18} color="#0f172a" />
+        <Text style={styles.metaAddButtonLabel}>{strings.metadataModal.addEntry}</Text>
+      </TouchableOpacity>
+    ),
+    [handleAddMetaEntry, strings.metadataModal.addEntry],
+  );
 
   useEffect(() => {
     if (!fileActionMessage) {
@@ -1665,19 +1733,35 @@ export const AnimationStudio = ({
             style={styles.metaModalWindow}
           >
             <View style={styles.metaHeaderRow}>
-              <Text style={styles.metaHeading}>{strings.metadataModal.heading}</Text>
+              <View style={styles.metaHeaderLeft}>
+                <Text style={styles.metaHeading}>{strings.metadataModal.heading}</Text>
+              </View>
               <IconButton
-                name="add"
-                onPress={addEntry}
-                accessibilityLabel={strings.metadataModal.addEntry}
+                name="save"
+                onPress={applyEntries}
+                accessibilityLabel={strings.metadataModal.apply}
               />
             </View>
-            <ScrollView style={styles.metaRowsStack} contentContainerStyle={styles.metaRowsContent}>
-              {metaEntries.map((entry) => (
-                <View key={entry.id} style={styles.metaRow}>
-                  <View style={styles.metaField}>
-                    <Text style={styles.metaLabel}>{strings.metadataModal.keyLabel}</Text>
-                    <TextInput
+            <View
+              style={styles.metaRowsWrapper}
+              onLayout={(event) => {
+                metaRowsViewportHeightRef.current = event.nativeEvent.layout.height;
+                evaluateMetaAddSticky();
+              }}
+            >
+              <ScrollView
+                ref={metaRowsScrollRef}
+                style={styles.metaRowsStack}
+                contentContainerStyle={styles.metaRowsContent}
+                onScroll={handleMetaRowsScroll}
+                scrollEventThrottle={16}
+                onContentSizeChange={() => evaluateMetaAddSticky()}
+              >
+                {metaEntries.map((entry) => (
+                  <View key={entry.id} style={styles.metaRow}>
+                    <View style={styles.metaField}>
+                      <Text style={styles.metaLabel}>{strings.metadataModal.keyLabel}</Text>
+                      <TextInput
                       value={entry.key}
                       onChangeText={(text) => updateEntry(entry.id, 'key', text)}
                       style={styles.metaInput}
@@ -1706,13 +1790,29 @@ export const AnimationStudio = ({
                   )}
                 </View>
               ))}
-            </ScrollView>
-            <View style={styles.metaButtonRow}>
-              <IconButton
-                name="save"
-                onPress={applyEntries}
-                accessibilityLabel={strings.metadataModal.apply}
-              />
+                <View
+                  style={styles.metaAddRow}
+                  onLayout={(event) => {
+                    metaAddRowLayoutRef.current = {
+                      y: event.nativeEvent.layout.y,
+                      height: event.nativeEvent.layout.height,
+                    };
+                    evaluateMetaAddSticky();
+                  }}
+                >
+                  {renderMetaAddButton()}
+                </View>
+              </ScrollView>
+              <View
+                pointerEvents={isMetaAddStickyVisible ? 'auto' : 'none'}
+                style={[
+                  styles.metaAddRow,
+                  styles.metaAddRowSticky,
+                  isMetaAddStickyVisible && styles.metaAddRowStickyVisible,
+                ]}
+              >
+                {renderMetaAddButton()}
+              </View>
             </View>
             <Text style={styles.metaHelpText}>{strings.metadataModal.helpText}</Text>
           </MacWindow>
@@ -2040,16 +2140,19 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     marginBottom: 8,
   },
+  metaHeaderLeft: {
+    flex: 1,
+  },
   metaHeading: {
     color: '#e2e7ff',
     fontWeight: '600',
   },
   metaRowsStack: {
     flex: 1,
-    marginBottom: 8,
+    marginBottom: 0,
   },
   metaRowsContent: {
-    paddingBottom: 8,
+    paddingBottom: 0,
   },
   metaRow: {
     flexDirection: 'row',
@@ -2077,13 +2180,51 @@ const styles = StyleSheet.create({
   metaDeleteSpacer: {
     width: 32,
   },
-  metaButtonRow: {
+  metaRowsWrapper: {
+    flex: 1,
+    position: 'relative',
+  },
+  metaAddRow: {
     flexDirection: 'row',
-    marginBottom: 6,
+    justifyContent: 'center',
+    borderTopWidth: 1,
+    borderTopColor: '#1c2334',
+    backgroundColor: '#1c2233',
+  },
+  metaAddRowSticky: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    bottom: 0,
+    opacity: 0,
+  },
+  metaAddRowStickyVisible: {
+    opacity: 1,
+  },
+  metaAddButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    borderRadius: 999,
+    backgroundColor: '#fff',
+    borderWidth: 1,
+    borderColor: '#c5cbdc',
+    shadowColor: '#000',
+    shadowOpacity: 0.15,
+    shadowRadius: 4,
+    shadowOffset: { width: 0, height: 2 },
+    elevation: 2,
+  },
+  metaAddButtonLabel: {
+    color: '#0f172a',
+    fontWeight: '600',
   },
   metaHelpText: {
     color: '#8f97b0',
     fontSize: 12,
+    marginTop: 12,
   },
   templateModalContent: {
     paddingHorizontal: 20,
