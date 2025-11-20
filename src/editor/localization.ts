@@ -626,14 +626,11 @@ const translations: Record<SupportedLanguage, EditorStrings> = {
  */
 const shouldUseJapanese = (languageCode?: string | null, regionCode?: string | null) => {
   const normalizedLanguage = languageCode?.toLowerCase();
+  if (normalizedLanguage) {
+    return normalizedLanguage === 'ja';
+  }
   const normalizedRegion = regionCode?.toUpperCase();
-  if (normalizedLanguage === 'ja') {
-    return true;
-  }
-  if (normalizedRegion === 'JP') {
-    return true;
-  }
-  return false;
+  return normalizedRegion === 'JP';
 };
 
 /**
