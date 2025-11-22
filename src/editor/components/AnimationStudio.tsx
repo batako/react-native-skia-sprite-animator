@@ -236,6 +236,11 @@ export const AnimationStudio = ({
   const styles = useMemo(() => createThemedStyles(isDarkMode), [isDarkMode]);
   const headerChipIconColor = isDarkMode ? '#cfd7ff' : '#475569';
   const headerChipCloseColor = isDarkMode ? '#aebdff' : '#0f172a';
+  // subdued, theme-aware accent colors
+  const loopActiveColor = isDarkMode ? '#9fb5e1' : '#475569';
+  const loopInactiveColor = isDarkMode ? '#1f2430' : '#e2e8f0';
+  const autoplayActiveColor = isDarkMode ? '#9fb5e1' : '#475569';
+  const autoplayInactiveColor = isDarkMode ? '#6f7896' : '#94a3b8';
   const frames = editor.state.frames;
   const animations = useMemo(() => editor.state.animations ?? {}, [editor.state.animations]);
   const animationsMeta = useMemo(
@@ -1636,7 +1641,11 @@ export const AnimationStudio = ({
                 name="repeat"
                 onPress={handleToggleAnimationLoop}
                 disabled={!currentAnimationName}
-                style={currentAnimationLoop ? styles.loopButtonActive : styles.loopButtonInactive}
+                style={[
+                  styles.loopButtonBase,
+                  currentAnimationLoop ? { backgroundColor: loopActiveColor } : { backgroundColor: loopInactiveColor },
+                ]}
+                color={currentAnimationLoop ? '#ffffff' : undefined}
                 accessibilityLabel={
                   currentAnimationLoop
                     ? strings.animationStudio.disableLoop
@@ -1683,13 +1692,13 @@ export const AnimationStudio = ({
                       style={styles.autoPlayIndicatorButton}
                       hitSlop={{ top: 6, bottom: 6, left: 6, right: 6 }}
                     >
-                      <MaterialIcons
-                        name={
-                          autoPlayAnimationName === name ? 'play-circle' : 'play-circle-outline'
-                        }
-                        size={20}
-                        color={autoPlayAnimationName === name ? '#f6c343' : '#4d5878'}
-                      />
+              <MaterialIcons
+                name={
+                  autoPlayAnimationName === name ? 'play-circle' : 'play-circle-outline'
+                }
+                size={20}
+                color={autoPlayAnimationName === name ? autoplayActiveColor : autoplayInactiveColor}
+              />
                     </TouchableOpacity>
                     {renamingAnimation === name ? (
                       <>
@@ -2465,9 +2474,12 @@ const baseStyles = {
     marginRight: 8,
   },
   loopButtonActive: {
-    backgroundColor: '#28a745',
+    backgroundColor: '#00c2a8',
   },
   loopButtonInactive: {
+    backgroundColor: '#1f2430',
+  },
+  loopButtonBase: {
     backgroundColor: '#1f2430',
   },
   animationFpsRow: {
