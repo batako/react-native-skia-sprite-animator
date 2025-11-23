@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useState } from 'react';
 import {
   StyleSheet,
   Text,
+  Pressable,
   TouchableOpacity,
   View,
   FlatList,
@@ -196,6 +197,7 @@ export const FileBrowserModal = ({
 
   useEffect(() => {
     if (visible) {
+      setWindowVariant('default');
       refreshEntries();
     }
   }, [refreshEntries, visible]);
@@ -378,8 +380,9 @@ export const FileBrowserModal = ({
       title={strings.fileBrowser.title}
       onClose={handleClose}
       enableCompact={false}
+      variant={windowVariant}
       onVariantChange={setWindowVariant}
-      style={windowVariant === 'default' ? styles.window : undefined}
+      style={windowVariant === 'default' ? styles.window : styles.windowFullscreen}
       toolbarContent={toolbarContent}
       contentStyle={styles.content}
     >
@@ -437,13 +440,28 @@ export const FileBrowserModal = ({
   }
 
   return (
-    <View style={styles.overlayRoot} pointerEvents={visible ? 'auto' : 'none'}>
-      {visible ? (
-        <>
-          <View style={styles.backdrop} />
-          <View style={styles.modalOverlay}>{renderWindow()}</View>
-        </>
-      ) : null}
+    <View
+      style={[
+        styles.overlayRoot,
+        windowVariant === 'fullscreen' && styles.overlayRootFullscreen,
+      ]}
+      pointerEvents={visible ? 'auto' : 'none'}
+    >
+      <Pressable
+        style={[
+          styles.backdrop,
+          windowVariant === 'fullscreen' && styles.backdropFullscreen,
+        ]}
+        onPress={handleClose}
+      />
+      <View
+        style={[
+          styles.modalOverlay,
+          windowVariant === 'fullscreen' && styles.modalOverlayFullscreen,
+        ]}
+      >
+        {renderWindow()}
+      </View>
     </View>
   );
 };
@@ -452,10 +470,18 @@ const baseStyles = {
   overlayRoot: {
     ...StyleSheet.absoluteFillObject,
     zIndex: 999,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  overlayRootFullscreen: {
+    padding: 0,
   },
   backdrop: {
     ...StyleSheet.absoluteFillObject,
     backgroundColor: 'rgba(0,0,0,0.5)',
+  },
+  backdropFullscreen: {
+    padding: 0,
   },
   modalOverlay: {
     position: 'absolute',
@@ -466,6 +492,13 @@ const baseStyles = {
     alignItems: 'center',
     justifyContent: 'center',
     padding: 16,
+  },
+  modalOverlayFullscreen: {
+    padding: 0,
+    justifyContent: 'center',
+    alignItems: 'center',
+    width: '100%',
+    height: '100%',
   },
   toolbarContent: {
     flexDirection: 'row',
@@ -478,6 +511,14 @@ const baseStyles = {
     maxWidth: 760,
     minHeight: 520,
     maxHeight: '88%',
+  },
+  windowFullscreen: {
+    width: '100%',
+    maxWidth: '100%',
+    minWidth: 820,
+    minHeight: 760,
+    height: '100%',
+    maxHeight: '100%',
   },
   toolbarButton: {
     flexDirection: 'row',

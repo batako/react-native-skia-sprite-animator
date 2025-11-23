@@ -2,6 +2,7 @@ import React from 'react';
 import {
   Alert,
   Image,
+  Pressable,
   ScrollView,
   StyleSheet,
   Text,
@@ -14,7 +15,7 @@ import type { SpriteEditorApi } from '../hooks/useSpriteEditor';
 import { useSpriteStorage, type SpriteStorageController } from '../hooks/useSpriteStorage';
 import type { SpriteSummary, StoredSprite } from '../../storage/spriteStorage';
 import { IconButton } from './IconButton';
-import { MacWindow } from './MacWindow';
+import { MacWindow, type MacWindowVariant } from './MacWindow';
 import { getEditorStrings, formatEditorString } from '../localization';
 
 const THUMB_SIZE = 56;
@@ -55,6 +56,7 @@ export const StoragePanel = ({
   storageApi,
 }: StoragePanelProps) => {
   const strings = React.useMemo(() => getEditorStrings(), []);
+  const [windowVariant, setWindowVariant] = React.useState<MacWindowVariant>('default');
   const [saveName, setSaveName] = React.useState('');
   const [editingId, setEditingId] = React.useState<string | null>(null);
   const [renameDraft, setRenameDraft] = React.useState('');
@@ -87,10 +89,12 @@ export const StoragePanel = ({
 
   React.useEffect(() => {
     if (visible) {
+      setWindowVariant('default');
       refresh();
     } else {
       setEditingId(null);
       setRenameDraft('');
+      setWindowVariant('default');
     }
   }, [refresh, visible]);
 
@@ -377,14 +381,35 @@ export const StoragePanel = ({
   }
 
   return (
-    <View style={styles.overlayRoot}>
-      <View style={styles.backdrop} />
-      <MacWindow
-        title={strings.storagePanel.title}
-        onClose={onClose}
-        contentStyle={styles.windowContent}
-        enableCompact={false}
+    <View
+      style={[
+        styles.overlayRoot,
+        windowVariant === 'fullscreen' && styles.overlayFullscreen,
+      ]}
+      pointerEvents={visible ? 'auto' : 'none'}
+    >
+      <Pressable
+        style={[
+          styles.backdrop,
+          windowVariant === 'fullscreen' && styles.backdropFullscreen,
+        ]}
+        onPress={onClose}
+      />
+      <View
+        style={[
+          styles.overlayContent,
+          windowVariant === 'fullscreen' && styles.overlayContentFullscreen,
+        ]}
       >
+        <MacWindow
+          title={strings.storagePanel.title}
+          onClose={onClose}
+          variant={windowVariant}
+          onVariantChange={setWindowVariant}
+          contentStyle={styles.windowContent}
+          enableCompact={false}
+          style={windowVariant === 'fullscreen' ? styles.windowFullscreenVariant : undefined}
+        >
         <View style={styles.formRow}>
           <View style={{ flex: 1 }}>
             <Text style={styles.meta}>{strings.storagePanel.spriteNameLabel}</Text>
@@ -461,7 +486,8 @@ export const StoragePanel = ({
             {!sprites.length && <Text style={styles.empty}>{strings.storagePanel.emptyList}</Text>}
           </ScrollView>
         </View>
-      </MacWindow>
+        </MacWindow>
+      </View>
     </View>
   );
 };
@@ -473,14 +499,41 @@ const baseStyles = {
     justifyContent: 'center',
     alignItems: 'center',
   },
+  overlayFullscreen: {
+    padding: 0,
+  },
   backdrop: {
     ...StyleSheet.absoluteFillObject,
     backgroundColor: 'rgba(6, 10, 18, 0.8)',
+  },
+  backdropFullscreen: {
+    padding: 0,
+  },
+  overlayContent: {
+    alignSelf: 'center',
+    maxWidth: '100%',
+    width: '100%',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  overlayContentFullscreen: {
+    width: '100%',
+    height: '100%',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   windowContent: {
     paddingHorizontal: 12,
     paddingTop: 2,
     paddingBottom: 12,
+  },
+  windowFullscreenVariant: {
+    width: '100%',
+    maxWidth: '100%',
+    minWidth: 820,
+    minHeight: 760,
+    height: '100%',
+    maxHeight: '100%',
   },
   listContainer: {
     flex: 1,

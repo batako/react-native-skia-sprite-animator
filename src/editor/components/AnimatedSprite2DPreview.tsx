@@ -44,6 +44,7 @@ export const AnimatedSprite2DPreview = ({
   const strings = useMemo(() => getEditorStrings(), []);
   const colorScheme = useColorScheme();
   const isDarkMode = colorScheme !== 'light';
+  const zoomControlColor = isDarkMode ? '#fff' : '#0f172a';
   const styles = useMemo(() => createThemedStyles(isDarkMode), [isDarkMode]);
   const rawResource = useMemo(
     () =>
@@ -62,17 +63,24 @@ export const AnimatedSprite2DPreview = ({
   }, [resource]);
 
   const sceneBounds = useMemo(() => {
-    if (!resolvedResource.frames.length) {
+    const sequence = animationName ? resolvedResource.animations[animationName] ?? [] : [];
+    const framesForBounds =
+      sequence.length > 0
+        ? sequence
+            .map((idx) => resolvedResource.frames[idx])
+            .filter((frame): frame is typeof resolvedResource.frames[number] => Boolean(frame))
+        : resolvedResource.frames;
+    if (!framesForBounds.length) {
       return { width: 64, height: 64 };
     }
-    return resolvedResource.frames.reduce(
+    return framesForBounds.reduce(
       (acc, frame) => ({
         width: Math.max(acc.width, frame.width),
         height: Math.max(acc.height, frame.height),
       }),
       { width: 0, height: 0 },
     );
-  }, [resolvedResource.frames]);
+  }, [animationName, resolvedResource.animations, resolvedResource.frames]);
 
   const windowSize = useWindowDimensions();
   const previewHeight = useMemo(() => {
@@ -221,7 +229,7 @@ export const AnimatedSprite2DPreview = ({
                 onPress={() => adjustZoom(-0.25)}
                 accessibilityLabel={strings.general.zoomOut}
                 style={styles.zoomButton}
-                color="#fff"
+                color={zoomControlColor}
               />
               <Pressable
                 onPress={resetZoom}
@@ -229,14 +237,21 @@ export const AnimatedSprite2DPreview = ({
                 accessibilityLabel={strings.general.resetZoom}
                 style={styles.zoomTextButton}
               >
-                <Text style={styles.zoomLabel}>{Math.round(zoom * 100)}%</Text>
+                <Text
+                  style={[
+                    styles.zoomLabel,
+                    !isDarkMode && styles.zoomLabelLight,
+                  ]}
+                >
+                  {Math.round(zoom * 100)}%
+                </Text>
               </Pressable>
               <IconButton
                 name="zoom-in"
                 onPress={() => adjustZoom(0.25)}
                 accessibilityLabel={strings.general.zoomIn}
                 style={styles.zoomButton}
-                color="#fff"
+                color={zoomControlColor}
               />
             </View>
           </View>
@@ -370,6 +385,9 @@ const baseStyles = {
     fontSize: 12,
     minWidth: 50,
     textAlign: 'center',
+  },
+  zoomLabelLight: {
+    color: '#0f172a',
   },
   playbackControls: {
     flexDirection: 'row',

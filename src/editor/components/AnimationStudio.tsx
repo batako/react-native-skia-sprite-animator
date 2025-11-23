@@ -4,6 +4,7 @@ import {
   Image,
   Linking,
   Platform,
+  Pressable,
   ScrollView,
   StyleSheet,
   Text,
@@ -270,6 +271,7 @@ export const AnimationStudio = ({
   const [templateStatus, setTemplateStatus] = useState<string | null>(null);
   const [isMetaModalVisible, setMetaModalVisible] = useState(false);
   const [isTemplateModalVisible, setTemplateModalVisible] = useState(false);
+  const [metaModalVariant, setMetaModalVariant] = useState<MacWindowVariant>('default');
   const [templateModalVariant, setTemplateModalVariant] = useState<MacWindowVariant>('default');
   const storageApi = storageController ?? defaultStorageController;
   const activeSpriteName = useMemo(() => {
@@ -358,6 +360,11 @@ export const AnimationStudio = ({
       styles.metaAddButtonLabel,
     ],
   );
+  const handleCloseFramePicker = useCallback(() => {
+    setFramePickerVariant('default');
+    setFramePickerVisible(false);
+    setFramePickerImage(null);
+  }, []);
 
   useEffect(() => {
     if (!fileActionMessage) {
@@ -473,12 +480,14 @@ export const AnimationStudio = ({
 
   const handleOpenMetaModal = useCallback(() => {
     resetMeta();
+    setMetaModalVariant('default');
     setMetaModalVisible(true);
   }, [resetMeta]);
 
   const handleCloseMetaModal = useCallback(() => {
     resetMeta();
     setMetaModalVisible(false);
+    setMetaModalVariant('default');
   }, [resetMeta]);
 
   const handleOpenTemplateModal = useCallback(() => {
@@ -947,18 +956,19 @@ export const AnimationStudio = ({
       return;
     }
 
-    if (animationChanged) {
-      setTimelineSelection(() => 0);
+    const needsReset =
+      animationChanged || selectedTimelineIndex === null || selectedTimelineIndex >= nextSequence.length;
+    if (needsReset) {
+      selectTimelineFrame(0, nextSequence);
       return;
     }
-
-    setTimelineSelection((prev) => {
-      if (prev === null || prev >= nextSequence.length) {
-        return 0;
-      }
-      return prev;
-    });
-  }, [animations, currentAnimationName, setTimelineSelection]);
+  }, [
+    animations,
+    currentAnimationName,
+    selectedTimelineIndex,
+    selectTimelineFrame,
+    setTimelineSelection,
+  ]);
 
   const skipTimelineSelectionSeekRef = useRef(false);
   const ignoreNextTimelineCursorRef = useRef(false);
@@ -1226,9 +1236,12 @@ export const AnimationStudio = ({
           if (previousAnimation) {
             setActiveAnimation(previousAnimation);
           }
-          if (previousTimelineIndex !== null && nextSequence.length) {
-            const clamped = Math.max(0, Math.min(nextSequence.length - 1, previousTimelineIndex));
-            setTimelineSelection(clamped);
+          if (nextSequence.length) {
+            const targetIndex =
+              previousTimelineIndex !== null
+                ? Math.max(0, Math.min(nextSequence.length - 1, previousTimelineIndex))
+                : 0;
+            selectTimelineFrame(targetIndex, nextSequence);
           }
         });
       });
@@ -1240,6 +1253,7 @@ export const AnimationStudio = ({
       resolveFrameImageUri,
       setActiveAnimation,
       setTimelineSelection,
+      selectTimelineFrame,
       updateSequence,
     ],
   );
@@ -1302,16 +1316,31 @@ export const AnimationStudio = ({
     (name: string) => {
       const next = { ...animations };
       delete next[name];
-      editor.setAnimations(next);
+      const remaining = Object.keys(next);
       const nextAnimationsMeta = { ...animationsMeta };
       delete nextAnimationsMeta[name];
-      editor.setAnimationsMeta(nextAnimationsMeta);
+
+      // If this was the last animation, clear frames as well to avoid orphaned indices carrying over.
+      if (!remaining.length) {
+        editor.reset({
+          frames: [],
+          animations: {},
+          animationsMeta: {},
+          autoPlayAnimation: null,
+          meta: editor.state.meta,
+        });
+        setTimelineSelection(null);
+        setActiveAnimation(null);
+      } else {
+        editor.setAnimations(next);
+        editor.setAnimationsMeta(nextAnimationsMeta);
+        if (activeAnimation === name) {
+          setActiveAnimation(remaining[0]);
+        }
+      }
+
       if (autoPlayAnimationName === name) {
         editor.setAutoPlayAnimation(null);
-      }
-      if (activeAnimation === name) {
-        const remaining = Object.keys(next);
-        setActiveAnimation(remaining.length ? remaining[0] : null);
       }
     },
     [
@@ -1321,6 +1350,7 @@ export const AnimationStudio = ({
       editor,
       autoPlayAnimationName,
       setActiveAnimation,
+      setTimelineSelection,
     ],
   );
 
@@ -1768,18 +1798,37 @@ export const AnimationStudio = ({
         </View>
       </View>
       {isFramePickerVisible ? (
-        <View style={styles.modalOverlayRoot}>
-          <View style={styles.modalOverlay}>
+        <View
+          style={[
+            styles.modalOverlayRoot,
+            framePickerVariant === 'fullscreen' && styles.modalOverlayFullscreen,
+          ]}
+          pointerEvents="auto"
+        >
+          <Pressable
+            style={[
+              styles.modalOverlay,
+              framePickerVariant === 'fullscreen' && styles.modalOverlayFullscreen,
+            ]}
+            onPress={handleCloseFramePicker}
+          />
+          <View
+            style={[
+              styles.modalContentWrap,
+              framePickerVariant === 'fullscreen' && styles.modalContentFullscreen,
+            ]}
+          >
             <MacWindow
               title={strings.framePicker.title}
+              variant={framePickerVariant}
               onVariantChange={setFramePickerVariant}
-              onClose={() => {
-                setFramePickerVariant('default');
-                setFramePickerVisible(false);
-                setFramePickerImage(null);
-              }}
+              onClose={handleCloseFramePicker}
               enableCompact={false}
-              style={framePickerVariant === 'default' ? styles.framePickerWindow : undefined}
+              style={
+                framePickerVariant === 'default'
+                  ? styles.framePickerWindow
+                  : styles.framePickerWindowFullscreen
+              }
               contentStyle={styles.framePickerContent}
             >
               <FrameGridSelector
@@ -1829,14 +1878,32 @@ export const AnimationStudio = ({
         }}
       />
       {isMetaModalVisible ? (
-        <View style={styles.modalOverlayRoot}>
-          <View style={styles.modalOverlay}>
+        <Pressable
+          style={[
+            styles.modalOverlayRoot,
+            styles.modalOverlay,
+            metaModalVariant === 'fullscreen' && styles.modalOverlayFullscreen,
+          ]}
+          onPress={handleCloseMetaModal}
+        >
+          <Pressable
+            style={[
+              styles.modalContentWrap,
+              metaModalVariant === 'fullscreen' && styles.modalContentFullscreen,
+            ]}
+            onPress={() => {}}
+          >
             <MacWindow
               title={strings.metadataModal.title}
               onClose={handleCloseMetaModal}
+              variant={metaModalVariant}
+              onVariantChange={setMetaModalVariant}
               contentStyle={styles.metaModalContent}
               enableCompact={false}
-              style={styles.metaModalWindow}
+              style={[
+                styles.metaModalWindow,
+                metaModalVariant === 'fullscreen' && styles.metaModalWindowFullscreen,
+              ]}
             >
               <View style={styles.metaHeaderRow}>
                 <View style={styles.metaHeaderLeft}>
@@ -1922,19 +1989,36 @@ export const AnimationStudio = ({
               </View>
               <Text style={styles.metaHelpText}>{strings.metadataModal.helpText}</Text>
             </MacWindow>
-          </View>
-        </View>
+          </Pressable>
+        </Pressable>
       ) : null}
       {isTemplateModalVisible ? (
-        <View style={styles.modalOverlayRoot}>
-          <View style={styles.modalOverlay}>
+        <Pressable
+          style={[
+            styles.modalOverlayRoot,
+            styles.modalOverlay,
+            templateModalVariant === 'fullscreen' && styles.modalOverlayFullscreen,
+          ]}
+          onPress={handleCloseTemplateModal}
+        >
+          <Pressable
+            style={[
+              styles.modalContentWrap,
+              templateModalVariant === 'fullscreen' && styles.modalContentFullscreen,
+            ]}
+            onPress={() => {}}
+          >
             <MacWindow
               title={strings.templateModal.title}
               onClose={handleCloseTemplateModal}
+              variant={templateModalVariant}
               contentStyle={styles.templateModalContent}
               enableCompact={false}
               onVariantChange={setTemplateModalVariant}
-              style={styles.templateModalWindow}
+              style={[
+                styles.templateModalWindow,
+                templateModalVariant === 'fullscreen' && styles.templateModalWindowFullscreen,
+              ]}
             >
               <View style={styles.templateContent}>
                 <Text style={styles.templateDescription}>{strings.templateModal.description}</Text>
@@ -2021,8 +2105,8 @@ export const AnimationStudio = ({
                 ) : null}
               </View>
             </MacWindow>
-          </View>
-        </View>
+          </Pressable>
+        </Pressable>
       ) : null}
     </View>
   );
@@ -2279,8 +2363,19 @@ const baseStyles = {
     paddingVertical: 12,
   },
   metaModalWindow: {
+    width: '92%',
+    maxWidth: 1200,
+    minWidth: 720,
     minHeight: 520,
     maxHeight: '90%',
+  },
+  metaModalWindowFullscreen: {
+    width: '100%',
+    maxWidth: '100%',
+    minWidth: 820,
+    minHeight: 760,
+    height: '100%',
+    maxHeight: '100%',
   },
   metaHeaderRow: {
     flexDirection: 'row',
@@ -2380,6 +2475,14 @@ const baseStyles = {
   templateModalWindow: {
     minHeight: 520,
     maxHeight: '90%',
+  },
+  templateModalWindowFullscreen: {
+    width: '100%',
+    maxWidth: '100%',
+    minWidth: 820,
+    minHeight: 760,
+    height: '100%',
+    maxHeight: '100%',
   },
   templateContent: {
     flex: 1,
@@ -2569,12 +2672,22 @@ const baseStyles = {
     alignItems: 'center',
   },
   modalOverlay: {
-    width: '100%',
-    height: '100%',
+    ...StyleSheet.absoluteFillObject,
     backgroundColor: 'rgba(0,0,0,0.65)',
+    padding: 16,
     justifyContent: 'center',
     alignItems: 'center',
-    padding: 16,
+  },
+  modalOverlayFullscreen: {
+    padding: 0,
+  },
+  modalContentWrap: {
+    alignSelf: 'center',
+    maxWidth: '100%',
+  },
+  modalContentFullscreen: {
+    width: '100%',
+    height: '100%',
   },
   framePickerWindow: {
     width: 980,
@@ -2583,6 +2696,14 @@ const baseStyles = {
     maxHeight: '96%',
     minWidth: 590,
     minHeight: 600,
+  },
+  framePickerWindowFullscreen: {
+    width: '100%',
+    maxWidth: '100%',
+    minWidth: 820,
+    minHeight: 760,
+    height: '100%',
+    maxHeight: '100%',
   },
   framePickerContent: {
     flex: 1,
