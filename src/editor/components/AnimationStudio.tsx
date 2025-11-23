@@ -959,7 +959,7 @@ export const AnimationStudio = ({
     const needsReset =
       animationChanged || selectedTimelineIndex === null || selectedTimelineIndex >= nextSequence.length;
     if (needsReset) {
-      selectTimelineFrame(0, nextSequence);
+      selectTimelineFrame(0, nextSequence, nextName);
       return;
     }
   }, [
@@ -1241,7 +1241,7 @@ export const AnimationStudio = ({
               previousTimelineIndex !== null
                 ? Math.max(0, Math.min(nextSequence.length - 1, previousTimelineIndex))
                 : 0;
-            selectTimelineFrame(targetIndex, nextSequence);
+            selectTimelineFrame(targetIndex, nextSequence, previousAnimation);
           }
         });
       });
@@ -1446,14 +1446,15 @@ export const AnimationStudio = ({
   };
 
   const selectTimelineFrame = useCallback(
-    (timelineIndex: number, sequenceOverride?: number[]) => {
+    (timelineIndex: number, sequenceOverride?: number[], animationNameOverride?: string | null) => {
       setTimelineSelection(timelineIndex);
       const sequence = sequenceOverride ?? currentSequence;
       const frameIndex = sequence[timelineIndex];
       if (typeof frameIndex === 'number') {
+        const animationForSeek = animationNameOverride ?? currentAnimationName ?? null;
         seekFrame(frameIndex, {
           cursor: timelineIndex,
-          animationName: currentAnimationName ?? null,
+          animationName: animationForSeek,
           sequenceOverride: sequence,
         });
       }
