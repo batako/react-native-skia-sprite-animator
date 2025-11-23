@@ -1415,13 +1415,18 @@ export const AnimationStudio = ({
       selectedTimelineIndex !== null ? selectedTimelineIndex + 1 : currentSequence.length;
     const next = [...currentSequence];
     next.splice(insertIndex, 0, ...timelineClipboard);
-    updateSequence(next, (prevMultipliers) => {
+    const nextSequence = updateSequence(next, (prevMultipliers) => {
       const result = prevMultipliers.slice();
       const filler = new Array(timelineClipboard.length).fill(DEFAULT_FRAME_MULTIPLIER);
       result.splice(insertIndex, 0, ...filler);
       return result;
     });
-    setTimelineSelection(insertIndex);
+    if (nextSequence.length) {
+      ignoreNextTimelineCursorRef.current = true;
+      selectTimelineFrame(insertIndex, nextSequence);
+    } else {
+      setTimelineSelection(insertIndex);
+    }
   };
 
   const handleRemoveTimelineFrame = () => {
