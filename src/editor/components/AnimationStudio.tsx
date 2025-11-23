@@ -1428,6 +1428,7 @@ export const AnimationStudio = ({
     if (selectedTimelineIndex === null) {
       return;
     }
+    const targetIndex = Math.max(0, selectedTimelineIndex - 1);
     const next = [...currentSequence];
     next.splice(selectedTimelineIndex, 1);
     updateSequence(next, (prevMultipliers) => {
@@ -1439,8 +1440,15 @@ export const AnimationStudio = ({
       if (prev === null) {
         return prev;
       }
-      return Math.max(0, Math.min(next.length - 1, prev));
+      const clamped = Math.max(0, Math.min(next.length - 1, targetIndex));
+      return clamped;
     });
+    if (next.length) {
+      ignoreNextTimelineCursorRef.current = true;
+      selectTimelineFrame(Math.max(0, Math.min(next.length - 1, targetIndex)), next);
+    } else {
+      setTimelineSelection(null);
+    }
   };
 
   const selectTimelineFrame = useCallback(
