@@ -1,6 +1,6 @@
 /* eslint-disable jsdoc/require-jsdoc */
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import type { SpriteAnimatorDirection } from '../SpriteAnimator';
+import type { PlaybackDirection } from '../spriteTypes';
 import type {
   AnimatedSpriteFrameChangeEvent,
   SpriteFramesResource,
@@ -19,7 +19,7 @@ export interface UseSpriteAnimationTickerOptions {
   speedScale?: number;
   onAnimationFinished?: (name: string | null) => void;
   onFrameChanged?: (event: AnimatedSpriteFrameChangeEvent) => void;
-  direction?: SpriteAnimatorDirection;
+  direction?: PlaybackDirection;
 }
 
 export interface SpriteAnimationTickerResult {

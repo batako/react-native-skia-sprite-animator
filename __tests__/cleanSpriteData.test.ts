@@ -1,5 +1,5 @@
 import { cleanSpriteData } from '../src/editor/utils/cleanSpriteData';
-import type { SpriteFrame, SpriteData } from '../src/SpriteAnimator';
+import type { SpriteFrame, SpriteData } from '../src/spriteTypes';
 
 describe('cleanSpriteData', () => {
   const createFrame = (x: number, overrides: Partial<SpriteFrame> = {}): SpriteFrame => ({

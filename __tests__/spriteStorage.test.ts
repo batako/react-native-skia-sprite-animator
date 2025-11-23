@@ -7,7 +7,7 @@ import {
   getSpriteStoragePaths,
   clearSpriteStorage,
 } from '../src/storage/spriteStorage';
-import type { SpriteFrame } from '../src/SpriteAnimator';
+import type { SpriteFrame } from '../src/spriteTypes';
 
 jest.mock('expo-file-system/legacy');
 

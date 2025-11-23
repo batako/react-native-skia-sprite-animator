@@ -1,4 +1,4 @@
-import type { SpriteAnimations, SpriteAnimationsMeta } from '../../SpriteAnimator';
+import type { SpriteAnimations, SpriteAnimationsMeta } from '../../spriteTypes';
 import type { SpriteEditorFrame, SpriteEditorSnapshot, SpriteEditorState } from '../types';
 
 /**

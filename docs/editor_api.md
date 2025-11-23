@@ -6,8 +6,6 @@ v0.3 introduces headless editor primitives so you can build custom sprite editor
 2. `SpriteEditUtils` – geometry helpers for snapping, hit-testing, and layout math.
 3. Templates – `SpriteTemplate` interface plus `DefaultSpriteTemplate` for spriteStorage-compatible JSON.
 
-> **Note:** The legacy `SpriteAnimator` component stays available through v0.4.0 but will be **removed starting with v0.4.1**. Prefer the newer `AnimatedSprite2D` runtime when wiring previews or playback controls.
-
 ---
 
 ## useSpriteEditor hook
@@ -97,7 +95,7 @@ const timeline = useTimelineEditor({ onBeforeSelectionChange: commitPendingEdits
 - `clearClipboard()`: Clears the stored clipboard payload.
 - `setMeasuredHeight(height)` / `updateFilledHeight(updater)`: Track scroll container measurements to keep animation lists aligned next to the timeline.
 
-Use it alongside `useSpriteEditor` to keep toolbar buttons, contextual menus, and multiplier inputs in sync with the actual cursor inside `SpriteAnimator`.
+Use it alongside `useSpriteEditor` to keep toolbar buttons, contextual menus, and multiplier inputs in sync with the actual cursor inside your preview runtime.
 
 ---
 
@@ -165,24 +163,27 @@ You can provide a custom `controller` to back these operations with your own fil
 
 ## useEditorIntegration hook
 
-`useEditorIntegration` ties `useSpriteEditor` state to an animation preview. Historically this targeted the `SpriteAnimator` component, but you can feed the returned `runtimeData` into `AnimatedSprite2D` as well. It exposes imperative handlers (play/pause/seek), playback speed, selected animations, and refs so that your preview widgets stay synchronized with the editor state.
+`useEditorIntegration` ties `useSpriteEditor` state to an animation preview. It exposes imperative handlers (play/pause/seek), playback speed, selected animations, and refs so that your preview widgets stay synchronized with the editor state.
 
 ```tsx
 import {
   useEditorIntegration,
   useSpriteEditor,
-  SpriteAnimator,
+  AnimatedSprite2D,
 } from 'react-native-skia-sprite-animator';
 
 const editor = useSpriteEditor();
 const integration = useEditorIntegration({ editor });
 
 return (
-  <SpriteAnimator
-    ref={integration.animatorRef}
-    image={spriteSheet}
-    data={integration.runtimeData}
+  <AnimatedSprite2D
+    frames={integration.runtimeData}
+    animation={integration.activeAnimation}
+    frame={integration.frameCursor}
+    playing={integration.isPlaying}
+    speedScale={integration.speedScale}
     onFrameChange={integration.onFrameChange}
+    onAnimationEnd={integration.onAnimationEnd}
   />
 );
 ```
@@ -193,7 +194,7 @@ The returned object (exported as `EditorIntegration`) includes helpers such as `
 
 ## AnimationStudio component
 
-`AnimationStudio` is a ready-made editor surface that combines every hook above: frame list, metadata editor, sprite JSON import/export, sprite storage modal, timeline panel, and the SpriteAnimator preview. Bring your own editor instance, integration hook result, and sprite sheet image.
+`AnimationStudio` is a ready-made editor surface that combines every hook above: frame list, metadata editor, sprite JSON import/export, sprite storage modal, timeline panel, and the AnimatedSprite2D preview. Bring your own editor instance, integration hook result, and sprite sheet image.
 
 ```tsx
 import {
@@ -217,7 +218,7 @@ Additional props:
 
 ## Serialization helpers
 
-`exportJSON()` and `importJSON()` always use the built-in `DefaultSpriteTemplate`, which mirrors the spriteStorage payload (frames are exported without ids). Use it whenever you need to persist editor state or preview the JSON handed to `SpriteAnimator`.
+`exportJSON()` and `importJSON()` always use the built-in `DefaultSpriteTemplate`, which mirrors the spriteStorage payload (frames are exported without ids). Use it whenever you need to persist editor state or preview the JSON handed to `AnimatedSprite2D` or `spriteStorage`.
 
 ```ts
 const payload = editor.exportJSON();
@@ -245,7 +246,7 @@ Geometry helpers are UI-agnostic utilities intended for marquee tools, selection
 
 ## Migration notes (v0.2 → v0.3)
 
-- Renderer inputs remain unchanged: `SpriteAnimator` and `spriteStorage` still expect the v0.2 schema.
+- Renderer inputs remain unchanged: `AnimatedSprite2D` and `spriteStorage` still expect the v0.2 schema.
 - Editor state tracks frames by `id` internally, but `exportJSON()` strips ids during export so runtime components continue to work without modification.
 - Use `DefaultSpriteTemplate.fromJSON()` to load legacy spriteStorage payloads into the editor before editing.
 - Undo depth now defaults to 50 snapshots; adjust `historyLimit` if you need more/less aggressive memory usage.

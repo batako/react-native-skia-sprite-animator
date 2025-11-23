@@ -441,17 +441,11 @@ export const FileBrowserModal = ({
 
   return (
     <View
-      style={[
-        styles.overlayRoot,
-        windowVariant === 'fullscreen' && styles.overlayRootFullscreen,
-      ]}
+      style={[styles.overlayRoot, windowVariant === 'fullscreen' && styles.overlayRootFullscreen]}
       pointerEvents={visible ? 'auto' : 'none'}
     >
       <Pressable
-        style={[
-          styles.backdrop,
-          windowVariant === 'fullscreen' && styles.backdropFullscreen,
-        ]}
+        style={[styles.backdrop, windowVariant === 'fullscreen' && styles.backdropFullscreen]}
         onPress={handleClose}
       />
       <View

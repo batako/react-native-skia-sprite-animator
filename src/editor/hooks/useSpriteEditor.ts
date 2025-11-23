@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import type { SpriteAnimations, SpriteAnimationsMeta, SpriteData } from '../../SpriteAnimator';
+import type { SpriteAnimations, SpriteAnimationsMeta, SpriteData } from '../../spriteTypes';
 import { DefaultSpriteTemplate } from '../templates/DefaultSpriteTemplate';
 import type {
   SpriteEditorFrame,

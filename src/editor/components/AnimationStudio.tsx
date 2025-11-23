@@ -32,7 +32,7 @@ import {
 } from '../../storage/spriteStorage';
 import { useMetadataManager } from '../hooks/useMetadataManager';
 import { useTimelineEditor } from '../hooks/useTimelineEditor';
-import type { SpriteAnimationMeta, SpriteAnimationsMeta } from '../../SpriteAnimator';
+import type { SpriteAnimationMeta, SpriteAnimationsMeta } from '../../spriteTypes';
 import type { SpriteEditorApi } from '../hooks/useSpriteEditor';
 import type { SpriteEditorFrame } from '../types';
 import type { DataSourceParam } from '@shopify/react-native-skia';
@@ -77,7 +77,7 @@ export interface SpriteStorageController {
 export interface AnimationStudioProps {
   /** Sprite editor instance that stores the canvas state. */
   editor: SpriteEditorApi;
-  /** Integration between the editor and SpriteAnimator preview. */
+  /** Integration between the editor and preview runtime. */
   integration: EditorIntegration;
   /** Sprite sheet image source used throughout the studio. */
   image: DataSourceParam;
@@ -944,6 +944,22 @@ export const AnimationStudio = ({
     setActiveAnimation,
   ]);
 
+  const selectTimelineFrame = useCallback(
+    (timelineIndex: number, sequenceOverride?: number[]) => {
+      setTimelineSelection(timelineIndex);
+      const sequence = sequenceOverride ?? currentSequence;
+      const frameIndex = sequence[timelineIndex];
+      if (typeof frameIndex === 'number') {
+        seekFrame(frameIndex, {
+          cursor: timelineIndex,
+          animationName: currentAnimationName ?? null,
+          sequenceOverride: sequence,
+        });
+      }
+    },
+    [currentAnimationName, currentSequence, seekFrame, setTimelineSelection],
+  );
+
   const lastAnimationRef = useRef<string | null>(null);
   useEffect(() => {
     const nextName = currentAnimationName ?? null;
@@ -957,7 +973,9 @@ export const AnimationStudio = ({
     }
 
     const needsReset =
-      animationChanged || selectedTimelineIndex === null || selectedTimelineIndex >= nextSequence.length;
+      animationChanged ||
+      selectedTimelineIndex === null ||
+      selectedTimelineIndex >= nextSequence.length;
     if (needsReset) {
       selectTimelineFrame(0, nextSequence);
       return;
@@ -1200,7 +1218,6 @@ export const AnimationStudio = ({
         return;
       }
       const previousAnimation = currentAnimationName;
-      const previousTimelineIndex = selectedTimelineIndex;
 
       // Clear selection before inserting frames; keeping the previous selection active while frames are appended causes the timeline state to toggle rapidly
       setActiveAnimation(null);
@@ -1239,7 +1256,7 @@ export const AnimationStudio = ({
           if (nextSequence.length) {
             const targetIndex = Math.max(0, nextSequence.length - newIndexes.length); // first of newly added frames
             ignoreNextTimelineCursorRef.current = true;
-            selectTimelineFrame(targetIndex, nextSequence, previousAnimation ?? currentAnimationName);
+            selectTimelineFrame(targetIndex, nextSequence);
           }
         });
       });
@@ -1247,7 +1264,6 @@ export const AnimationStudio = ({
     [
       currentAnimationName,
       editor,
-      selectedTimelineIndex,
       resolveFrameImageUri,
       setActiveAnimation,
       setTimelineSelection,
@@ -1455,22 +1471,6 @@ export const AnimationStudio = ({
       setTimelineSelection(null);
     }
   };
-
-  const selectTimelineFrame = useCallback(
-    (timelineIndex: number, sequenceOverride?: number[]) => {
-      setTimelineSelection(timelineIndex);
-      const sequence = sequenceOverride ?? currentSequence;
-      const frameIndex = sequence[timelineIndex];
-      if (typeof frameIndex === 'number') {
-        seekFrame(frameIndex, {
-          cursor: timelineIndex,
-          animationName: currentAnimationName ?? null,
-          sequenceOverride: sequence,
-        });
-      }
-    },
-    [currentAnimationName, currentSequence, seekFrame, setTimelineSelection],
-  );
 
   const handleMoveTimelineFrame = (direction: -1 | 1) => {
     if (selectedTimelineIndex === null) {

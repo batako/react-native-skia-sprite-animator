@@ -11,7 +11,7 @@ import {
 } from 'react-native';
 import type { ImageSourcePropType } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
-import type { SpriteAnimationsMeta } from '../../SpriteAnimator';
+import type { SpriteAnimationsMeta } from '../../spriteTypes';
 import type { SpriteEditorFrame } from '../types';
 import { IconButton } from './IconButton';
 import { TimelineControls } from './TimelineControls';

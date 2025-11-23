@@ -4,7 +4,7 @@ import type {
   SpriteAnimationsMeta,
   SpriteFrame,
   SpriteData,
-} from '../../SpriteAnimator';
+} from '../../spriteTypes';
 
 type SpriteDataLike<TFrame extends SpriteFrame> = Pick<
   SpriteData,

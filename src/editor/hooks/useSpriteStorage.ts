@@ -5,7 +5,7 @@ import type {
   SpriteAnimationsMeta,
   SpriteData,
   SpriteFrame,
-} from '../../SpriteAnimator';
+} from '../../spriteTypes';
 import {
   deleteSprite as defaultDeleteSprite,
   listSprites as defaultListSprites,

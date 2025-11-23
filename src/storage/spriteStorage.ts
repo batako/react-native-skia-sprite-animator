@@ -1,5 +1,5 @@
 import * as FileSystem from 'expo-file-system/legacy';
-import type { SpriteAnimations, SpriteAnimationsMeta, SpriteFrame } from '../SpriteAnimator';
+import type { SpriteAnimations, SpriteAnimationsMeta, SpriteFrame } from '../spriteTypes';
 
 /**
  * Metadata describing stored sprite assets.

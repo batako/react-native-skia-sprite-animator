@@ -1,7 +1,13 @@
 import React from 'react';
 import { ScrollView, StyleSheet, Text, View, Pressable } from 'react-native';
-import { SpriteAnimator } from 'react-native-skia-sprite-animator';
-import type { DataSourceParam } from '@shopify/react-native-skia';
+import {
+  AnimatedSprite2D,
+  type SpriteData,
+  type SpriteFramesResource,
+  type FrameImageSource,
+  type FrameImageSubset,
+} from 'react-native-skia-sprite-animator';
+import type { DataSourceParam, SkImage } from '@shopify/react-native-skia';
 import type { EditorIntegration } from '../hooks/useEditorIntegration';
 import { IconButton } from './IconButton';
 
@@ -11,16 +17,15 @@ import { IconButton } from './IconButton';
 export interface PlaybackControlsProps {
   /** Combined editor + animator integration helpers. */
   integration: EditorIntegration;
-  /** Sprite sheet image fed into SpriteAnimator. */
+  /** Sprite sheet image fed into AnimatedSprite2D. */
   image: DataSourceParam;
 }
 
 /**
- * Renders preview playback controls around {@link SpriteAnimator}.
+ * Renders preview playback controls around {@link AnimatedSprite2D}.
  */
 export const PlaybackControls = ({ integration, image }: PlaybackControlsProps) => {
   const {
-    animatorRef,
     runtimeData,
     availableAnimations,
     activeAnimation,
@@ -33,9 +38,69 @@ export const PlaybackControls = ({ integration, image }: PlaybackControlsProps) 
     setSpeedScale,
     isPlaying,
     frameCursor,
-    onFrameChange,
+    onAnimationEnd,
     selectedFrameIndex,
   } = integration;
+
+  const toFrameImage = (source: DataSourceParam | undefined, subset?: FrameImageSubset | null) => {
+    if (!source) {
+      return null;
+    }
+    if (typeof source === 'number') {
+      return subset
+        ? ({ type: 'require', assetId: source, subset } as FrameImageSource)
+        : ({ type: 'require', assetId: source } as FrameImageSource);
+    }
+    if (typeof source === 'string') {
+      return subset
+        ? ({ type: 'uri', uri: source, subset } as FrameImageSource)
+        : ({ type: 'uri', uri: source } as FrameImageSource);
+    }
+    return subset
+      ? ({ type: 'skImage', image: source as unknown as SkImage, subset } as FrameImageSource)
+      : ({ type: 'skImage', image: source as unknown as SkImage } as FrameImageSource);
+  };
+
+  const buildResource = React.useMemo((): SpriteFramesResource | null => {
+    const frames: SpriteFramesResource['frames'] = [];
+    for (let i = 0; i < runtimeData.frames.length; i += 1) {
+      const frame = runtimeData.frames[i] as SpriteData['frames'][number];
+      const subset =
+        typeof frame.x === 'number' && typeof frame.y === 'number'
+          ? ({ x: frame.x, y: frame.y, width: frame.w, height: frame.h } as FrameImageSubset)
+          : undefined;
+      const imageSource: FrameImageSource | null =
+        (frame.imageUri
+          ? subset
+            ? ({ type: 'uri', uri: frame.imageUri, subset } as FrameImageSource)
+            : ({ type: 'uri', uri: frame.imageUri } as FrameImageSource)
+          : null) ?? toFrameImage(image, subset);
+      if (!imageSource) {
+        return null;
+      }
+      frames.push({
+        id: `frame-${i}`,
+        width: frame.w,
+        height: frame.h,
+        duration: frame.duration,
+        image: imageSource,
+      });
+    }
+    return {
+      frames,
+      animations: runtimeData.animations ?? {},
+      animationsMeta: runtimeData.animationsMeta,
+      autoPlayAnimation: runtimeData.autoPlayAnimation ?? null,
+      meta: runtimeData.meta ?? {},
+    };
+  }, [
+    image,
+    runtimeData.animations,
+    runtimeData.animationsMeta,
+    runtimeData.autoPlayAnimation,
+    runtimeData.frames,
+    runtimeData.meta,
+  ]);
 
   const handleSelectAnimation = (name: string | null) => {
     setActiveAnimation(name);
@@ -54,14 +119,19 @@ export const PlaybackControls = ({ integration, image }: PlaybackControlsProps) 
     <View style={styles.container}>
       <Text style={styles.heading}>Animator Preview</Text>
       <View style={styles.previewCard}>
-        <SpriteAnimator
-          ref={animatorRef}
-          image={image}
-          data={runtimeData}
-          speedScale={speedScale}
-          onFrameChange={onFrameChange}
-          style={styles.canvas}
-        />
+        {buildResource ? (
+          <AnimatedSprite2D
+            frames={buildResource}
+            animation={activeAnimation}
+            playing={isPlaying}
+            frame={frameCursor}
+            speedScale={speedScale}
+            onAnimationFinished={onAnimationEnd}
+            style={styles.canvas}
+          />
+        ) : (
+          <Text style={styles.statusText}>画像を読み込めませんでした</Text>
+        )}
       </View>
       <View style={styles.buttonRow}>
         <IconButton

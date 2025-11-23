@@ -6,8 +6,6 @@ UI を含まないエディター用プリミティブを利用することで�
 2. `SpriteEditUtils` – スナップやヒットテストなど、エディターでよく使うジオメトリ系ヘルパー。
 3. シリアライズヘルパー – `DefaultSpriteTemplate` が spriteStorage 互換の JSON を生成/復元します。
 
-> **注意:** 旧来の `SpriteAnimator` コンポーネントは v0.4.0 までは利用できますが、v0.4.1 以降で削除予定の deprecated 機能です。今後は `AnimatedSprite2D` を利用してください。
-
 ---
 
 ## useSpriteEditor Hook
@@ -160,23 +158,27 @@ const storage = useSpriteStorage({
 
 ## useEditorIntegration Hook
 
-`useEditorIntegration` は `useSpriteEditor` の状態とプレビュー用アニメーションコンポーネント（従来の `SpriteAnimator` や推奨される `AnimatedSprite2D`）を結び付けるためのフックです。`playForward` / `playReverse` / `seekFrame` といった再生操作、`animatorRef`、現在のアニメーション名、速度倍率などをまとめて返すため、プレビュー UI が常に編集内容と同期します。
+`useEditorIntegration` は `useSpriteEditor` の状態と `AnimatedSprite2D` プレビューコンポーネントを結び付けるためのフックです。`playForward` / `playReverse` / `seekFrame` といった再生操作、`animatorRef`、現在のアニメーション名、速度倍率などをまとめて返すため、プレビュー UI が常に編集内容と同期します。
 
 ```tsx
 import {
   useEditorIntegration,
   useSpriteEditor,
-  SpriteAnimator,
+  AnimatedSprite2D,
 } from 'react-native-skia-sprite-animator';
 
 const editor = useSpriteEditor();
 const integration = useEditorIntegration({ editor });
 
-<SpriteAnimator
+<AnimatedSprite2D
   ref={integration.animatorRef}
-  image={spriteSheet}
-  data={integration.runtimeData}
+  frames={integration.runtimeData}
+  animation={integration.activeAnimation}
+  frame={integration.frameCursor}
+  playing={integration.isPlaying}
+  speedScale={integration.speedScale}
   onFrameChange={integration.onFrameChange}
+  onAnimationEnd={integration.onAnimationEnd}
 />;
 ```
 
@@ -208,7 +210,7 @@ const integration = useEditorIntegration({ editor });
 
 ## シリアライズヘルパー
 
-`exportJSON()` / `importJSON()` は常に組み込みの `DefaultSpriteTemplate` を使用し、spriteStorage 互換の JSON をやり取りします。SpriteAnimator へのプレビューや `spriteStorage` 連携はこの JSON をそのまま使えば OK です。
+`exportJSON()` / `importJSON()` は常に組み込みの `DefaultSpriteTemplate` を使用し、spriteStorage 互換の JSON をやり取りします。`AnimatedSprite2D` でのプレビューや `spriteStorage` 連携はこの JSON をそのまま使えば OK です。
 
 ```ts
 const payload = editor.exportJSON();
@@ -236,7 +238,7 @@ editor.importJSON(payload); // Undo 可能
 
 ## 移行メモ
 
-- ランタイム側 (`SpriteAnimator` / `spriteStorage`) は従来と同じ JSON スキーマを受け付けます。
+- ランタイム側 (`AnimatedSprite2D` / `spriteStorage`) は従来と同じ JSON スキーマを受け付けます。
 - エディター内部ではフレームごとに `id` を保持しますが、`exportJSON()` は出力時に ID を取り除くため、既存ランタイムを変更する必要はありません。
 - 既存の `spriteStorage` JSON を編集したい場合は `DefaultSpriteTemplate.fromJSON()` で読み込み、編集後に再度 `exportJSON` してください。
 - Undo スタックはデフォルトで 50 件です。`historyLimit` を調整してメモリ使用量とトレードオフできます。

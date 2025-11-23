@@ -382,17 +382,11 @@ export const StoragePanel = ({
 
   return (
     <View
-      style={[
-        styles.overlayRoot,
-        windowVariant === 'fullscreen' && styles.overlayFullscreen,
-      ]}
+      style={[styles.overlayRoot, windowVariant === 'fullscreen' && styles.overlayFullscreen]}
       pointerEvents={visible ? 'auto' : 'none'}
     >
       <Pressable
-        style={[
-          styles.backdrop,
-          windowVariant === 'fullscreen' && styles.backdropFullscreen,
-        ]}
+        style={[styles.backdrop, windowVariant === 'fullscreen' && styles.backdropFullscreen]}
         onPress={onClose}
       />
       <View
@@ -410,82 +404,84 @@ export const StoragePanel = ({
           enableCompact={false}
           style={windowVariant === 'fullscreen' ? styles.windowFullscreenVariant : undefined}
         >
-        <View style={styles.formRow}>
-          <View style={{ flex: 1 }}>
-            <Text style={styles.meta}>{strings.storagePanel.spriteNameLabel}</Text>
-            <TextInput
-              style={styles.nameInput}
-              value={saveName}
-              onChangeText={setSaveName}
-              placeholder={strings.storagePanel.spriteNamePlaceholder}
-              editable={!isBusy}
-            />
+          <View style={styles.formRow}>
+            <View style={{ flex: 1 }}>
+              <Text style={styles.meta}>{strings.storagePanel.spriteNameLabel}</Text>
+              <TextInput
+                style={styles.nameInput}
+                value={saveName}
+                onChangeText={setSaveName}
+                placeholder={strings.storagePanel.spriteNamePlaceholder}
+                editable={!isBusy}
+              />
+            </View>
+            <View style={styles.formActions}>
+              <IconButton
+                iconFamily="material"
+                name="save"
+                onPress={handleSave}
+                disabled={isBusy}
+                accessibilityLabel={strings.storagePanel.saveSprite}
+              />
+            </View>
           </View>
-          <View style={styles.formActions}>
-            <IconButton
-              iconFamily="material"
-              name="save"
-              onPress={handleSave}
-              disabled={isBusy}
-              accessibilityLabel={strings.storagePanel.saveSprite}
-            />
-          </View>
-        </View>
-        <View style={styles.listContainer}>
-          {translatedStatus ? <Text style={styles.statusText}>{translatedStatus}</Text> : null}
-          <ScrollView style={styles.list} contentContainerStyle={styles.listContent}>
-            {sprites.map((sprite) => (
-              <View key={sprite.id} style={styles.spriteRow}>
-                <View style={styles.thumbnailSlot}>{renderThumbnail(sprite.id)}</View>
-                <View style={{ flex: 1 }}>
-                  {editingId === sprite.id ? (
-                    <TextInput
-                      style={styles.renameInput}
-                      value={renameDraft}
-                      onChangeText={setRenameDraft}
-                      autoFocus
-                      onSubmitEditing={() => handleRename(sprite.id, renameDraft)}
-                      onBlur={() => handleRename(sprite.id, renameDraft)}
-                      editable={!isBusy}
-                    />
-                  ) : (
-                    <TouchableOpacity
-                      style={styles.renameDisplay}
-                      onPress={() => {
-                        setEditingId(sprite.id);
-                        setRenameDraft(sprite.displayName);
-                      }}
+          <View style={styles.listContainer}>
+            {translatedStatus ? <Text style={styles.statusText}>{translatedStatus}</Text> : null}
+            <ScrollView style={styles.list} contentContainerStyle={styles.listContent}>
+              {sprites.map((sprite) => (
+                <View key={sprite.id} style={styles.spriteRow}>
+                  <View style={styles.thumbnailSlot}>{renderThumbnail(sprite.id)}</View>
+                  <View style={{ flex: 1 }}>
+                    {editingId === sprite.id ? (
+                      <TextInput
+                        style={styles.renameInput}
+                        value={renameDraft}
+                        onChangeText={setRenameDraft}
+                        autoFocus
+                        onSubmitEditing={() => handleRename(sprite.id, renameDraft)}
+                        onBlur={() => handleRename(sprite.id, renameDraft)}
+                        editable={!isBusy}
+                      />
+                    ) : (
+                      <TouchableOpacity
+                        style={styles.renameDisplay}
+                        onPress={() => {
+                          setEditingId(sprite.id);
+                          setRenameDraft(sprite.displayName);
+                        }}
+                        disabled={isBusy}
+                      >
+                        <Text style={styles.spriteName}>{sprite.displayName}</Text>
+                        <Text style={styles.spriteMeta}>
+                          {strings.storagePanel.updatedPrefix}{' '}
+                          {new Date(sprite.updatedAt).toLocaleString()}
+                        </Text>
+                      </TouchableOpacity>
+                    )}
+                  </View>
+                  <View style={styles.rowButtons}>
+                    <IconButton
+                      iconFamily="material"
+                      name="file-upload"
+                      onPress={() => handleLoad(sprite.id)}
                       disabled={isBusy}
-                    >
-                      <Text style={styles.spriteName}>{sprite.displayName}</Text>
-                      <Text style={styles.spriteMeta}>
-                        {strings.storagePanel.updatedPrefix}{' '}
-                        {new Date(sprite.updatedAt).toLocaleString()}
-                      </Text>
-                    </TouchableOpacity>
-                  )}
+                      accessibilityLabel={strings.storagePanel.loadSprite}
+                    />
+                    <IconButton
+                      iconFamily="material"
+                      name="delete"
+                      onPress={() => handleDelete(sprite.id, sprite.displayName)}
+                      disabled={isBusy}
+                      accessibilityLabel={strings.storagePanel.deleteSprite}
+                    />
+                  </View>
                 </View>
-                <View style={styles.rowButtons}>
-                  <IconButton
-                    iconFamily="material"
-                    name="file-upload"
-                    onPress={() => handleLoad(sprite.id)}
-                    disabled={isBusy}
-                    accessibilityLabel={strings.storagePanel.loadSprite}
-                  />
-                  <IconButton
-                    iconFamily="material"
-                    name="delete"
-                    onPress={() => handleDelete(sprite.id, sprite.displayName)}
-                    disabled={isBusy}
-                    accessibilityLabel={strings.storagePanel.deleteSprite}
-                  />
-                </View>
-              </View>
-            ))}
-            {!sprites.length && <Text style={styles.empty}>{strings.storagePanel.emptyList}</Text>}
-          </ScrollView>
-        </View>
+              ))}
+              {!sprites.length && (
+                <Text style={styles.empty}>{strings.storagePanel.emptyList}</Text>
+              )}
+            </ScrollView>
+          </View>
         </MacWindow>
       </View>
     </View>

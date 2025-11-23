@@ -39,7 +39,7 @@ export const TemplatePanel = ({ editor }: TemplatePanelProps) => {
     <View style={styles.container}>
       <Text style={styles.heading}>Sprite JSON</Text>
       <Text style={styles.description}>
-        Uses the same format consumed by SpriteAnimator previews and spriteStorage save/load
+        Uses the same format consumed by AnimatedSprite2D previews and spriteStorage save/load
         helpers.
       </Text>
       <View style={styles.buttonRow}>

@@ -2,7 +2,7 @@ import type {
   SpriteAnimations,
   SpriteAnimationsMeta,
   SpriteFrame as RenderSpriteFrame,
-} from '../SpriteAnimator';
+} from '../spriteTypes';
 
 /**
  * SpriteFrame extension that includes a stable identifier required by editor features.

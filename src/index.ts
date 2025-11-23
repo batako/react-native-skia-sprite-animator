@@ -1,4 +1,4 @@
-export * from './SpriteAnimator';
+export * from './spriteTypes';
 export * from './storage/spriteStorage';
 export * from './editor/types';
 export * from './editor/hooks/useSpriteEditor';
@@ -10,6 +10,18 @@ export * from './editor/hooks/animatedSprite2d';
 export { AnimatedSprite2DView, type AnimatedSprite2DViewProps } from './AnimatedSprite2DView';
 export { AnimatedSprite2D } from './AnimatedSprite2D';
 export { AnimatedSprite2DPreview } from './editor/components/AnimatedSprite2DPreview';
+export type {
+  AnimatedSprite2DHandle,
+  AnimatedSprite2DProps,
+  AnimatedSpriteFrame,
+  AnimatedSpriteFrameChangeEvent,
+  FrameImageSource,
+  FrameImageSubset,
+  SpriteAnimationsMap as AnimatedSpriteAnimationsMap,
+  SpriteAnimationsMetaMap as AnimatedSpriteAnimationsMetaMap,
+  SpriteFramesResource,
+} from './editor/animatedSprite2dTypes';
+export { buildAnimatedSpriteFrames } from './editor/utils/buildAnimatedSpriteFrames';
 export * from './editor/templates/DefaultSpriteTemplate';
 export * from './editor/utils/SpriteEditUtils';
 export * from './editor/utils/cleanSpriteData';

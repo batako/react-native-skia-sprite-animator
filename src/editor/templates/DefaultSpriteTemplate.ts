@@ -1,4 +1,4 @@
-import type { SpriteData } from '../../SpriteAnimator';
+import type { SpriteData } from '../../spriteTypes';
 import type { SpriteEditorSnapshot } from '../types';
 import { cloneSnapshot, createFrameId } from '../utils/state';
 

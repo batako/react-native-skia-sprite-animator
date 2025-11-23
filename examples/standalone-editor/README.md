@@ -5,7 +5,7 @@ This Expo app demonstrates every public API shipped in `react-native-skia-sprite
 ## Features
 
 - Real-time editing powered by `useSpriteEditor`
-- Canvas playback via `SpriteAnimator`
+- Canvas playback via `AnimatedSprite2D`
 - Export/import panel that previews spriteStorage JSON
 - Local persistence backed by `spriteStorage`
 - Utility helpers from `SpriteEditUtils` (grid, snapping, hit testing)

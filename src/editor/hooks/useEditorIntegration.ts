@@ -1,11 +1,11 @@
 /* eslint-disable jsdoc/require-jsdoc */
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type {
-  SpriteAnimatorDirection,
-  SpriteAnimatorFrameChangeEvent,
-  SpriteAnimatorHandle,
+  PlaybackDirection,
+  AnimationFrameChangeEvent,
+  AnimationHandle,
   SpriteData,
-} from '../../SpriteAnimator';
+} from '../../spriteTypes';
 import type { SpriteFramesResource } from '../animatedSprite2dTypes';
 import { useSpriteAnimationTicker } from '../../hooks/useSpriteAnimationTicker';
 import type { SpriteEditorApi } from './useSpriteEditor';
@@ -26,11 +26,11 @@ interface SeekFrameOptions {
 
 interface PlayOptions {
   fromFrame?: number;
-  direction?: SpriteAnimatorDirection;
+  direction?: PlaybackDirection;
 }
 
 /**
- * Ties the SpriteEditor state to the SpriteAnimator runtime.
+ * Ties the SpriteEditor state to the animation runtime.
  */
 const buildTickerResource = (state: SpriteEditorApi['state']): SpriteFramesResource => ({
   frames: state.frames.map((frame, index) => ({
@@ -47,9 +47,9 @@ const buildTickerResource = (state: SpriteEditorApi['state']): SpriteFramesResou
 });
 
 export const useEditorIntegration = ({ editor }: UseEditorIntegrationOptions) => {
-  const animatorRef = useRef<SpriteAnimatorHandle>(null);
+  const animatorRef = useRef<AnimationHandle>(null);
   const [speedScale, setSpeedScale] = useState(1);
-  const [playDirection, setPlayDirection] = useState<SpriteAnimatorDirection>('forward');
+  const [playDirection, setPlayDirection] = useState<PlaybackDirection>('forward');
   const endedAnimationRef = useRef<string | null>(null);
 
   const animationsState = useMemo(() => editor.state.animations ?? {}, [editor.state.animations]);
@@ -133,7 +133,7 @@ export const useEditorIntegration = ({ editor }: UseEditorIntegrationOptions) =>
         requestedCursor !== undefined
           ? true
           : (!tickerPlaying && targetName && sequenceLength > 0 && isAtEnd) || hasEnded;
-      const resolvedDirection: SpriteAnimatorDirection =
+      const resolvedDirection: PlaybackDirection =
         opts?.direction === 'reverse' || opts?.direction === 'forward'
           ? opts.direction
           : playDirection;
@@ -276,7 +276,7 @@ export const useEditorIntegration = ({ editor }: UseEditorIntegrationOptions) =>
   );
 
   const onFrameChange = useCallback(
-    (event: SpriteAnimatorFrameChangeEvent) => {
+    (event: AnimationFrameChangeEvent) => {
       controlTimelineCursor(event.frameCursor);
       if (!sequence.length) {
         tickerSeekFrame(event.frameIndex);

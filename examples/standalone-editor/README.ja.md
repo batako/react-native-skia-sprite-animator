@@ -5,7 +5,7 @@
 ## 特徴
 
 - `useSpriteEditor` を使ったリアルタイム編集 (フレーム CRUD / 選択 / クリップボード / Undo/Redo)
-- `SpriteAnimator` によるキャンバス上でのプレビュー再生
+- `AnimatedSprite2D` によるキャンバス上でのプレビュー再生
 - SpriteStorage 互換 JSON を扱うエクスポート / インポート
 - `spriteStorage` を利用したローカル永続化
 - `SpriteEditUtils` を用いたグリッド描画・スナップ・ヒットテスト

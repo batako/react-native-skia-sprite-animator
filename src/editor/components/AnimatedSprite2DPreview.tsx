@@ -63,12 +63,12 @@ export const AnimatedSprite2DPreview = ({
   }, [resource]);
 
   const sceneBounds = useMemo(() => {
-    const sequence = animationName ? resolvedResource.animations[animationName] ?? [] : [];
+    const sequence = animationName ? (resolvedResource.animations[animationName] ?? []) : [];
     const framesForBounds =
       sequence.length > 0
         ? sequence
             .map((idx) => resolvedResource.frames[idx])
-            .filter((frame): frame is typeof resolvedResource.frames[number] => Boolean(frame))
+            .filter((frame): frame is (typeof resolvedResource.frames)[number] => Boolean(frame))
         : resolvedResource.frames;
     if (!framesForBounds.length) {
       return { width: 64, height: 64 };
@@ -80,7 +80,7 @@ export const AnimatedSprite2DPreview = ({
       }),
       { width: 0, height: 0 },
     );
-  }, [animationName, resolvedResource.animations, resolvedResource.frames]);
+  }, [animationName, resolvedResource]);
 
   const windowSize = useWindowDimensions();
   const previewHeight = useMemo(() => {
@@ -237,12 +237,7 @@ export const AnimatedSprite2DPreview = ({
                 accessibilityLabel={strings.general.resetZoom}
                 style={styles.zoomTextButton}
               >
-                <Text
-                  style={[
-                    styles.zoomLabel,
-                    !isDarkMode && styles.zoomLabelLight,
-                  ]}
-                >
+                <Text style={[styles.zoomLabel, !isDarkMode && styles.zoomLabelLight]}>
                   {Math.round(zoom * 100)}%
                 </Text>
               </Pressable>

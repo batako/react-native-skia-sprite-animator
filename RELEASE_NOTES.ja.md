@@ -3,7 +3,6 @@
 - v0.4.0 では `AnimatedSprite2D` が正式ランタイムとなり、Hook / ティッカー / プレビューを揃えて React の再描画に依存しないスプライト再生を実現しました（[`15bfa76`](https://github.com/batako/react-native-skia-sprite-animator/commit/15bfa76) … [`750d897`](https://github.com/batako/react-native-skia-sprite-animator/commit/750d897)）。
 - AnimationStudio のストレージ / タイムラインを JSON 永続化・フレーム別画像・オートプレイ / 再生方向に合わせて全面刷新し、新ランタイムと同じ表現力を備えました（[`237cbf3`](https://github.com/batako/react-native-skia-sprite-animator/commit/237cbf3), [`421f535`](https://github.com/batako/react-native-skia-sprite-animator/commit/421f535), [`8980fd6`](https://github.com/batako/react-native-skia-sprite-animator/commit/8980fd6), [`e01831c`](https://github.com/batako/react-native-skia-sprite-animator/commit/e01831c)）。
 - 同梱の Expo エディタは情報 / 法務モーダルのローカライズ、新しいアイコン / スプラッシュ、ストア提出向け設定調整まで完了し、配布に耐える状態になりました（[`7275983`](https://github.com/batako/react-native-skia-sprite-animator/commit/7275983), [`5145b09`](https://github.com/batako/react-native-skia-sprite-animator/commit/5145b09), [`6a02c8e`](https://github.com/batako/react-native-skia-sprite-animator/commit/6a02c8e), [`a32992b`](https://github.com/batako/react-native-skia-sprite-animator/commit/a32992b)）。
-- `SpriteAnimator` は v0.4.0 のみサポートされ、実行時に非推奨警告を表示するようになりました。次バージョンで削除予定です（[`0a11e64`](https://github.com/batako/react-native-skia-sprite-animator/commit/0a11e64), [`b47500c`](https://github.com/batako/react-native-skia-sprite-animator/commit/b47500c)）。
 
 ## ✨ 機能追加
 
