@@ -959,7 +959,7 @@ export const AnimationStudio = ({
     const needsReset =
       animationChanged || selectedTimelineIndex === null || selectedTimelineIndex >= nextSequence.length;
     if (needsReset) {
-      selectTimelineFrame(0, nextSequence, nextName);
+      selectTimelineFrame(0, nextSequence);
       return;
     }
   }, [
@@ -1237,11 +1237,9 @@ export const AnimationStudio = ({
             setActiveAnimation(previousAnimation);
           }
           if (nextSequence.length) {
-            const targetIndex =
-              previousTimelineIndex !== null
-                ? Math.max(0, Math.min(nextSequence.length - 1, previousTimelineIndex))
-                : 0;
-            selectTimelineFrame(targetIndex, nextSequence, previousAnimation);
+            const targetIndex = Math.max(0, nextSequence.length - newIndexes.length); // first of newly added frames
+            ignoreNextTimelineCursorRef.current = true;
+            selectTimelineFrame(targetIndex, nextSequence, previousAnimation ?? currentAnimationName);
           }
         });
       });
@@ -1446,15 +1444,14 @@ export const AnimationStudio = ({
   };
 
   const selectTimelineFrame = useCallback(
-    (timelineIndex: number, sequenceOverride?: number[], animationNameOverride?: string | null) => {
+    (timelineIndex: number, sequenceOverride?: number[]) => {
       setTimelineSelection(timelineIndex);
       const sequence = sequenceOverride ?? currentSequence;
       const frameIndex = sequence[timelineIndex];
       if (typeof frameIndex === 'number') {
-        const animationForSeek = animationNameOverride ?? currentAnimationName ?? null;
         seekFrame(frameIndex, {
           cursor: timelineIndex,
-          animationName: animationForSeek,
+          animationName: currentAnimationName ?? null,
           sequenceOverride: sequence,
         });
       }
