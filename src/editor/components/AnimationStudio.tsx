@@ -2166,7 +2166,6 @@ export const AnimationStudio = ({
     isFramePickerVisible || isStorageManagerVisible || isMetaModalVisible || isTemplateModalVisible;
   const enableAvoiding = shouldHandleKeyboard && !hasBlockingModal;
 
-
   if (enableAvoiding) {
     return (
       <KeyboardAvoidingView
@@ -2509,7 +2508,7 @@ const baseStyles = {
   metaAddRow: {
     flexDirection: 'row',
     justifyContent: 'center',
-    backgroundColor: '#1c2233',
+    backgroundColor: 'transparent',
   },
   metaAddRowSticky: {
     position: 'absolute',
@@ -2517,6 +2516,7 @@ const baseStyles = {
     right: 0,
     bottom: 0,
     opacity: 0,
+    backgroundColor: 'transparent',
   },
   metaAddRowStickyVisible: {
     opacity: 1,
