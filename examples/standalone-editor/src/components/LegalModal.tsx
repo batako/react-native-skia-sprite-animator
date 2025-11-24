@@ -9,6 +9,7 @@ import {
   StyleSheet,
   Text,
   View,
+  useColorScheme,
   useWindowDimensions,
 } from 'react-native';
 import { IconButton } from './IconButton';
@@ -26,6 +27,9 @@ export const LegalModal = ({ title, visible, onClose, children }: LegalModalProp
   const { width } = useWindowDimensions();
   const slideAnim = React.useRef(new Animated.Value(width)).current;
   const [shouldRender, setShouldRender] = React.useState(visible);
+  const colorScheme = useColorScheme();
+  const isDarkMode = colorScheme !== 'light';
+  const styles = React.useMemo(() => createThemedStyles(isDarkMode), [isDarkMode]);
 
   React.useEffect(() => {
     if (visible) {
@@ -81,7 +85,49 @@ export const LegalModal = ({ title, visible, onClose, children }: LegalModalProp
   );
 };
 
-const styles = StyleSheet.create({
+const COLOR_PROP_KEYS = new Set([
+  'backgroundColor',
+  'borderBottomColor',
+  'borderColor',
+  'borderLeftColor',
+  'borderRightColor',
+  'borderStartColor',
+  'borderEndColor',
+  'borderTopColor',
+  'color',
+  'shadowColor',
+]);
+
+const lightColorMap: Record<string, string> = {
+  '#080b12': '#f7f9fd',
+  '#1f2430': '#d9dfe9',
+  '#f5f6ff': '#0f172a',
+};
+
+const lightTextColorMap: Record<string, string> = {
+  '#f5f6ff': '#0f172a',
+};
+
+const mapStyleColors = (
+  stylesObject: Record<string, any>,
+  mapColor: (value: string, key: string) => string,
+): Record<string, any> => {
+  const next: Record<string, any> = {};
+  Object.entries(stylesObject).forEach(([key, value]) => {
+    if (value && typeof value === 'object' && !Array.isArray(value)) {
+      next[key] = mapStyleColors(value, mapColor);
+      return;
+    }
+    if (typeof value === 'string' && COLOR_PROP_KEYS.has(key)) {
+      next[key] = mapColor(value, key);
+      return;
+    }
+    next[key] = value;
+  });
+  return next;
+};
+
+const baseStyles = {
   modalRoot: {
     flex: 1,
     backgroundColor: 'transparent',
@@ -112,4 +158,17 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 12,
   },
-});
+};
+
+const createThemedStyles = (isDarkMode: boolean) => {
+  const mapColor = (value: string, key: string) => {
+    if (isDarkMode) {
+      return value;
+    }
+    if (key === 'color') {
+      return lightTextColorMap[value] ?? lightColorMap[value] ?? value;
+    }
+    return lightColorMap[value] ?? value;
+  };
+  return StyleSheet.create(mapStyleColors(baseStyles, mapColor));
+};

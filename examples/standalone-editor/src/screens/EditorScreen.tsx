@@ -5,6 +5,7 @@ import {
   Platform,
   Pressable,
   SafeAreaView,
+  useColorScheme,
   StatusBar,
   StyleSheet,
   Text,
@@ -136,6 +137,9 @@ export const EditorScreen = () => {
   const integration = useEditorIntegration({ editor });
   const strings = React.useMemo(() => getEditorStrings(), []);
   const legalStrings = strings.editorScreen;
+  const colorScheme = useColorScheme();
+  const isDarkMode = colorScheme !== 'light';
+  const styles = React.useMemo(() => createThemedStyles(isDarkMode), [isDarkMode]);
 
   const [imageSource, setImageSource] = React.useState<DataSourceParam>(SAMPLE_SPRITE);
   const editorRef = React.useRef(editor);
@@ -365,7 +369,7 @@ export const EditorScreen = () => {
       default:
         return null;
     }
-  }, [legalModalView, legalStrings, handleOpenLink, setLegalModalView]);
+  }, [legalModalView, legalStrings, handleOpenLink, setLegalModalView, styles]);
 
   React.useEffect(() => {
     editorRef.current = editor;
@@ -402,7 +406,7 @@ export const EditorScreen = () => {
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      <StatusBar barStyle="light-content" />
+      <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
       <View style={styles.content}>
         <View style={styles.headerRow}>
           <View style={styles.titleRow}>
@@ -412,6 +416,7 @@ export const EditorScreen = () => {
           <IconButton
             iconFamily="material"
             name="info-outline"
+            color={isDarkMode ? '#fff' : '#000'}
             onPress={() => {
               setLegalModalView('overview');
               setLegalModalVisible(true);
@@ -433,7 +438,84 @@ export const EditorScreen = () => {
   );
 };
 
-const styles = StyleSheet.create({
+const COLOR_PROP_KEYS = new Set([
+  'backgroundColor',
+  'borderBottomColor',
+  'borderColor',
+  'borderLeftColor',
+  'borderRightColor',
+  'borderStartColor',
+  'borderEndColor',
+  'borderTopColor',
+  'color',
+  'shadowColor',
+]);
+
+const lightColorMap: Record<string, string> = {
+  '#000': '#000',
+  '#05070f': '#f8fafc',
+  '#080b12': '#f7f9fd',
+  '#0a0f1d': '#f4f7fd',
+  '#0d1422': '#f5f7fd',
+  '#111725': '#edf1f8',
+  '#121b2c': '#eaf0f9',
+  '#151f33': '#e5eaf5',
+  '#1b2438': '#d6dce8',
+  '#1c2538': '#d6dce8',
+  '#1d2639': '#d5dbe8',
+  '#242c3c': '#d2d9e6',
+  '#25344f': '#cbd2df',
+  '#273552': '#cbd2df',
+  '#f6c343': '#d97706',
+  '#8c95b6': '#475569',
+  '#9aa2c5': '#475569',
+  '#9aa3c9': '#475569',
+  '#9ba5bf': '#475569',
+  '#9ba5c7': '#475569',
+  '#cfd7f2': '#1f2937',
+  '#d8deff': '#0f172a',
+  '#d9dff8': '#111827',
+  '#dfe6ff': '#0f172a',
+  '#e7ecff': '#0f172a',
+  '#f3f6ff': '#0f172a',
+  '#f4f6ff': '#0f172a',
+  '#8ac1ff': '#1f2937',
+  '#9fb2ff': '#334155',
+  '#a9c2ff': '#1f2937',
+};
+
+const lightTextColorMap: Record<string, string> = {
+  '#fff': '#0f172a',
+  '#d8deff': '#0f172a',
+  '#d9dff8': '#111827',
+  '#dfe6ff': '#0f172a',
+  '#e7ecff': '#0f172a',
+  '#f3f6ff': '#0f172a',
+  '#f4f6ff': '#0f172a',
+  '#cfd7f2': '#1f2937',
+  '#9fb2ff': '#334155',
+};
+
+const mapStyleColors = (
+  stylesObject: Record<string, any>,
+  mapColor: (value: string, key: string) => string,
+): Record<string, any> => {
+  const next: Record<string, any> = {};
+  Object.entries(stylesObject).forEach(([key, value]) => {
+    if (value && typeof value === 'object' && !Array.isArray(value)) {
+      next[key] = mapStyleColors(value, mapColor);
+      return;
+    }
+    if (typeof value === 'string' && COLOR_PROP_KEYS.has(key)) {
+      next[key] = mapColor(value, key);
+      return;
+    }
+    next[key] = value;
+  });
+  return next;
+};
+
+const baseStyles = {
   safeArea: {
     flex: 1,
     backgroundColor: '#080b12',
@@ -453,7 +535,7 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   title: {
-    color: 'white',
+    color: '#fff',
     fontSize: 24,
     fontWeight: '700',
   },
@@ -643,4 +725,17 @@ const styles = StyleSheet.create({
     color: '#8ac1ff',
     fontSize: 12,
   },
-});
+};
+
+const createThemedStyles = (isDarkMode: boolean) => {
+  const mapColor = (value: string, key: string) => {
+    if (isDarkMode) {
+      return value;
+    }
+    if (key === 'color') {
+      return lightTextColorMap[value] ?? lightColorMap[value] ?? value;
+    }
+    return lightColorMap[value] ?? value;
+  };
+  return StyleSheet.create(mapStyleColors(baseStyles, mapColor));
+};
