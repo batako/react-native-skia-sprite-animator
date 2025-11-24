@@ -87,6 +87,8 @@ export interface AnimationStudioProps {
   storageController?: SpriteStorageController;
   /** Meta keys that should be locked from editing/removal. */
   protectedMetaKeys?: string[];
+  /** Enables keyboard avoidance behaviors (opt-in). */
+  enableKeyboardAvoidance?: boolean;
   /** Parent scroll view ref used to nudge focused inputs into view. */
   scrollParentRef?: React.RefObject<ScrollView | null>;
 }
@@ -234,6 +236,7 @@ export const AnimationStudio = ({
   image,
   storageController,
   protectedMetaKeys = DEFAULT_PROTECTED_META_KEYS,
+  enableKeyboardAvoidance = false,
   scrollParentRef,
 }: AnimationStudioProps) => {
   const strings = useMemo(() => getEditorStrings(), []);
@@ -278,21 +281,28 @@ export const AnimationStudio = ({
   const [isTemplateModalVisible, setTemplateModalVisible] = useState(false);
   const [metaModalVariant, setMetaModalVariant] = useState<MacWindowVariant>('default');
   const [templateModalVariant, setTemplateModalVariant] = useState<MacWindowVariant>('default');
+  const shouldHandleKeyboard = enableKeyboardAvoidance;
   const scrollToTop = useCallback(() => {
+    if (!shouldHandleKeyboard) {
+      return;
+    }
     const scrollView = scrollParentRef?.current;
     if (scrollView?.scrollTo) {
       scrollView.scrollTo({ y: 0, animated: true });
     }
-  }, [scrollParentRef]);
+  }, [scrollParentRef, shouldHandleKeyboard]);
   const scrollInputIntoView = useCallback(
     (input: TextInput | null) => {
+      if (!shouldHandleKeyboard) {
+        return;
+      }
       const node = input ? findNodeHandle(input) : null;
       const scrollView = scrollParentRef?.current as any;
       if (node && scrollView?.scrollResponderScrollNativeHandleToKeyboard) {
         scrollView.scrollResponderScrollNativeHandleToKeyboard(node, 80, true);
       }
     },
-    [scrollParentRef],
+    [scrollParentRef, shouldHandleKeyboard],
   );
   const storageApi = storageController ?? defaultStorageController;
   const activeSpriteName = useMemo(() => {
@@ -1619,7 +1629,7 @@ export const AnimationStudio = ({
     [animationsMeta, currentAnimationName, selectedTimelineIndex, updateAnimationMetaEntry],
   );
 
-  return (
+  const content = (
     <View style={styles.container}>
       <View style={styles.headerRow}>
         <View style={styles.headerLeft}>
@@ -2151,6 +2161,20 @@ export const AnimationStudio = ({
       ) : null}
     </View>
   );
+
+  if (shouldHandleKeyboard) {
+    return (
+      <KeyboardAvoidingView
+        style={styles.keyboardAvoider}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        keyboardVerticalOffset={16}
+      >
+        {content}
+      </KeyboardAvoidingView>
+    );
+  }
+
+  return content;
 };
 
 type AnimationStudioStyles = ReturnType<typeof createThemedStyles>;

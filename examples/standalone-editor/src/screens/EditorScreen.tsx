@@ -464,6 +464,7 @@ export const EditorScreen = () => {
               editor={editor}
               integration={integration}
               image={imageSource}
+              enableKeyboardAvoidance
               scrollParentRef={scrollRef}
             />
           </View>
