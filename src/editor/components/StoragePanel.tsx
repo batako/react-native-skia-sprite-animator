@@ -87,15 +87,18 @@ export const StoragePanel = ({
     imageInfosRef.current = imageInfos;
   }, [imageInfos]);
 
+  const wasVisibleRef = React.useRef(false);
   React.useEffect(() => {
-    if (visible) {
+    const wasVisible = wasVisibleRef.current;
+    if (visible && !wasVisible) {
       setWindowVariant('default');
       refresh();
-    } else {
+    } else if (!visible && wasVisible) {
       setEditingId(null);
       setRenameDraft('');
       setWindowVariant('default');
     }
+    wasVisibleRef.current = visible;
   }, [refresh, visible]);
 
   const ensureImageInfo = React.useCallback((uri: string) => {
@@ -383,7 +386,7 @@ export const StoragePanel = ({
   return (
     <View
       style={[styles.overlayRoot, windowVariant === 'fullscreen' && styles.overlayFullscreen]}
-      pointerEvents={visible ? 'auto' : 'none'}
+      pointerEvents="auto"
     >
       <Pressable
         style={[styles.backdrop, windowVariant === 'fullscreen' && styles.backdropFullscreen]}
@@ -477,9 +480,7 @@ export const StoragePanel = ({
                   </View>
                 </View>
               ))}
-              {!sprites.length && (
-                <Text style={styles.empty}>{strings.storagePanel.emptyList}</Text>
-              )}
+              {!sprites.length && <Text style={styles.empty}>{strings.storagePanel.emptyList}</Text>}
             </ScrollView>
           </View>
         </MacWindow>

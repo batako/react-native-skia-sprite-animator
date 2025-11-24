@@ -11,6 +11,7 @@ import {
   Image,
   Switch,
   useColorScheme,
+  ScrollView,
 } from 'react-native';
 import * as FileSystem from 'expo-file-system/legacy';
 import * as DocumentPicker from 'expo-document-picker';
@@ -389,13 +390,14 @@ export const FileBrowserModal = ({
       {isLoading ? (
         <ActivityIndicator color="#fff" />
       ) : (
-        <FlatList
+        <ScrollView
           style={styles.fileList}
-          data={entries}
-          keyExtractor={(item) => item.uri}
-          nestedScrollEnabled
-          renderItem={({ item }) => (
+          contentContainerStyle={styles.fileListContent}
+          keyboardShouldPersistTaps="handled"
+        >
+          {entries.map((item) => (
             <TouchableOpacity
+              key={item.uri}
               style={styles.fileRow}
               onPress={() => handleOpen(item)}
               activeOpacity={0.7}
@@ -425,13 +427,13 @@ export const FileBrowserModal = ({
                 <Text style={styles.deleteButtonText}>{strings.fileBrowser.deleteButton}</Text>
               </TouchableOpacity>
             </TouchableOpacity>
-          )}
-          ListEmptyComponent={
+          ))}
+          {!entries.length && (
             <View style={styles.emptyState}>
               <Text style={styles.emptyText}>{strings.fileBrowser.noFiles}</Text>
             </View>
-          }
-        />
+          )}
+        </ScrollView>
       )}
     </MacWindow>
   );
@@ -450,10 +452,7 @@ export const FileBrowserModal = ({
         onPress={handleClose}
       />
       <View
-        style={[
-          styles.modalOverlay,
-          windowVariant === 'fullscreen' && styles.modalOverlayFullscreen,
-        ]}
+        style={[styles.modalOverlay, windowVariant === 'fullscreen' && styles.modalOverlayFullscreen]}
         pointerEvents="box-none"
       >
         {renderWindow()}
@@ -546,6 +545,10 @@ const baseStyles = {
   },
   fileList: {
     flex: 1,
+    width: '100%',
+  },
+  fileListContent: {
+    paddingBottom: 12,
   },
   optimizeChip: {
     flexDirection: 'row',

@@ -2162,7 +2162,12 @@ export const AnimationStudio = ({
     </View>
   );
 
-  if (shouldHandleKeyboard) {
+  const hasBlockingModal =
+    isFramePickerVisible || isStorageManagerVisible || isMetaModalVisible || isTemplateModalVisible;
+  const enableAvoiding = shouldHandleKeyboard && !hasBlockingModal;
+
+
+  if (enableAvoiding) {
     return (
       <KeyboardAvoidingView
         style={styles.keyboardAvoider}
