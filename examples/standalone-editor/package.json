@@ -14,7 +14,8 @@
     "expo:prebuild:ios": "npx expo prebuild --platform ios",
     "expo:build:ios": "npx eas build --platform ios --profile production",
     "expo:submit:ios": "npx eas submit --platform ios --profile production",
-    "expo:release:ios": "npm run expo:build:ios && npm run expo:submit:ios"
+    "expo:release:ios": "npm run expo:build:ios && npm run expo:submit:ios",
+    "expo:update": "npx eas update --branch production --message \"update\""
   },
   "dependencies": {
     "@expo/vector-icons": "^15.0.3",
