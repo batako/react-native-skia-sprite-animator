@@ -480,7 +480,9 @@ export const StoragePanel = ({
                   </View>
                 </View>
               ))}
-              {!sprites.length && <Text style={styles.empty}>{strings.storagePanel.emptyList}</Text>}
+              {!sprites.length && (
+                <Text style={styles.empty}>{strings.storagePanel.emptyList}</Text>
+              )}
             </ScrollView>
           </View>
         </MacWindow>

@@ -5,7 +5,6 @@ import {
   Pressable,
   TouchableOpacity,
   View,
-  FlatList,
   ActivityIndicator,
   Alert,
   Image,
@@ -452,7 +451,10 @@ export const FileBrowserModal = ({
         onPress={handleClose}
       />
       <View
-        style={[styles.modalOverlay, windowVariant === 'fullscreen' && styles.modalOverlayFullscreen]}
+        style={[
+          styles.modalOverlay,
+          windowVariant === 'fullscreen' && styles.modalOverlayFullscreen,
+        ]}
         pointerEvents="box-none"
       >
         {renderWindow()}
