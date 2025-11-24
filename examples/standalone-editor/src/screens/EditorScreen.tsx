@@ -588,10 +588,11 @@ const baseStyles = {
     alignSelf: 'center',
   },
   contentTight: {
-    paddingVertical: 0,
+    paddingTop: 12,
+    paddingBottom: 0,
   },
   contentScroll: {
-    paddingTop: 0,
+    paddingTop: 12,
   },
   headerRow: {
     flexDirection: 'row',
