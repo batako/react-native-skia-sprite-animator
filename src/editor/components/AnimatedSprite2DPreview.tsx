@@ -44,7 +44,7 @@ export const AnimatedSprite2DPreview = ({
   const strings = useMemo(() => getEditorStrings(), []);
   const colorScheme = useColorScheme();
   const isDarkMode = colorScheme !== 'light';
-  const zoomControlColor = isDarkMode ? '#fff' : '#0f172a';
+  const zoomControlColor = '#fff';
   const styles = useMemo(() => createThemedStyles(isDarkMode), [isDarkMode]);
   const rawResource = useMemo(
     () =>
@@ -237,9 +237,7 @@ export const AnimatedSprite2DPreview = ({
                 accessibilityLabel={strings.general.resetZoom}
                 style={styles.zoomTextButton}
               >
-                <Text style={[styles.zoomLabel, !isDarkMode && styles.zoomLabelLight]}>
-                  {Math.round(zoom * 100)}%
-                </Text>
+                <Text style={styles.zoomLabel}>{Math.round(zoom * 100)}%</Text>
               </Pressable>
               <IconButton
                 name="zoom-in"
@@ -381,9 +379,6 @@ const baseStyles = {
     minWidth: 50,
     textAlign: 'center',
   },
-  zoomLabelLight: {
-    color: '#0f172a',
-  },
   playbackControls: {
     flexDirection: 'row',
     marginTop: 12,
@@ -403,13 +398,14 @@ const COLOR_KEYS = new Set([
 
 const lightColorMap: Record<string, string> = {
   '#dfe7ff': '#0f172a',
-  '#444444': '#eef2f9',
+  '#444444': '#444444',
   '#1f2430': '#d1d7e4',
   '#9ca9c7': '#475569',
 };
 
 const lightTextColorMap: Record<string, string> = {
   '#dfe7ff': '#0f172a',
+  '#fff': '#fff',
 };
 
 const mapStyleColors = (

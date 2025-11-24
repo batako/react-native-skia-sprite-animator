@@ -465,6 +465,7 @@ export const FrameGridSelector = ({
                   onPress={() => changeScale(-0.25)}
                   accessibilityLabel={strings.general.zoomOut}
                   style={styles.zoomButton}
+                  color="#fff"
                 />
                 <Pressable
                   onPress={resetScale}
@@ -479,6 +480,7 @@ export const FrameGridSelector = ({
                   onPress={() => changeScale(0.25)}
                   accessibilityLabel={strings.general.zoomIn}
                   style={styles.zoomButton}
+                  color="#fff"
                 />
               </View>
             </View>
@@ -708,7 +710,7 @@ const baseStyles = {
     marginRight: 4,
   },
   zoomLabel: {
-    color: '#dfe7ff',
+    color: '#fff',
     fontWeight: '600',
     fontSize: 12,
     minWidth: 50,
@@ -868,7 +870,7 @@ const baseStyles = {
     borderRadius: 8,
     borderWidth: 1,
     borderColor: '#30384a',
-    color: '#fff',
+    color: '#dfe3ff',
     paddingHorizontal: 10,
     paddingVertical: 6,
     flex: 1,
@@ -934,7 +936,7 @@ const lightColorMap: Record<string, string> = {
   '#2a3142': '#cbd5e1',
   '#4f8dff': '#2563eb',
   '#e3eaff': '#0f172a',
-  '#444444': '#e6e9f2',
+  '#444444': '#444444',
   '#d4dae8': '#cbd5e1',
   '#e5ebff': '#0f172a',
   '#b8c1db': '#475569',
@@ -960,7 +962,7 @@ const lightColorMap: Record<string, string> = {
 };
 
 const lightTextColorMap: Record<string, string> = {
-  '#fff': '#0f172a',
+  '#fff': '#fff',
   '#dfe7ff': '#0f172a',
   '#e3eaff': '#0f172a',
   '#e5ebff': '#0f172a',
