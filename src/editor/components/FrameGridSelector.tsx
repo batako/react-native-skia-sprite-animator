@@ -551,9 +551,7 @@ export const FrameGridSelector = ({
                                 styles.cellOutlineMiddle,
                                 {
                                   borderColor: isSelected ? '#4f8dff' : 'rgba(255,255,255,0.35)',
-                                  backgroundColor: isSelected
-                                    ? 'rgba(0,0,0,0.35)'
-                                    : 'transparent',
+                                  backgroundColor: isSelected ? 'rgba(0,0,0,0.35)' : 'transparent',
                                 },
                               ]}
                             />
