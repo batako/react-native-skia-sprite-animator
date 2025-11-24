@@ -45,7 +45,13 @@
       "bundler": "metro",
       "favicon": "./assets/favicon.png"
     },
-    "plugins": ["expo-localization"],
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/495d01ec-b3d6-4626-89bb-08b2edc265c2"
+    },
+    "plugins": ["expo-localization", "expo-updates"],
     "extra": {
       "eas": {
         "projectId": "495d01ec-b3d6-4626-89bb-08b2edc265c2"
