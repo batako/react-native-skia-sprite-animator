@@ -2008,6 +2008,7 @@ export const AnimationStudio = ({
                       ) : (
                         <IconButton
                           name="delete"
+                          style={styles.metaDeleteButton}
                           onPress={() => removeEntry(entry.id)}
                           accessibilityLabel={strings.metadataModal.removeEntry}
                         />
@@ -2477,7 +2478,7 @@ const baseStyles = {
   },
   metaRow: {
     flexDirection: 'row',
-    alignItems: 'flex-end',
+    alignItems: 'flex-start',
     marginBottom: 8,
     gap: 8,
   },
@@ -2500,6 +2501,10 @@ const baseStyles = {
   },
   metaDeleteSpacer: {
     width: 32,
+  },
+  metaDeleteButton: {
+    alignSelf: 'flex-start',
+    marginTop: 18,
   },
   metaRowsWrapper: {
     flex: 1,
