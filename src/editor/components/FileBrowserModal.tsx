@@ -453,6 +453,7 @@ export const FileBrowserModal = ({
           styles.modalOverlay,
           windowVariant === 'fullscreen' && styles.modalOverlayFullscreen,
         ]}
+        pointerEvents="box-none"
       >
         {renderWindow()}
       </View>
@@ -472,9 +473,11 @@ const baseStyles = {
   },
   backdrop: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(0,0,0,0.5)',
+    backgroundColor: 'rgba(0,0,0,0.65)',
+    borderRadius: 16,
   },
   backdropFullscreen: {
+    borderRadius: 0,
     padding: 0,
   },
   modalOverlay: {
@@ -486,8 +489,11 @@ const baseStyles = {
     alignItems: 'center',
     justifyContent: 'center',
     padding: 16,
+    borderRadius: 16,
+    overflow: 'hidden',
   },
   modalOverlayFullscreen: {
+    borderRadius: 0,
     padding: 0,
     justifyContent: 'center',
     alignItems: 'center',
@@ -646,7 +652,7 @@ const COLOR_KEYS = new Set([
 ]);
 
 const lightColorMap: Record<string, string> = {
-  'rgba(0,0,0,0.5)': 'rgba(0,0,0,0.35)',
+  'rgba(0,0,0,0.65)': 'rgba(0,0,0,0.55)',
   '#f2f6ff': '#e2e8f5',
   '#0f172a': '#0f172a',
   'rgba(255,255,255,0.2)': 'rgba(0,0,0,0.08)',

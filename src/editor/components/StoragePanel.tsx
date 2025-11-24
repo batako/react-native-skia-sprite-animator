@@ -494,15 +494,20 @@ const baseStyles = {
     zIndex: 999,
     justifyContent: 'center',
     alignItems: 'center',
+    borderRadius: 16,
+    overflow: 'hidden',
   },
   overlayFullscreen: {
+    borderRadius: 0,
     padding: 0,
   },
   backdrop: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(6, 10, 18, 0.8)',
+    backgroundColor: 'rgba(0,0,0,0.65)',
+    borderRadius: 16,
   },
   backdropFullscreen: {
+    borderRadius: 0,
     padding: 0,
   },
   overlayContent: {
@@ -511,12 +516,17 @@ const baseStyles = {
     width: '100%',
     alignItems: 'center',
     justifyContent: 'center',
+    padding: 16,
+    borderRadius: 16,
+    overflow: 'hidden',
   },
   overlayContentFullscreen: {
     width: '100%',
     height: '100%',
     alignItems: 'center',
     justifyContent: 'center',
+    padding: 0,
+    borderRadius: 0,
   },
   windowContent: {
     paddingHorizontal: 12,
@@ -653,7 +663,7 @@ const COLOR_KEYS = new Set([
 ]);
 
 const lightColorMap: Record<string, string> = {
-  'rgba(6, 10, 18, 0.8)': 'rgba(15, 23, 42, 0.55)',
+  'rgba(0,0,0,0.65)': 'rgba(0,0,0,0.55)',
   '#9ea4bc': '#475569',
   '#303852': '#cbd5e1',
   '#1a1f2d': '#eef2f9',

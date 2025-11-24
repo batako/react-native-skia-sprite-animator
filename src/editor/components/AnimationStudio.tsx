@@ -2693,8 +2693,11 @@ const baseStyles = {
     padding: 16,
     justifyContent: 'center',
     alignItems: 'center',
+    borderRadius: 16,
+    overflow: 'hidden',
   },
   modalOverlayFullscreen: {
+    borderRadius: 0,
     padding: 0,
   },
   modalContentWrap: {
