@@ -1702,6 +1702,15 @@
   },
   {
     "name": "arg",
+    "version": "4.1.0",
+    "licenses": "MIT",
+    "repository": "https://github.com/zeit/arg",
+    "homepage": "",
+    "publisher": "Josh Junon",
+    "email": "junon@zeit.co"
+  },
+  {
+    "name": "arg",
     "version": "5.0.2",
     "licenses": "MIT",
     "repository": "https://github.com/vercel/arg",
@@ -2691,6 +2700,15 @@
     "email": ""
   },
   {
+    "name": "expo-eas-client",
+    "version": "1.0.7",
+    "licenses": "MIT",
+    "repository": "https://github.com/expo/expo",
+    "homepage": "",
+    "publisher": "650 Industries, Inc.",
+    "email": ""
+  },
+  {
     "name": "expo-file-system",
     "version": "19.0.19",
     "licenses": "MIT",
@@ -2727,6 +2745,15 @@
     "email": ""
   },
   {
+    "name": "expo-json-utils",
+    "version": "0.15.0",
+    "licenses": "MIT",
+    "repository": "https://github.com/expo/expo",
+    "homepage": "",
+    "publisher": "650 Industries, Inc.",
+    "email": ""
+  },
+  {
     "name": "expo-keep-awake",
     "version": "15.0.7",
     "licenses": "MIT",
@@ -2738,6 +2765,15 @@
   {
     "name": "expo-localization",
     "version": "17.0.7",
+    "licenses": "MIT",
+    "repository": "https://github.com/expo/expo",
+    "homepage": "",
+    "publisher": "650 Industries, Inc.",
+    "email": ""
+  },
+  {
+    "name": "expo-manifests",
+    "version": "1.0.9",
     "licenses": "MIT",
     "repository": "https://github.com/expo/expo",
     "homepage": "",
@@ -2774,6 +2810,33 @@
   {
     "name": "expo-sharing",
     "version": "14.0.7",
+    "licenses": "MIT",
+    "repository": "https://github.com/expo/expo",
+    "homepage": "",
+    "publisher": "650 Industries, Inc.",
+    "email": ""
+  },
+  {
+    "name": "expo-structured-headers",
+    "version": "5.0.0",
+    "licenses": "MIT",
+    "repository": "https://github.com/expo/expo",
+    "homepage": "",
+    "publisher": "650 Industries, Inc.",
+    "email": ""
+  },
+  {
+    "name": "expo-updates",
+    "version": "29.0.13",
+    "licenses": "MIT",
+    "repository": "https://github.com/expo/expo",
+    "homepage": "",
+    "publisher": "650 Industries, Inc.",
+    "email": ""
+  },
+  {
+    "name": "expo-updates-interface",
+    "version": "2.0.0",
     "licenses": "MIT",
     "repository": "https://github.com/expo/expo",
     "homepage": "",
@@ -4447,7 +4510,7 @@
   },
   {
     "name": "react-native-skia-sprite-animator",
-    "version": "0.4.0",
+    "version": "0.5.0",
     "licenses": "MIT",
     "repository": "",
     "homepage": "",
