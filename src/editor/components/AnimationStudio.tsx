@@ -5,6 +5,7 @@ import {
   Linking,
   Platform,
   Pressable,
+  KeyboardAvoidingView,
   ScrollView,
   StyleSheet,
   Text,
@@ -12,6 +13,7 @@ import {
   TouchableOpacity,
   useColorScheme,
   View,
+  findNodeHandle,
 } from 'react-native';
 import type {
   ImageSourcePropType,
@@ -85,6 +87,8 @@ export interface AnimationStudioProps {
   storageController?: SpriteStorageController;
   /** Meta keys that should be locked from editing/removal. */
   protectedMetaKeys?: string[];
+  /** Parent scroll view ref used to nudge focused inputs into view. */
+  scrollParentRef?: React.RefObject<ScrollView | null>;
 }
 
 const DEFAULT_ANIMATION_FPS = 5;
@@ -230,6 +234,7 @@ export const AnimationStudio = ({
   image,
   storageController,
   protectedMetaKeys = DEFAULT_PROTECTED_META_KEYS,
+  scrollParentRef,
 }: AnimationStudioProps) => {
   const strings = useMemo(() => getEditorStrings(), []);
   const colorScheme = useColorScheme();
@@ -273,6 +278,22 @@ export const AnimationStudio = ({
   const [isTemplateModalVisible, setTemplateModalVisible] = useState(false);
   const [metaModalVariant, setMetaModalVariant] = useState<MacWindowVariant>('default');
   const [templateModalVariant, setTemplateModalVariant] = useState<MacWindowVariant>('default');
+  const scrollToTop = useCallback(() => {
+    const scrollView = scrollParentRef?.current;
+    if (scrollView?.scrollTo) {
+      scrollView.scrollTo({ y: 0, animated: true });
+    }
+  }, [scrollParentRef]);
+  const scrollInputIntoView = useCallback(
+    (input: TextInput | null) => {
+      const node = input ? findNodeHandle(input) : null;
+      const scrollView = scrollParentRef?.current as any;
+      if (node && scrollView?.scrollResponderScrollNativeHandleToKeyboard) {
+        scrollView.scrollResponderScrollNativeHandleToKeyboard(node, 80, true);
+      }
+    },
+    [scrollParentRef],
+  );
   const storageApi = storageController ?? defaultStorageController;
   const activeSpriteName = useMemo(() => {
     if (!lastStoredSummary) {
@@ -1712,6 +1733,8 @@ export const AnimationStudio = ({
                 onSubmit={handleAnimationFpsChange}
                 disabled={isPlaying}
                 styles={styles}
+                onFocusInput={scrollInputIntoView}
+                onBlurInput={scrollToTop}
               />
             )}
             <ScrollView
@@ -1806,6 +1829,8 @@ export const AnimationStudio = ({
             onSelectFrame={selectTimelineFrame}
             multiplierRef={multiplierFieldRef}
             onSubmitMultiplier={handleMultiplierSubmit}
+            onFocusMultiplierInput={scrollInputIntoView}
+            onBlurMultiplierInput={scrollToTop}
             timelineImageSource={timelineImageSource ?? undefined}
             frameImageInfos={frameImageInfos}
             fallbackImageInfo={imageInfo}
@@ -2135,6 +2160,8 @@ interface AnimationFpsFieldProps {
   onSubmit: (value: number) => void;
   disabled?: boolean;
   styles: AnimationStudioStyles;
+  onFocusInput?: (input: TextInput | null) => void;
+  onBlurInput?: () => void;
 }
 
 const AnimationFpsField = ({
@@ -2142,6 +2169,8 @@ const AnimationFpsField = ({
   onSubmit,
   disabled = false,
   styles,
+  onFocusInput,
+  onBlurInput,
 }: AnimationFpsFieldProps) => {
   const [text, setText] = useState(String(value));
   const [isFocused, setFocused] = useState(false);
@@ -2172,10 +2201,14 @@ const AnimationFpsField = ({
         value={text}
         editable={!disabled}
         onChangeText={setText}
-        onFocus={() => setFocused(true)}
+        onFocus={() => {
+          setFocused(true);
+          onFocusInput?.(inputRef.current);
+        }}
         onBlur={() => {
           setFocused(false);
           commit();
+          onBlurInput?.();
         }}
         onSubmitEditing={commit}
         returnKeyType="done"

@@ -62,10 +62,12 @@ interface MultiplierFieldProps {
   onSubmit: (value: number) => void;
   disabled?: boolean;
   styles: TimelinePanelStyles;
+  onFocusInput?: (input: TextInput | null) => void;
+  onBlurInput?: () => void;
 }
 
 const MultiplierField = React.forwardRef<MultiplierFieldHandle, MultiplierFieldProps>(
-  ({ value, onSubmit, disabled, styles }, ref) => {
+  ({ value, onSubmit, disabled, styles, onFocusInput, onBlurInput }, ref) => {
     const [draft, setDraft] = useState(String(value));
     const [isFocused, setFocused] = useState(false);
     const strings = useMemo(() => getEditorStrings(), []);
@@ -101,10 +103,14 @@ const MultiplierField = React.forwardRef<MultiplierFieldHandle, MultiplierFieldP
             onChangeText={setDraft}
             style={[styles.multiplierInput, disabled && styles.multiplierInputDisabled]}
             editable={!disabled}
-            onFocus={() => setFocused(true)}
+            onFocus={() => {
+              setFocused(true);
+              onFocusInput?.(inputRef.current);
+            }}
             onBlur={() => {
               setFocused(false);
               commit();
+              onBlurInput?.();
             }}
             onSubmitEditing={commit}
             returnKeyType="done"
@@ -180,6 +186,10 @@ export interface TimelinePanelProps {
   multiplierRef: React.RefObject<MultiplierFieldHandle | null>;
   /** Applies a new multiplier for the selection. */
   onSubmitMultiplier: (value: number) => void;
+  /** Brings the multiplier field into view when focused. */
+  onFocusMultiplierInput?: (input: TextInput | null) => void;
+  /** Scrolls away when multiplier field loses focus. */
+  onBlurMultiplierInput?: () => void;
   /** Image source used for timeline thumbnails. */
   timelineImageSource?: ImageSourcePropType;
   /** Dimension cache per frame id. */
@@ -223,6 +233,8 @@ export const TimelinePanel = ({
   onSelectFrame,
   multiplierRef,
   onSubmitMultiplier,
+  onFocusMultiplierInput,
+  onBlurMultiplierInput,
   timelineImageSource,
   frameImageInfos,
   fallbackImageInfo,
@@ -474,6 +486,8 @@ export const TimelinePanel = ({
           disabled={isPlaying || !selectedFrame}
           onSubmit={onSubmitMultiplier}
           styles={styles}
+          onFocusInput={onFocusMultiplierInput}
+          onBlurInput={onBlurMultiplierInput}
         />
       </View>
       <View style={styles.timelineTrack}>{trackContent}</View>

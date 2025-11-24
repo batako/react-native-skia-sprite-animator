@@ -4,6 +4,9 @@ import {
   Linking,
   Platform,
   Pressable,
+  KeyboardAvoidingView,
+  Keyboard,
+  ScrollView,
   SafeAreaView,
   useColorScheme,
   StatusBar,
@@ -140,6 +143,8 @@ export const EditorScreen = () => {
   const colorScheme = useColorScheme();
   const isDarkMode = colorScheme !== 'light';
   const styles = React.useMemo(() => createThemedStyles(isDarkMode), [isDarkMode]);
+  const scrollRef = React.useRef<ScrollView | null>(null);
+  const [isKeyboardVisible, setKeyboardVisible] = React.useState(false);
 
   const [imageSource, setImageSource] = React.useState<DataSourceParam>(SAMPLE_SPRITE);
   const editorRef = React.useRef(editor);
@@ -404,29 +409,66 @@ export const EditorScreen = () => {
     };
   }, []);
 
+  React.useEffect(() => {
+    const showSub = Keyboard.addListener('keyboardDidShow', () => setKeyboardVisible(true));
+    const hideSub = Keyboard.addListener('keyboardDidHide', () => setKeyboardVisible(false));
+    return () => {
+      showSub.remove();
+      hideSub.remove();
+    };
+  }, []);
+
   return (
     <SafeAreaView style={styles.safeArea}>
       <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
-      <View style={styles.content}>
-        <View style={styles.headerRow}>
-          <View style={styles.titleRow}>
-            <Text style={styles.title}>React Native Skia Sprite Animator</Text>
-            <Text style={styles.versionLabel}>{`v${SPRITE_ANIMATOR_VERSION}`}</Text>
+      <KeyboardAvoidingView
+        style={styles.keyboardAvoider}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        keyboardVerticalOffset={Platform.OS === 'ios' ? 12 : 0}
+      >
+        <ScrollView
+          ref={scrollRef}
+          style={styles.scroll}
+          contentContainerStyle={[
+            styles.scrollContent,
+            !isKeyboardVisible && styles.scrollContentCollapsed,
+          ]}
+          keyboardShouldPersistTaps="handled"
+          scrollEnabled={isKeyboardVisible}
+          showsVerticalScrollIndicator={false}
+        >
+          <View
+            style={[
+              styles.content,
+              !isKeyboardVisible ? styles.contentTight : styles.contentScroll,
+            ]}
+          >
+            <View style={styles.headerRow}>
+              <View style={styles.titleRow}>
+                <Text style={styles.title}>React Native Skia Sprite Animator</Text>
+                <Text style={styles.versionLabel}>{`v${SPRITE_ANIMATOR_VERSION}`}</Text>
+              </View>
+              <IconButton
+                iconFamily="material"
+                name="info-outline"
+                color={isDarkMode ? '#fff' : '#000'}
+                onPress={() => {
+                  setLegalModalView('overview');
+                  setLegalModalVisible(true);
+                }}
+                accessibilityLabel={legalStrings.infoCenterTitle}
+              />
+            </View>
+            <Text style={styles.subtitle}>{strings.editorScreen.subtitle}</Text>
+            <AnimationStudio
+              editor={editor}
+              integration={integration}
+              image={imageSource}
+              scrollParentRef={scrollRef}
+            />
           </View>
-          <IconButton
-            iconFamily="material"
-            name="info-outline"
-            color={isDarkMode ? '#fff' : '#000'}
-            onPress={() => {
-              setLegalModalView('overview');
-              setLegalModalVisible(true);
-            }}
-            accessibilityLabel={legalStrings.infoCenterTitle}
-          />
-        </View>
-        <Text style={styles.subtitle}>{strings.editorScreen.subtitle}</Text>
-        <AnimationStudio editor={editor} integration={integration} image={imageSource} />
-      </View>
+        </ScrollView>
+      </KeyboardAvoidingView>
       <LegalModal
         title={legalModalTitle}
         visible={isLegalModalVisible}
@@ -520,8 +562,26 @@ const baseStyles = {
     flex: 1,
     backgroundColor: '#080b12',
   },
+  keyboardAvoider: {
+    flex: 1,
+  },
+  scroll: {
+    flex: 1,
+  },
+  scrollContent: {
+    flexGrow: 1,
+  },
+  scrollContentCollapsed: {
+    flexGrow: 0,
+  },
   content: {
     padding: 20,
+  },
+  contentTight: {
+    paddingVertical: 0,
+  },
+  contentScroll: {
+    paddingTop: 0,
   },
   headerRow: {
     flexDirection: 'row',
