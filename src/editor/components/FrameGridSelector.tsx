@@ -552,7 +552,7 @@ export const FrameGridSelector = ({
                                 {
                                   borderColor: isSelected ? '#4f8dff' : 'rgba(255,255,255,0.35)',
                                   backgroundColor: isSelected
-                                    ? 'rgba(79,141,255,0.15)'
+                                    ? 'rgba(0,0,0,0.35)'
                                     : 'transparent',
                                 },
                               ]}
@@ -851,7 +851,8 @@ const baseStyles = {
   },
   orderText: {
     color: '#fff',
-    fontSize: 12,
+    fontSize: 13,
+    fontWeight: '700',
   },
   fieldRow: {
     marginBottom: 10,
