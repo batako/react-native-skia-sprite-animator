@@ -961,6 +961,7 @@ export const AnimationStudio = ({
   );
 
   const lastAnimationRef = useRef<string | null>(null);
+  const skipSelectionResetRef = useRef(false);
   useEffect(() => {
     const nextName = currentAnimationName ?? null;
     const nextSequence = nextName ? (animations[nextName] ?? []) : [];
@@ -977,6 +978,10 @@ export const AnimationStudio = ({
       selectedTimelineIndex === null ||
       selectedTimelineIndex >= nextSequence.length;
     if (needsReset) {
+      if (skipSelectionResetRef.current) {
+        skipSelectionResetRef.current = false;
+        return;
+      }
       selectTimelineFrame(0, nextSequence);
       return;
     }
@@ -1220,7 +1225,7 @@ export const AnimationStudio = ({
       const previousAnimation = currentAnimationName;
 
       // Clear selection before inserting frames; keeping the previous selection active while frames are appended causes the timeline state to toggle rapidly
-      setActiveAnimation(null);
+      skipSelectionResetRef.current = true;
       setTimelineSelection(null);
 
       const resolvedImageUri = resolveFrameImageUri(sourceImage);
@@ -1449,7 +1454,6 @@ export const AnimationStudio = ({
     if (selectedTimelineIndex === null) {
       return;
     }
-    const targetIndex = Math.max(0, selectedTimelineIndex - 1);
     const next = [...currentSequence];
     next.splice(selectedTimelineIndex, 1);
     updateSequence(next, (prevMultipliers) => {
@@ -1457,16 +1461,17 @@ export const AnimationStudio = ({
       result.splice(selectedTimelineIndex, 1);
       return result;
     });
+    const desiredIndex = Math.max(0, Math.min(next.length - 1, selectedTimelineIndex));
     setTimelineSelection((prev) => {
       if (prev === null) {
         return prev;
       }
-      const clamped = Math.max(0, Math.min(next.length - 1, targetIndex));
+      const clamped = Math.max(0, Math.min(next.length - 1, desiredIndex));
       return clamped;
     });
     if (next.length) {
       ignoreNextTimelineCursorRef.current = true;
-      selectTimelineFrame(Math.max(0, Math.min(next.length - 1, targetIndex)), next);
+      selectTimelineFrame(Math.max(0, Math.min(next.length - 1, desiredIndex)), next);
     } else {
       setTimelineSelection(null);
     }
