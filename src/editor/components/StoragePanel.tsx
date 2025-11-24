@@ -498,8 +498,9 @@ const baseStyles = {
     overflow: 'hidden',
   },
   overlayFullscreen: {
-    borderRadius: 0,
+    borderRadius: 16,
     padding: 0,
+    overflow: 'hidden',
   },
   backdrop: {
     ...StyleSheet.absoluteFillObject,
@@ -526,7 +527,7 @@ const baseStyles = {
     alignItems: 'center',
     justifyContent: 'center',
     padding: 0,
-    borderRadius: 0,
+    borderRadius: 16,
   },
   windowContent: {
     paddingHorizontal: 12,

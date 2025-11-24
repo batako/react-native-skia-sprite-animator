@@ -2697,7 +2697,8 @@ const baseStyles = {
     overflow: 'hidden',
   },
   modalOverlayFullscreen: {
-    borderRadius: 0,
+    borderRadius: 16,
+    overflow: 'hidden',
     padding: 0,
   },
   modalContentWrap: {

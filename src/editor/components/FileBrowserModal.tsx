@@ -475,10 +475,12 @@ const baseStyles = {
     ...StyleSheet.absoluteFillObject,
     backgroundColor: 'rgba(0,0,0,0.65)',
     borderRadius: 16,
+    overflow: 'hidden',
   },
   backdropFullscreen: {
-    borderRadius: 0,
+    borderRadius: 16,
     padding: 0,
+    overflow: 'hidden',
   },
   modalOverlay: {
     position: 'absolute',
@@ -493,12 +495,13 @@ const baseStyles = {
     overflow: 'hidden',
   },
   modalOverlayFullscreen: {
-    borderRadius: 0,
+    borderRadius: 16,
     padding: 0,
     justifyContent: 'center',
     alignItems: 'center',
     width: '100%',
     height: '100%',
+    overflow: 'hidden',
   },
   toolbarContent: {
     flexDirection: 'row',
