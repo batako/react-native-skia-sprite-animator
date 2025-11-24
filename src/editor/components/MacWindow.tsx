@@ -245,6 +245,7 @@ const baseStyles = {
     flex: 1,
     padding: 12,
     minHeight: 320,
+    backgroundColor: '#1e2434',
   },
 } as const;
 
@@ -259,9 +260,10 @@ const COLOR_KEYS = new Set([
 ]);
 
 const lightColorMap: Record<string, string> = {
-  '#1c2233': '#f6f7fb',
-  '#2a3147': '#d1d7e4',
-  '#151b2a': '#e8edf6',
+  '#1c2233': '#e6ebf5',
+  '#2a3147': '#cdd3df',
+  '#151b2a': '#dfe4ef',
+  '#1e2434': '#f1f5fb',
   '#ff5f56': '#ef4444',
   '#ffbd2e': '#f59e0b',
   '#27c840': '#22c55e',
