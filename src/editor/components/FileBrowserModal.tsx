@@ -393,6 +393,7 @@ export const FileBrowserModal = ({
           style={styles.fileList}
           data={entries}
           keyExtractor={(item) => item.uri}
+          nestedScrollEnabled
           renderItem={({ item }) => (
             <TouchableOpacity
               style={styles.fileRow}

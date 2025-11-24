@@ -418,21 +418,6 @@ export const EditorScreen = () => {
     };
   }, []);
 
-  const isScrollable = isKeyboardVisible;
-  const Container = (isScrollable ? ScrollView : View) as React.ComponentType<any>;
-  const containerProps = isScrollable
-    ? {
-        ref: scrollRef,
-        style: styles.scroll,
-        contentContainerStyle: [
-          styles.scrollContent,
-          !isKeyboardVisible && styles.scrollContentCollapsed,
-        ],
-        keyboardShouldPersistTaps: 'handled' as const,
-        showsVerticalScrollIndicator: false,
-      }
-    : { style: [styles.content, styles.contentTight] };
-
   return (
     <SafeAreaView style={styles.safeArea}>
       <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
@@ -441,8 +426,23 @@ export const EditorScreen = () => {
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         keyboardVerticalOffset={Platform.OS === 'ios' ? 12 : 0}
       >
-        <Container {...containerProps}>
-          <View style={[styles.content, isScrollable ? styles.contentScroll : styles.contentTight]}>
+        <ScrollView
+          ref={scrollRef}
+          style={styles.scroll}
+          contentContainerStyle={[
+            styles.scrollContent,
+            !isKeyboardVisible && styles.scrollContentCollapsed,
+          ]}
+          keyboardShouldPersistTaps="handled"
+          scrollEnabled={isKeyboardVisible}
+          showsVerticalScrollIndicator={false}
+        >
+          <View
+            style={[
+              styles.content,
+              !isKeyboardVisible ? styles.contentTight : styles.contentScroll,
+            ]}
+          >
             <View style={styles.headerRow}>
               <View style={styles.titleRow}>
                 <Text style={styles.title}>React Native Skia Sprite Animator</Text>
@@ -467,10 +467,10 @@ export const EditorScreen = () => {
               integration={integration}
               image={imageSource}
               enableKeyboardAvoidance
-              scrollParentRef={isScrollable ? scrollRef : undefined}
+              scrollParentRef={scrollRef}
             />
           </View>
-        </Container>
+        </ScrollView>
       </KeyboardAvoidingView>
       <LegalModal
         title={legalModalTitle}
