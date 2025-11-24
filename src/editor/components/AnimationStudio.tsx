@@ -2166,7 +2166,7 @@ const AnimationFpsField = ({
   return (
     <View style={styles.animationFpsRow}>
       <Text style={styles.animationFpsLabel}>FPS</Text>
-      <SelectableTextInput
+      <TextInput
         ref={inputRef}
         style={[styles.animationFpsInput, disabled && styles.animationFpsInputDisabled]}
         value={text}
@@ -2179,6 +2179,7 @@ const AnimationFpsField = ({
         }}
         onSubmitEditing={commit}
         returnKeyType="done"
+        selectTextOnFocus={false}
       />
     </View>
   );
