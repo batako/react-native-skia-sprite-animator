@@ -2466,8 +2466,9 @@ const baseStyles = {
     flex: 1,
   },
   metaHeading: {
-    color: '#e2e7ff',
-    fontWeight: '600',
+    color: '#9aa4bd',
+    fontSize: 12,
+    fontWeight: '400',
   },
   metaRowsStack: {
     flex: 1,
@@ -2547,9 +2548,9 @@ const baseStyles = {
     fontWeight: '600',
   },
   metaHelpText: {
-    color: '#8f97b0',
+    color: '#9aa4bd',
     fontSize: 12,
-    marginTop: 12,
+    marginTop: 8,
   },
   templateModalContent: {
     paddingHorizontal: 20,
