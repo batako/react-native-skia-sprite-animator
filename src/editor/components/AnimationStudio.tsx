@@ -237,11 +237,11 @@ export const AnimationStudio = ({
   const styles = useMemo(() => createThemedStyles(isDarkMode), [isDarkMode]);
   const headerChipIconColor = isDarkMode ? '#cfd7ff' : '#475569';
   const headerChipCloseColor = isDarkMode ? '#aebdff' : '#0f172a';
-  // subdued, theme-aware accent colors
-  const loopActiveColor = isDarkMode ? '#9fb5e1' : '#475569';
-  const loopInactiveColor = isDarkMode ? '#1f2430' : '#e2e8f0';
-  const autoplayActiveColor = isDarkMode ? '#9fb5e1' : '#475569';
-  const autoplayInactiveColor = isDarkMode ? '#6f7896' : '#94a3b8';
+  // subdued accent colors shared across themes (loop off matches the plain toolbar icons)
+  const loopActiveColor = '#9fb5e1';
+  const loopInactiveColor = 'transparent';
+  const autoplayActiveColor = '#9fb5e1';
+  const autoplayInactiveColor = '#6f7896';
   const frames = editor.state.frames;
   const animations = useMemo(() => editor.state.animations ?? {}, [editor.state.animations]);
   const animationsMeta = useMemo(
