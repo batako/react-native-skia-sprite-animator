@@ -452,6 +452,8 @@ export const EditorScreen = () => {
                 iconFamily="material"
                 name="info-outline"
                 color={isDarkMode ? '#fff' : '#000'}
+                size={24}
+                style={styles.infoButton}
                 onPress={() => {
                   setLegalModalView('overview');
                   setLegalModalVisible(true);
@@ -577,6 +579,13 @@ const baseStyles = {
   },
   content: {
     padding: 20,
+  },
+  infoButton: {
+    marginBottom: 0,
+    marginRight: 0,
+    paddingVertical: 0,
+    paddingHorizontal: 4,
+    alignSelf: 'center',
   },
   contentTight: {
     paddingVertical: 0,
