@@ -441,6 +441,7 @@ export const TimelinePanel = ({
     styles.emptyTimelineWrapper,
     styles.timelineContent,
     styles.timelineScroll,
+    scrollViewportWidth,
   ]);
 
   return (
