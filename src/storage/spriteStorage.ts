@@ -273,13 +273,18 @@ export const loadSprite = async <TExtra extends Record<string, unknown>>(
  * Lists the sprite summaries persisted on disk.
  */
 export const listSprites = async (): Promise<SpriteSummary[]> => {
-  const registry = await readRegistry();
-  return registry.items.map((item) => ({
+ const registry = await readRegistry();
+  const summaries = registry.items.map((item) => ({
     id: item.id,
     displayName: item.displayName,
     createdAt: item.createdAt ?? item.updatedAt ?? Date.now(),
     updatedAt: item.updatedAt ?? item.createdAt ?? Date.now(),
   }));
+  return summaries.sort((a, b) => {
+    const aTime = a.createdAt ?? a.updatedAt ?? 0;
+    const bTime = b.createdAt ?? b.updatedAt ?? 0;
+    return bTime - aTime;
+  });
 };
 
 /**
