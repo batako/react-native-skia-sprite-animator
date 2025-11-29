@@ -15,11 +15,7 @@ import {
   View,
   findNodeHandle,
 } from 'react-native';
-import type {
-  NativeScrollEvent,
-  NativeSyntheticEvent,
-  ViewStyle,
-} from 'react-native';
+import type { NativeScrollEvent, NativeSyntheticEvent, ViewStyle } from 'react-native';
 import * as FileSystem from 'expo-file-system/legacy';
 import * as Sharing from 'expo-sharing';
 import { cleanSpriteData } from '../utils/cleanSpriteData';
@@ -1225,7 +1221,7 @@ export const AnimationStudio = ({
     if (!descriptor?.source) {
       return undefined;
     }
-    const source = descriptor.source as DataSourceParam;
+    const source = descriptor.source as unknown;
     if (typeof source === 'string') {
       return source;
     }
@@ -1677,16 +1673,16 @@ export const AnimationStudio = ({
             onPress={handleOpenTemplateModal}
             accessibilityLabel={strings.animationStudio.openSpriteJsonTools}
           />
+        </View>
       </View>
-    </View>
-    <View style={styles.previewSection}>
-      <AnimatedSprite2DPreview
-        editor={editor}
-        integration={integration}
-        animationName={currentAnimationName}
-        allowRendering={hasCurrentAnimationFrames}
-      />
-    </View>
+      <View style={styles.previewSection}>
+        <AnimatedSprite2DPreview
+          editor={editor}
+          integration={integration}
+          animationName={currentAnimationName}
+          allowRendering={hasCurrentAnimationFrames}
+        />
+      </View>
       <View style={styles.body}>
         <View style={styles.sequenceGroup}>
           <View
