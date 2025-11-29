@@ -9,7 +9,6 @@ import {
   View,
   useColorScheme,
 } from 'react-native';
-import type { ImageSourcePropType } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import type { SpriteAnimationsMeta } from '../../spriteTypes';
 import type { SpriteEditorFrame } from '../types';
@@ -190,12 +189,8 @@ export interface TimelinePanelProps {
   onFocusMultiplierInput?: (input: TextInput | null) => void;
   /** Scrolls away when multiplier field loses focus. */
   onBlurMultiplierInput?: () => void;
-  /** Image source used for timeline thumbnails. */
-  timelineImageSource?: ImageSourcePropType;
   /** Dimension cache per frame id. */
   frameImageInfos: Record<string, FrameImageInfo>;
-  /** Dimensions for fallback thumbnails. */
-  fallbackImageInfo: FrameImageInfo | null;
   /** Animations metadata indexed by name. */
   animationsMeta: SpriteAnimationsMeta;
 }
@@ -235,9 +230,7 @@ export const TimelinePanel = ({
   onSubmitMultiplier,
   onFocusMultiplierInput,
   onBlurMultiplierInput,
-  timelineImageSource,
   frameImageInfos,
-  fallbackImageInfo,
   animationsMeta,
 }: TimelinePanelProps) => {
   const strings = useMemo(() => getEditorStrings(), []);
@@ -304,8 +297,8 @@ export const TimelinePanel = ({
         if (!frame) {
           return resolvePlaceholder();
         }
-        const frameSource = frame.imageUri ? { uri: frame.imageUri } : timelineImageSource;
-        const frameInfo = frame.imageUri ? frameImageInfos[frame.imageUri] : fallbackImageInfo;
+        const frameSource = frame.imageUri ? { uri: frame.imageUri } : null;
+        const frameInfo = frame.imageUri ? frameImageInfos[frame.imageUri] : null;
         if (!frameSource || !frameInfo || !frameInfo.ready) {
           return resolvePlaceholder();
         }
@@ -364,11 +357,9 @@ export const TimelinePanel = ({
       animationsMeta,
       currentAnimationName,
       defaultFrameMultiplier,
-      fallbackImageInfo,
       frameImageInfos,
       onSelectFrame,
       strings,
-      timelineImageSource,
       styles.timelineCard,
       styles.timelineCardSelected,
       styles.timelineCardBody,

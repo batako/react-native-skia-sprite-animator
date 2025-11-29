@@ -16,7 +16,6 @@ import {
   findNodeHandle,
 } from 'react-native';
 import type {
-  ImageSourcePropType,
   NativeScrollEvent,
   NativeSyntheticEvent,
   ViewStyle,
@@ -37,7 +36,6 @@ import { useTimelineEditor } from '../hooks/useTimelineEditor';
 import type { SpriteAnimationMeta, SpriteAnimationsMeta } from '../../spriteTypes';
 import type { SpriteEditorApi } from '../hooks/useSpriteEditor';
 import type { SpriteEditorFrame } from '../types';
-import type { DataSourceParam } from '@shopify/react-native-skia';
 import { MaterialIcons } from '@expo/vector-icons';
 import { IconButton } from './IconButton';
 import { MacWindow, type MacWindowVariant } from './MacWindow';
@@ -81,8 +79,6 @@ export interface AnimationStudioProps {
   editor: SpriteEditorApi;
   /** Integration between the editor and preview runtime. */
   integration: EditorIntegration;
-  /** Sprite sheet image source used throughout the studio. */
-  image: DataSourceParam;
   /** Optional storage hooks to override persistence. */
   storageController?: SpriteStorageController;
   /** Meta keys that should be locked from editing/removal. */
@@ -233,7 +229,6 @@ const cleanupAnimationMetaEntry = (
 export const AnimationStudio = ({
   editor,
   integration,
-  image,
   storageController,
   protectedMetaKeys = DEFAULT_PROTECTED_META_KEYS,
   enableKeyboardAvoidance = false,
@@ -1121,8 +1116,6 @@ export const AnimationStudio = ({
     setFrameSourceBrowserVisible(true);
   }, []);
 
-  const imageInfo = useImageDimensions(image);
-  const timelineImageSource = useMemo(() => resolveReactNativeImageSource(image), [image]);
   const frameImageUris = useMemo(() => {
     const unique = new Set<string>();
     editor.state.frames.forEach((frame) => {
@@ -1684,17 +1677,16 @@ export const AnimationStudio = ({
             onPress={handleOpenTemplateModal}
             accessibilityLabel={strings.animationStudio.openSpriteJsonTools}
           />
-        </View>
       </View>
-      <View style={styles.previewSection}>
-        <AnimatedSprite2DPreview
-          editor={editor}
-          integration={integration}
-          image={image}
-          animationName={currentAnimationName}
-          allowRendering={hasCurrentAnimationFrames}
-        />
-      </View>
+    </View>
+    <View style={styles.previewSection}>
+      <AnimatedSprite2DPreview
+        editor={editor}
+        integration={integration}
+        animationName={currentAnimationName}
+        allowRendering={hasCurrentAnimationFrames}
+      />
+    </View>
       <View style={styles.body}>
         <View style={styles.sequenceGroup}>
           <View
@@ -1841,9 +1833,7 @@ export const AnimationStudio = ({
             onSubmitMultiplier={handleMultiplierSubmit}
             onFocusMultiplierInput={scrollInputIntoView}
             onBlurMultiplierInput={scrollToTop}
-            timelineImageSource={timelineImageSource ?? undefined}
             frameImageInfos={frameImageInfos}
-            fallbackImageInfo={imageInfo}
             animationsMeta={animationsMeta}
           />
         </View>
@@ -2245,78 +2235,6 @@ const AnimationFpsField = ({
       />
     </View>
   );
-};
-
-const useImageDimensions = (source: DataSourceParam): FrameImageInfo | null => {
-  const [state, setState] = useState<FrameImageInfo | null>(null);
-
-  useEffect(() => {
-    if (typeof source === 'number') {
-      const resolved = Image.resolveAssetSource(source);
-      if (resolved?.width && resolved?.height) {
-        setState({ width: resolved.width, height: resolved.height, ready: true });
-      } else {
-        setState({ width: 0, height: 0, ready: false });
-      }
-      return;
-    }
-    const uri = typeof source === 'string' ? source : (source as { uri?: string }).uri;
-    if (!uri) {
-      setState({ width: 0, height: 0, ready: false });
-      return;
-    }
-    let cancelled = false;
-    Image.getSize(
-      uri,
-      (width, height) => {
-        if (!cancelled) {
-          setState({ width, height, ready: true });
-        }
-      },
-      () => {
-        if (!cancelled) {
-          setState({ width: 0, height: 0, ready: false });
-        }
-      },
-    );
-    return () => {
-      cancelled = true;
-    };
-  }, [source]);
-
-  return state;
-};
-
-const resolveReactNativeImageSource = (
-  value: DataSourceParam | undefined,
-): ImageSourcePropType | null => {
-  if (!value) {
-    return null;
-  }
-  if (typeof value === 'number') {
-    return value as ImageSourcePropType;
-  }
-  if (typeof value === 'string') {
-    return { uri: value };
-  }
-  if (Array.isArray(value)) {
-    return value as ImageSourcePropType;
-  }
-  if (typeof value === 'object') {
-    if (
-      'uri' in (value as Record<string, unknown>) &&
-      typeof (value as { uri?: string }).uri === 'string'
-    ) {
-      return value as ImageSourcePropType;
-    }
-    if ('source' in (value as Record<string, unknown>)) {
-      const descriptor = value as { source?: DataSourceParam };
-      if (descriptor.source) {
-        return resolveReactNativeImageSource(descriptor.source);
-      }
-    }
-  }
-  return null;
 };
 
 const baseStyles = {

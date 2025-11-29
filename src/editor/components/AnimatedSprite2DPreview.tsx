@@ -14,7 +14,6 @@ import type { SpriteEditorApi } from '../hooks/useSpriteEditor';
 import type { EditorIntegration } from '../hooks/useEditorIntegration';
 import { buildAnimatedSpriteFrames } from '../utils/buildAnimatedSpriteFrames';
 import { IconButton } from './IconButton';
-import type { DataSourceParam } from '@shopify/react-native-skia';
 import type { SpriteFramesResource } from '../animatedSprite2dTypes';
 import { useSpriteAnimationTicker } from '../../hooks/useSpriteAnimationTicker';
 import { getEditorStrings } from '../localization';
@@ -27,7 +26,6 @@ const VERTICAL_RESERVE = 320;
 interface AnimatedSprite2DPreviewProps {
   editor: SpriteEditorApi;
   integration: EditorIntegration;
-  image: DataSourceParam;
   animationName: string | null;
   mode?: 'timeline' | 'self';
   allowRendering?: boolean;
@@ -36,7 +34,6 @@ interface AnimatedSprite2DPreviewProps {
 export const AnimatedSprite2DPreview = ({
   editor,
   integration,
-  image,
   animationName,
   mode = 'timeline',
   allowRendering = true,
@@ -48,11 +45,11 @@ export const AnimatedSprite2DPreview = ({
   const styles = useMemo(() => createThemedStyles(isDarkMode), [isDarkMode]);
   const rawResource = useMemo(
     () =>
-      buildAnimatedSpriteFrames(editor.state, image, {
+      buildAnimatedSpriteFrames(editor.state, {
         animations: integration.runtimeData.animations ?? editor.state.animations,
         animationsMeta: integration.animationsMeta,
       }),
-    [editor.state, image, integration.animationsMeta, integration.runtimeData.animations],
+    [editor.state, integration.animationsMeta, integration.runtimeData.animations],
   );
   const resource = allowRendering ? rawResource : null;
   const resolvedResource: SpriteFramesResource = useMemo(() => {

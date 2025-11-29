@@ -23,7 +23,6 @@ import {
   getEditorStrings,
   SPRITE_ANIMATOR_VERSION,
 } from 'react-native-skia-sprite-animator';
-import type { DataSourceParam } from '@shopify/react-native-skia';
 import { AnimationStudio } from '../components/AnimationStudio';
 import { useEditorIntegration } from '../hooks/useEditorIntegration';
 import { LegalModal } from '../components/LegalModal';
@@ -145,8 +144,6 @@ export const EditorScreen = () => {
   const styles = React.useMemo(() => createThemedStyles(isDarkMode), [isDarkMode]);
   const scrollRef = React.useRef<ScrollView | null>(null);
   const [isKeyboardVisible, setKeyboardVisible] = React.useState(false);
-
-  const [imageSource, setImageSource] = React.useState<DataSourceParam>(SAMPLE_SPRITE);
   const editorRef = React.useRef(editor);
   const [legalModalView, setLegalModalView] = React.useState<
     'overview' | 'about' | 'terms' | 'privacy' | 'licenses'
@@ -392,9 +389,7 @@ export const EditorScreen = () => {
         return;
       }
       const uri = asset.localUri ?? asset.uri;
-      const nextSource = uri ?? SAMPLE_SPRITE;
       const frameImageUri = typeof uri === 'string' ? uri : undefined;
-      setImageSource(nextSource);
       editorRef.current.reset({
         frames: SAMPLE_FRAMES.map((frame) => ({ ...frame, imageUri: frameImageUri })),
         animations: SAMPLE_INITIAL_STATE.animations ?? {},
@@ -465,7 +460,6 @@ export const EditorScreen = () => {
             <AnimationStudio
               editor={editor}
               integration={integration}
-              image={imageSource}
               enableKeyboardAvoidance
               scrollParentRef={scrollRef}
             />

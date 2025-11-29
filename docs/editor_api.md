@@ -194,7 +194,7 @@ The returned object (exported as `EditorIntegration`) includes helpers such as `
 
 ## AnimationStudio component
 
-`AnimationStudio` is a ready-made editor surface that combines every hook above: frame list, metadata editor, sprite JSON import/export, sprite storage modal, timeline panel, and the AnimatedSprite2D preview. Bring your own editor instance, integration hook result, and sprite sheet image.
+`AnimationStudio` is a ready-made editor surface that combines every hook above: frame list, metadata editor, sprite JSON import/export, sprite storage modal, timeline panel, and the AnimatedSprite2D preview. Bring your own editor instance and integration hook result; frames are expected to carry their own `imageUri`.
 
 ```tsx
 import {
@@ -206,7 +206,9 @@ import {
 const editor = useSpriteEditor();
 const integration = useEditorIntegration({ editor });
 
-<AnimationStudio editor={editor} integration={integration} image={spriteSheet} />;
+<AnimationStudio editor={editor} integration={integration} />;
+
+// frames should include imageUri for preview/timeline rendering
 ```
 
 Additional props:

@@ -1,5 +1,4 @@
 /* eslint-disable jsdoc/require-jsdoc */
-import type { DataSourceParam, SkImage } from '@shopify/react-native-skia';
 import type { SpriteEditorState } from '../types';
 import type {
   AnimatedSpriteFrame,
@@ -18,27 +17,6 @@ const buildFrameImageSource = (
     return subset ? { type: 'uri', uri, subset } : { type: 'uri', uri };
   }
   return null;
-};
-
-const buildFromDataSource = (
-  source: DataSourceParam | undefined,
-  subset?: FrameImageSubset,
-): FrameImageSource | null => {
-  if (!source) {
-    return null;
-  }
-  if (typeof source === 'number') {
-    return subset
-      ? { type: 'require', assetId: source, subset }
-      : { type: 'require', assetId: source };
-  }
-  if (typeof source === 'string') {
-    return subset ? { type: 'uri', uri: source, subset } : { type: 'uri', uri: source };
-  }
-  const imageSource = source as unknown as SkImage;
-  return subset
-    ? { type: 'skImage', image: imageSource, subset }
-    : { type: 'skImage', image: imageSource };
 };
 
 const cloneAnimations = (source: SpriteAnimationsMap | undefined): SpriteAnimationsMap => {
@@ -74,7 +52,6 @@ const cloneAnimationsMeta = (
 
 export const buildAnimatedSpriteFrames = (
   state: SpriteEditorState,
-  fallbackImage?: DataSourceParam,
   overrides?: {
     animations?: SpriteAnimationsMap;
     animationsMeta?: SpriteAnimationsMetaMap;
@@ -95,8 +72,7 @@ export const buildAnimatedSpriteFrames = (
             height: frame.h,
           }
         : undefined;
-    const source =
-      buildFrameImageSource(frame.imageUri, subset) ?? buildFromDataSource(fallbackImage, subset);
+    const source = buildFrameImageSource(frame.imageUri, subset);
     if (!source) {
       return null;
     }
