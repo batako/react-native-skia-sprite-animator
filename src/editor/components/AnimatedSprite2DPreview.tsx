@@ -338,7 +338,7 @@ const baseStyles = {
     justifyContent: 'center',
   },
   placeholderText: {
-    color: '#9ca9c7',
+    color: '#ffffff',
     textAlign: 'center',
   },
   placeholderContainer: {

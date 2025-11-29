@@ -239,8 +239,7 @@ const translations: Record<SupportedLanguage, EditorStrings> = {
       noFramesSelected: 'No frames selected',
     },
     preview: {
-      framesMissing:
-        'Frame images are missing. AnimatedSprite2D preview becomes available once each frame has its own image URI.',
+      framesMissing: 'No frame images. Import an image to see the preview.',
       pausePreview: 'Pause preview',
       playPreview: 'Play preview',
       stopPreview: 'Stop preview',
@@ -448,8 +447,7 @@ const translations: Record<SupportedLanguage, EditorStrings> = {
       noFramesSelected: 'フレームが選択されていません',
     },
     preview: {
-      framesMissing:
-        'フレーム画像がありません。各フレームに画像URIを設定すると AnimatedSprite2D のプレビューが表示されます。',
+      framesMissing: 'フレーム画像がありません。画像を取り込むとプレビューが表示されます。',
       pausePreview: 'プレビューを一時停止',
       playPreview: 'プレビューを再生',
       stopPreview: 'プレビューを停止',
