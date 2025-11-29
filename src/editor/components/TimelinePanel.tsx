@@ -238,6 +238,9 @@ export const TimelinePanel = ({
   const isDarkMode = colorScheme !== 'light';
   const styles = useMemo(() => createThemedStyles(isDarkMode), [isDarkMode]);
   const heading = title ?? strings.animationStudio.animationFramesTitle;
+  const scrollRef = useRef<ScrollView | null>(null);
+  const lastScrollXRef = useRef(0);
+  const [scrollViewportWidth, setScrollViewportWidth] = useState(0);
   const renderRestartForwardIcon = useCallback(
     ({ color, size }: { color: string; size: number }) => (
       <View style={styles.restartIcon}>
@@ -267,6 +270,34 @@ export const TimelinePanel = ({
     },
     [onTimelineMeasured, timelineMeasuredHeight],
   );
+  const scrollCardIntoView = useCallback(
+    (targetIndex: number | null | undefined) => {
+      if (targetIndex === null || targetIndex === undefined) {
+        return;
+      }
+      const viewportWidth = scrollViewportWidth;
+      const scrollView = scrollRef.current;
+      if (!scrollView || viewportWidth <= 0) {
+        return;
+      }
+      const cardWidth = TIMELINE_CARD_SIZE;
+      const targetStart = cardWidth * targetIndex;
+      const targetEnd = targetStart + cardWidth;
+      const currentStart = lastScrollXRef.current;
+      const currentEnd = currentStart + viewportWidth;
+      if (targetStart >= currentStart && targetEnd <= currentEnd) {
+        return;
+      }
+      const centeredOffset = targetStart - (viewportWidth - cardWidth) / 2;
+      const nextOffset = Math.max(0, centeredOffset);
+      scrollView.scrollTo({ x: nextOffset, animated: true });
+      lastScrollXRef.current = nextOffset;
+    },
+    [scrollViewportWidth],
+  );
+  React.useEffect(() => {
+    scrollCardIntoView(selectedTimelineIndex);
+  }, [scrollCardIntoView, selectedTimelineIndex, sequenceCards.length]);
   const renderTimelineCard = useCallback(
     (card: TimelineSequenceCard) => {
       const { frame, frameIndex, timelineIndex, isSelected } = card;
@@ -386,9 +417,20 @@ export const TimelinePanel = ({
     return (
       <ScrollView
         horizontal
+        ref={scrollRef}
         style={styles.timelineScroll}
         contentContainerStyle={styles.timelineContent}
         showsHorizontalScrollIndicator={false}
+        onScroll={(event) => {
+          lastScrollXRef.current = event.nativeEvent.contentOffset.x;
+        }}
+        scrollEventThrottle={16}
+        onLayout={(event) => {
+          const width = event.nativeEvent.layout.width;
+          if (width > 0 && Math.abs(width - scrollViewportWidth) > 1) {
+            setScrollViewportWidth(width);
+          }
+        }}
       >
         {sequenceCards.map((card) => renderTimelineCard(card))}
       </ScrollView>
