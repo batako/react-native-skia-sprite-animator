@@ -62,7 +62,15 @@ export const useTicker = ({
   useEffect(() => {
     setCursor(0);
     resetAccumulator();
-  }, [animationName, sequence, resetAccumulator, setCursor]);
+  }, [animationName, resetAccumulator, setCursor]);
+
+  useEffect(() => {
+    const clamped = Math.max(0, Math.min(cursorRef.current, Math.max(0, sequence.length - 1)));
+    if (clamped !== cursorRef.current) {
+      setCursor(clamped);
+    }
+    resetAccumulator();
+  }, [resetAccumulator, sequence.length, setCursor]);
 
   useEffect(() => {
     if (!playing || !sequence.length || typeof forcedFrameIndex === 'number') {
