@@ -9,34 +9,33 @@
 
 ## 🌟 Highlights
 
-- Keyboard avoidance for `AnimationStudio` is now opt-in, keeping host layouts unchanged unless explicitly enabled (sample app opts in) ([`9823eb8`](https://github.com/batako/react-native-skia-sprite-animator/commit/9823eb8)).
-- Storage, metadata, and file browser modals now share unified overlays/styling across light/dark themes and remain stable when keyboards appear ([`94560c5`](https://github.com/batako/react-native-skia-sprite-animator/commit/94560c5), [`28dfde6`](https://github.com/batako/react-native-skia-sprite-animator/commit/28dfde6)).
-- Standalone editor header alignment and spacing refined for tablet layouts ([`d4fc909`](https://github.com/batako/react-native-skia-sprite-animator/commit/d4fc909), [`288b53a`](https://github.com/batako/react-native-skia-sprite-animator/commit/288b53a)).
+- Removed the shared sprite-sheet `image` prop from `AnimationStudio`; frames are now expected to carry their own `imageUri` (breaking change, build-time detectable) ([`90b05d7`](https://github.com/batako/react-native-skia-sprite-animator/commit/90b05d7)).
+- Timeline paste now keeps cursor/selection and auto-scrolls the new frame into view ([`f06a23c`](https://github.com/batako/react-native-skia-sprite-animator/commit/f06a23c), [`5b35bc1`](https://github.com/batako/react-native-skia-sprite-animator/commit/5b35bc1), [`36c0d41`](https://github.com/batako/react-native-skia-sprite-animator/commit/36c0d41)).
+- spriteStorage listing is sorted newest-first so recent work is surfaced immediately ([`32513cb`](https://github.com/batako/react-native-skia-sprite-animator/commit/32513cb)).
 
 <!-- Section: Features -->
 
 ## ✨ Features
 
-- Added `enableKeyboardAvoidance` (default `false`) to `AnimationStudio`, allowing optional auto-scroll/avoidance for FPS, multiplier, and rename inputs ([`9823eb8`](https://github.com/batako/react-native-skia-sprite-animator/commit/9823eb8)).
-- Improved landscape full-keyboard handling in the standalone editor to keep inputs visible ([`0e3f4f4`](https://github.com/batako/react-native-skia-sprite-animator/commit/0e3f4f4), [`97a8fc1`](https://github.com/batako/react-native-skia-sprite-animator/commit/97a8fc1)).
+- Simpler `AnimationStudio` usage with per-frame `imageUri` (shared sheet prop removed) ([`90b05d7`](https://github.com/batako/react-native-skia-sprite-animator/commit/90b05d7)).
+- Auto-scroll timeline to the pasted frame to keep it visible ([`36c0d41`](https://github.com/batako/react-native-skia-sprite-animator/commit/36c0d41)).
+- Sort spriteStorage list by most-recent first ([`32513cb`](https://github.com/batako/react-native-skia-sprite-animator/commit/32513cb)).
 
 <!-- Section: Bug Fixes -->
 
 ## 🐞 Bug Fixes
 
-- Prevented storage/file-browser/modals from shrinking or exiting fullscreen when keyboards appear; maintained overlay boundaries across themes ([`94560c5`](https://github.com/batako/react-native-skia-sprite-animator/commit/94560c5)).
-- Removed nested VirtualizedList warnings in the file browser by flattening the list and avoiding ScrollView nesting ([`28dfde6`](https://github.com/batako/react-native-skia-sprite-animator/commit/28dfde6), [`21f6832`](https://github.com/batako/react-native-skia-sprite-animator/commit/21f6832)).
-- Aligned metadata modal labels/buttons and text colors with other modal sections in both themes ([`d601726`](https://github.com/batako/react-native-skia-sprite-animator/commit/d601726), [`e4794af`](https://github.com/batako/react-native-skia-sprite-animator/commit/e4794af), [`ab625db`](https://github.com/batako/react-native-skia-sprite-animator/commit/ab625db)).
+- Preserve selection when pasting and keep cursor aligned when sequences grow ([`f06a23c`](https://github.com/batako/react-native-skia-sprite-animator/commit/f06a23c), [`5b35bc1`](https://github.com/batako/react-native-skia-sprite-animator/commit/5b35bc1)).
+- Resolved dependency audit warnings (`npm audit fix`) ([`00429f3`](https://github.com/batako/react-native-skia-sprite-animator/commit/00429f3), [`b535e46`](https://github.com/batako/react-native-skia-sprite-animator/commit/b535e46)).
 
 <!-- Section: Refactors -->
 
 ## 🔧 Refactors
 
-- Consolidated overlay styling and dropped React Native `Modal` dependencies from internal panels to mirror Animation Studio surfaces ([`28dfde6`](https://github.com/batako/react-native-skia-sprite-animator/commit/28dfde6), [`94560c5`](https://github.com/batako/react-native-skia-sprite-animator/commit/94560c5)).
-- Documented the keyboard-avoidance opt-in in README/README.ja and kept sample usage explicit ([`9823eb8`](https://github.com/batako/react-native-skia-sprite-animator/commit/9823eb8)).
+- Cleaned up timeline autoscroll implementation and lint dependencies ([`22e3b10`](https://github.com/batako/react-native-skia-sprite-animator/commit/22e3b10)).
 
 <!-- Section: Full Changelog -->
 
 ## 📜 Full Changelog
 
-- https://github.com/batako/react-native-skia-sprite-animator/compare/v0.4.0...v0.5.0
+- https://github.com/batako/react-native-skia-sprite-animator/compare/v0.5.0...v0.6.0

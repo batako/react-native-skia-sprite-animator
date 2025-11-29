@@ -7,28 +7,25 @@
 
 ## 🌟 ハイライト
 
-- `AnimationStudio` のキーボード回避をオプトイン化し、ホスト側で必要なときだけ有効化できるようにしました（サンプルアプリは opt-in）（[`9823eb8`](https://github.com/batako/react-native-skia-sprite-animator/commit/9823eb8)）。
-- ストレージ／メタデータ／ファイルブラウザのモーダル配色とオーバーレイをライト/ダークで統一し、キーボード表示でも全画面が崩れないよう安定化しました（[`94560c5`](https://github.com/batako/react-native-skia-sprite-animator/commit/94560c5), [`28dfde6`](https://github.com/batako/react-native-skia-sprite-animator/commit/28dfde6)）。
-- スタンドアロン編集画面のヘッダー整列と余白を調整し、タブレット表示の視認性を改善しました（[`d4fc909`](https://github.com/batako/react-native-skia-sprite-animator/commit/d4fc909), [`288b53a`](https://github.com/batako/react-native-skia-sprite-animator/commit/288b53a)）。
+- `AnimationStudio` から共有スプライトシート `image` props を削除し、各フレームが `imageUri` を持つ前提に簡素化。ビルド時に差分が分かる破壊的変更です（[`90b05d7`](https://github.com/batako/react-native-skia-sprite-animator/commit/90b05d7)）。
+- タイムライン貼り付け後もカーソル/選択を維持し、新規フレームへ自動スクロールして視界に入るよう改善（[`f06a23c`](https://github.com/batako/react-native-skia-sprite-animator/commit/f06a23c), [`5b35bc1`](https://github.com/batako/react-native-skia-sprite-animator/commit/5b35bc1), [`36c0d41`](https://github.com/batako/react-native-skia-sprite-animator/commit/36c0d41)）。
+- spriteStorage の一覧を新しい順に並べ替え、直近の作業を見つけやすく変更（[`32513cb`](https://github.com/batako/react-native-skia-sprite-animator/commit/32513cb)）。
 
 ## ✨ 機能追加
 
-- `AnimationStudio` に `enableKeyboardAvoidance` を追加（デフォルト false）。FPS/倍率/リネーム入力の自動スクロール・回避を必要な場合だけ有効化可能に（[`9823eb8`](https://github.com/batako/react-native-skia-sprite-animator/commit/9823eb8)）。
-- 横向きフルキーボード環境でのフォーム操作を改善し、入力欄が確実に見えるようスクロールとキーボード回避を組み合わせ（[`0e3f4f4`](https://github.com/batako/react-native-skia-sprite-animator/commit/0e3f4f4), [`97a8fc1`](https://github.com/batako/react-native-skia-sprite-animator/commit/97a8fc1)）。
-- ファイルブラウザのリストをフラットなスクロール表示に刷新し、VirtualizedList のネスト警告を解消（[`28dfde6`](https://github.com/batako/react-native-skia-sprite-animator/commit/28dfde6), [`21f6832`](https://github.com/batako/react-native-skia-sprite-animator/commit/21f6832)）。
+- 各フレームの `imageUri` 前提で `AnimationStudio` を簡潔に利用可能に（共有シート props を削除） ([`90b05d7`](https://github.com/batako/react-native-skia-sprite-animator/commit/90b05d7))。
+- タイムラインで貼り付けたフレームへ自動スクロールし、視界内に保持する挙動を追加（[`36c0d41`](https://github.com/batako/react-native-skia-sprite-animator/commit/36c0d41)）。
+- spriteStorage の一覧を作成日時の新しい順にソート（[`32513cb`](https://github.com/batako/react-native-skia-sprite-animator/commit/32513cb)）。
 
 ## 🐞 バグ修正
 
-- ストレージ/ファイルブラウザ/メタデータのモーダルがキーボード表示で縮む・閉じる問題を修正し、オーバーレイ境界を安定化（[`94560c5`](https://github.com/batako/react-native-skia-sprite-animator/commit/94560c5)）。
-- ファイルブラウザで VirtualizedList のネスト警告を除去（[`28dfde6`](https://github.com/batako/react-native-skia-sprite-animator/commit/28dfde6), [`21f6832`](https://github.com/batako/react-native-skia-sprite-animator/commit/21f6832)）。
-- メタデータモーダルのラベル/ボタン/テキスト色をほかのモーダルセクションと揃え、ライト/ダーク両方で統一（[`d601726`](https://github.com/batako/react-native-skia-sprite-animator/commit/d601726), [`e4794af`](https://github.com/batako/react-native-skia-sprite-animator/commit/e4794af), [`ab625db`](https://github.com/batako/react-native-skia-sprite-animator/commit/ab625db)）。
-- スタンドアロン画面のヘッダーアイコン位置や余白のずれを修正（[`d4fc909`](https://github.com/batako/react-native-skia-sprite-animator/commit/d4fc909), [`288b53a`](https://github.com/batako/react-native-skia-sprite-animator/commit/288b53a)）。
+- 貼り付け後に選択が先頭へ戻る問題を修正し、シーケンス伸長時にもカーソルを維持（[`f06a23c`](https://github.com/batako/react-native-skia-sprite-animator/commit/f06a23c), [`5b35bc1`](https://github.com/batako/react-native-skia-sprite-animator/commit/5b35bc1)）。
+- 依存パッケージの監査警告を解消 (`npm audit fix`)（[`00429f3`](https://github.com/batako/react-native-skia-sprite-animator/commit/00429f3), [`b535e46`](https://github.com/batako/react-native-skia-sprite-animator/commit/b535e46)）。
 
 ## 🔧 リファクタ
 
-- モーダルオーバーレイの共通スタイルを整理し、React Native `Modal` 依存を外して Animation Studio と揃った軽量な重ね合わせに統一（[`28dfde6`](https://github.com/batako/react-native-skia-sprite-animator/commit/28dfde6), [`94560c5`](https://github.com/batako/react-native-skia-sprite-animator/commit/94560c5)）。
-- README/README.ja に `enableKeyboardAvoidance` の説明を追加し、サンプルのみ opt-in で使う方針を明記（[`9823eb8`](https://github.com/batako/react-native-skia-sprite-animator/commit/9823eb8)）。
+- タイムラインの自動スクロール実装に伴い、依存解決と lint 対応を整理（[`22e3b10`](https://github.com/batako/react-native-skia-sprite-animator/commit/22e3b10)）。
 
 ## 📜 変更履歴全文
 
-- https://github.com/batako/react-native-skia-sprite-animator/compare/v0.4.0...v0.5.0
+- https://github.com/batako/react-native-skia-sprite-animator/compare/v0.5.0...v0.6.0
