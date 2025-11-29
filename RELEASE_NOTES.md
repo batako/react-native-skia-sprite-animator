@@ -9,28 +9,25 @@
 
 ## 🌟 Highlights
 
-- `AnimationStudio` can now auto-create `editor`/`integration` when omitted, making single-screen embeds simpler (breaking change removed earlier `image` prop dependency) ([`baca973`](https://github.com/batako/react-native-skia-sprite-animator/commit/baca973)).
+- `AnimationStudio` can now auto-create `editor`/`integration` when omitted, simplifying single-screen embeds (no API required if you don't need to share state) ([`baca973b`](https://github.com/batako/react-native-skia-sprite-animator/commit/baca973b8a0a0d06dc70216933b93c7bf548cf6d)).
 
 <!-- Section: Features -->
 
 ## ✨ Features
 
-- Simpler `AnimationStudio` usage with per-frame `imageUri` and optional editor/integration injection ([`baca973`](https://github.com/batako/react-native-skia-sprite-animator/commit/baca973)).
-- Auto-scroll timeline to the pasted frame to keep it visible ([`36c0d41`](https://github.com/batako/react-native-skia-sprite-animator/commit/36c0d41)).
-- Sort spriteStorage list by most-recent first ([`32513cb`](https://github.com/batako/react-native-skia-sprite-animator/commit/32513cb)).
+- Optional `editor`/`integration` injection for `AnimationStudio`; internal defaults are created when omitted ([`baca973b`](https://github.com/batako/react-native-skia-sprite-animator/commit/baca973b8a0a0d06dc70216933b93c7bf548cf6d)).
 
 <!-- Section: Bug Fixes -->
 
 ## 🐞 Bug Fixes
 
-- Preserve selection when pasting and keep cursor aligned when sequences grow ([`5b35bc1`](https://github.com/batako/react-native-skia-sprite-animator/commit/5b35bc1), [`36c0d41`](https://github.com/batako/react-native-skia-sprite-animator/commit/36c0d41)).
-- Resolved dependency audit warnings (`npm audit fix`) ([`00429f3`](https://github.com/batako/react-native-skia-sprite-animator/commit/00429f3), [`b535e46`](https://github.com/batako/react-native-skia-sprite-animator/commit/b535e46)).
+- _None._
 
 <!-- Section: Refactors -->
 
 ## 🔧 Refactors
 
-- Cleaned up timeline autoscroll implementation and lint dependencies ([`22e3b10`](https://github.com/batako/react-native-skia-sprite-animator/commit/22e3b10)).
+- _None._
 
 <!-- Section: Full Changelog -->
 
