@@ -24,7 +24,6 @@ import {
   SPRITE_ANIMATOR_VERSION,
 } from 'react-native-skia-sprite-animator';
 import { AnimationStudio } from '../components/AnimationStudio';
-import { useEditorIntegration } from '../hooks/useEditorIntegration';
 import { LegalModal } from '../components/LegalModal';
 import { IconButton } from '../components/IconButton';
 
@@ -136,7 +135,6 @@ export const EditorScreen = () => {
     trackSelectionInHistory: true,
     initialState: __DEV__ ? SAMPLE_INITIAL_STATE : undefined,
   });
-  const integration = useEditorIntegration({ editor });
   const strings = React.useMemo(() => getEditorStrings(), []);
   const legalStrings = strings.editorScreen;
   const colorScheme = useColorScheme();
@@ -457,12 +455,7 @@ export const EditorScreen = () => {
               />
             </View>
             <Text style={styles.subtitle}>{strings.editorScreen.subtitle}</Text>
-            <AnimationStudio
-              editor={editor}
-              integration={integration}
-              enableKeyboardAvoidance
-              scrollParentRef={scrollRef}
-            />
+            <AnimationStudio editor={editor} enableKeyboardAvoidance scrollParentRef={scrollRef} />
           </View>
         </ScrollView>
       </KeyboardAvoidingView>

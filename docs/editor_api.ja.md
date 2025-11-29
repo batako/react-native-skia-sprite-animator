@@ -188,7 +188,7 @@ const integration = useEditorIntegration({ editor });
 
 ## AnimationStudio コンポーネント
 
-`AnimationStudio` は、フレーム一覧・メタデータ編集・Sprite JSON import/export・spriteStorage モーダル・タイムライン・プレビューを 1 つにまとめた完成済み UI です。`useSpriteEditor` と `useEditorIntegration` の戻り値を渡すだけで使え、各フレームが `imageUri` を持つ前提でプレビューされます。
+`AnimationStudio` は、フレーム一覧・メタデータ編集・Sprite JSON import/export・spriteStorage モーダル・タイムライン・プレビューを 1 つにまとめた完成済み UI です。各フレームが `imageUri` を持つ前提でプレビューされます。`useSpriteEditor` / `useEditorIntegration` を外から渡してもよし、省略して内部で自動生成してもよし、の両対応です。
 
 ```tsx
 import {
@@ -200,6 +200,13 @@ import {
 const editor = useSpriteEditor();
 const integration = useEditorIntegration({ editor });
 
+// もっとも簡単: 省略して内部生成に任せる
+<AnimationStudio />;
+
+// editor だけ指定（integration は内部で自動生成）
+<AnimationStudio editor={editor} />;
+
+// editor / integration をどちらも外部で管理したい場合
 <AnimationStudio editor={editor} integration={integration} />;
 
 // プレビューやタイムラインには各フレームの imageUri が必要です

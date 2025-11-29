@@ -30,7 +30,7 @@ import {
 import { useMetadataManager } from '../hooks/useMetadataManager';
 import { useTimelineEditor } from '../hooks/useTimelineEditor';
 import type { SpriteAnimationMeta, SpriteAnimationsMeta } from '../../spriteTypes';
-import type { SpriteEditorApi } from '../hooks/useSpriteEditor';
+import { useSpriteEditor, type SpriteEditorApi } from '../hooks/useSpriteEditor';
 import type { SpriteEditorFrame } from '../types';
 import { MaterialIcons } from '@expo/vector-icons';
 import { IconButton } from './IconButton';
@@ -42,7 +42,7 @@ import {
   type FrameGridImageDescriptor,
 } from './FrameGridSelector';
 import { SelectableTextInput } from './SelectableTextInput';
-import type { EditorIntegration } from '../hooks/useEditorIntegration';
+import { useEditorIntegration, type EditorIntegration } from '../hooks/useEditorIntegration';
 import { FileBrowserModal } from './FileBrowserModal';
 import { StoragePanel } from './StoragePanel';
 import {
@@ -72,9 +72,9 @@ export interface SpriteStorageController {
  */
 export interface AnimationStudioProps {
   /** Sprite editor instance that stores the canvas state. */
-  editor: SpriteEditorApi;
+  editor?: SpriteEditorApi;
   /** Integration between the editor and preview runtime. */
-  integration: EditorIntegration;
+  integration?: EditorIntegration;
   /** Optional storage hooks to override persistence. */
   storageController?: SpriteStorageController;
   /** Meta keys that should be locked from editing/removal. */
@@ -223,13 +223,22 @@ const cleanupAnimationMetaEntry = (
  * High-level Animation Studio that wires editor, storage, metadata, and timeline UIs together.
  */
 export const AnimationStudio = ({
-  editor,
-  integration,
+  editor: editorProp,
+  integration: integrationProp,
   storageController,
   protectedMetaKeys = DEFAULT_PROTECTED_META_KEYS,
   enableKeyboardAvoidance = false,
   scrollParentRef,
 }: AnimationStudioProps) => {
+  const fallbackEditor = useSpriteEditor();
+  const editor = editorProp ?? fallbackEditor;
+  const fallbackIntegration = useEditorIntegration({ editor });
+  const integration = integrationProp ?? fallbackIntegration;
+  if (integrationProp && !editorProp) {
+    throw new Error(
+      'AnimationStudio: integration was provided without editor. Provide both, or just editor, or neither.',
+    );
+  }
   const strings = useMemo(() => getEditorStrings(), []);
   const colorScheme = useColorScheme();
   const isDarkMode = colorScheme !== 'light';

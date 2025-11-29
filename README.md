@@ -101,7 +101,7 @@ Editor primitives live under `src/editor/` so you can build custom sprite toolin
 - `useTimelineEditor`: Keeps track of the selected timeline index, clipboard payloads, and layout measurements so custom Timeline/Playback toolbars can stay in sync with your preview runtime.
 - `useMetadataManager`: Normalizes primitive meta entries into `{ key, value }` rows with helpers for adding, removing, and persisting updates via `editor.updateMeta`.
 - `useSpriteStorage`: Wraps `spriteStorage` helpers with UI-friendly state (`status`, `isBusy`, list of `SpriteSummary` items) and supports injecting custom storage controllers.
-- `AnimationStudio`: Turnkey editor screen that composes every hook above (frames list, metadata editor, sprite JSON import/export, sprite storage, timeline panel, preview player). Provide your own `useSpriteEditor` instance, integration hook, and base image to embed it anywhere.
+- `AnimationStudio`: Turnkey editor screen that composes every hook above (frames list, metadata editor, sprite JSON import/export, sprite storage, timeline panel, preview player). Provide your own `useSpriteEditor` / `useEditorIntegration` or omit both and let the component create them; each frame should carry its own `imageUri`.
 - `SpriteEditUtils`: Geometry helpers (`snapToGrid`, `normalizeRect`, `pointInFrame`, `mergeFrames`) for snap-lines, hit-tests, and bounding boxes.
 - `DefaultSpriteTemplate`: Serialize editor state to the same JSON shape expected by `spriteStorage`.
 

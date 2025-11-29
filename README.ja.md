@@ -71,7 +71,7 @@ export function HeroPreview() {
 - `useTimelineEditor`: タイムラインの選択、クリップボード、レイアウト計測を管理し、プレビューと同期
 - `useMetadataManager`: `{ key, value }` のメタ行を正規化し、追加/削除/保存を補助
 - `useSpriteStorage`: `spriteStorage` をUI向けの状態（`status`, `isBusy`, `SpriteSummary`一覧）でラップし、カスタムストレージも注入可能
-- `AnimationStudio`: 上記フックをまとめた完成済みエディター画面（フレーム、メタデータ、JSON入出力、ストレージ、タイムライン、プレビュー）
+- `AnimationStudio`: 上記フックをまとめた完成済みエディター画面（フレーム、メタデータ、JSON入出力、ストレージ、タイムライン、プレビュー）。`useSpriteEditor` / `useEditorIntegration` を外から渡してもよし、省略して内部で自動生成させてもよし。各フレームは `imageUri` を持つ前提です。
 - `SpriteEditUtils`: グリッドスナップ、矩形正規化、ヒットテストなどの幾何ヘルパー
 - `DefaultSpriteTemplate`: エディター状態を `spriteStorage` と同じ JSON 形へシリアライズ
 

@@ -194,7 +194,7 @@ The returned object (exported as `EditorIntegration`) includes helpers such as `
 
 ## AnimationStudio component
 
-`AnimationStudio` is a ready-made editor surface that combines every hook above: frame list, metadata editor, sprite JSON import/export, sprite storage modal, timeline panel, and the AnimatedSprite2D preview. Bring your own editor instance and integration hook result; frames are expected to carry their own `imageUri`.
+`AnimationStudio` is a ready-made editor surface that combines every hook above: frame list, metadata editor, sprite JSON import/export, sprite storage modal, timeline panel, and the AnimatedSprite2D preview. Frames are expected to carry their own `imageUri`. You can bring your own editor/integration or let the component create them internally.
 
 ```tsx
 import {
@@ -203,9 +203,15 @@ import {
   useSpriteEditor,
 } from 'react-native-skia-sprite-animator';
 
-const editor = useSpriteEditor();
-const integration = useEditorIntegration({ editor });
+// Simplest: let the component create editor/integration internally
+<AnimationStudio />;
 
+// Custom editor, integration auto-created inside
+const editor = useSpriteEditor();
+<AnimationStudio editor={editor} />;
+
+// Fully managed: supply both editor and integration
+const integration = useEditorIntegration({ editor });
 <AnimationStudio editor={editor} integration={integration} />;
 
 // frames should include imageUri for preview/timeline rendering
