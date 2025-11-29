@@ -113,10 +113,29 @@ export const useSpriteAnimationTicker = (
     onFrameChanged?.({ animationName, frameIndex });
   }, [animationName, frameIndex, onFrameChanged]);
 
+  const lastAnimationRef = useRef<string | null>(animationName);
+  const lastDirectionRef = useRef(direction);
+  const lastSequenceRef = useRef(sequence);
+
   useEffect(() => {
-    setCursor(0);
-    resetAccumulator();
-  }, [animationName, direction, sequence, resetAccumulator, setCursor]);
+    const animationChanged = lastAnimationRef.current !== animationName;
+    const directionChanged = lastDirectionRef.current !== direction;
+    const sequenceChanged = lastSequenceRef.current !== sequence;
+    lastAnimationRef.current = animationName;
+    lastDirectionRef.current = direction;
+    lastSequenceRef.current = sequence;
+
+    if (animationChanged || directionChanged) {
+      setCursor(0);
+      resetAccumulator();
+      return;
+    }
+    if (sequenceChanged) {
+      const clamped = Math.max(0, Math.min(sequence.length - 1, timelineCursor));
+      setCursor(clamped);
+      resetAccumulator();
+    }
+  }, [animationName, direction, sequence, timelineCursor, resetAccumulator, setCursor]);
 
   const play = useCallback(
     (name?: string | null) => {
