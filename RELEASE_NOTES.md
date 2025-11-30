@@ -9,19 +9,19 @@
 
 ## 🌟 Highlights
 
-- `AnimationStudio` can now auto-create `editor`/`integration` when omitted, simplifying single-screen embeds (no API required if you don't need to share state) ([`baca973b`](https://github.com/batako/react-native-skia-sprite-animator/commit/baca973b8a0a0d06dc70216933b93c7bf548cf6d)).
+- _None._
 
 <!-- Section: Features -->
 
 ## ✨ Features
 
-- Optional `editor`/`integration` injection for `AnimationStudio`; internal defaults are created when omitted ([`baca973b`](https://github.com/batako/react-native-skia-sprite-animator/commit/baca973b8a0a0d06dc70216933b93c7bf548cf6d)).
+- _None._
 
 <!-- Section: Bug Fixes -->
 
 ## 🐞 Bug Fixes
 
-- _None._
+- Improved empty preview readability: placeholder text is now white and wording no longer references “AnimatedSprite2D” ([`bcbd14e`](https://github.com/batako/react-native-skia-sprite-animator/commit/bcbd14e9c83b21bd4dd4e4339ad330f0de433187)).
 
 <!-- Section: Refactors -->
 
@@ -33,4 +33,4 @@
 
 ## 📜 Full Changelog
 
-- https://github.com/batako/react-native-skia-sprite-animator/compare/v0.6.0...v0.6.1
+- https://github.com/batako/react-native-skia-sprite-animator/compare/v0.6.1...v0.6.2

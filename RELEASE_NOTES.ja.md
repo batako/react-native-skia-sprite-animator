@@ -7,15 +7,15 @@
 
 ## 🌟 ハイライト
 
-- `AnimationStudio` で `editor` / `integration` を省略した際に内部で自動生成するようにし、単一画面埋め込みを簡素化（[`baca973b`](https://github.com/batako/react-native-skia-sprite-animator/commit/baca973b8a0a0d06dc70216933b93c7bf548cf6d)）。
+- なし
 
 ## ✨ 機能追加
 
-- `AnimationStudio` が `imageUri` 前提で、editor/integration を省略可能に（[`baca973b`](https://github.com/batako/react-native-skia-sprite-animator/commit/baca973b8a0a0d06dc70216933b93c7bf548cf6d)）。
+- なし
 
 ## 🐞 バグ修正
 
-- なし
+- プレビュー空状態のメッセージを読みやすく修正（白文字化・固有名詞を削除）([`bcbd14e`](https://github.com/batako/react-native-skia-sprite-animator/commit/bcbd14e9c83b21bd4dd4e4339ad330f0de433187))。
 
 ## 🔧 リファクタ
 
@@ -23,4 +23,4 @@
 
 ## 📜 変更履歴全文
 
-- https://github.com/batako/react-native-skia-sprite-animator/compare/v0.6.0...v0.6.1
+- https://github.com/batako/react-native-skia-sprite-animator/compare/v0.6.1...v0.6.2
