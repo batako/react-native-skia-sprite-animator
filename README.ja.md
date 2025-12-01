@@ -4,7 +4,7 @@
 
 ## 機能一覧
 
-- **AnimatedSprite2D**: エディター/テンプレートが出力する JSON をそのまま読み込み、オートプレイ、タイムライン上書き、反転描画、命令的ハンドルを提供する軽量ランタイム
+- **AnimatedSprite2D**: エディター/テンプレートが出力する JSON をそのまま読み込み、オートプレイ、タイムライン上書き、反転描画、プレビューごとの `scale`、命令的ハンドルを提供する軽量ランタイム
 - **spriteStorage**: `saveSprite` / `loadSprite` / `listSprites` / `deleteSprite` と保存先設定ヘルパーで JSON+メタデータを永続化
 - **エディター API**: `useSpriteEditor`（フレーム CRUD、選択、クリップボード、Undo/Redo、メタ編集）、`useTimelineEditor` / `useMetadataManager` / `useSpriteStorage` など UI 非依存フック、`DefaultSpriteTemplate`（インポート/エクスポート）、`SpriteEditUtils`（グリッドスナップ、矩形マージ、ヒットテスト）
 - **Expo スタンドアロンエディタ**: `examples/standalone-editor/` に API をまとめたサンプルアプリを同梱

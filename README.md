@@ -4,7 +4,7 @@
 
 ## Feature Overview
 
-- **AnimatedSprite2D** – lightweight runtime that consumes the same JSON as the editor/template helpers. Supports autoplay, timeline overrides, flips, and imperative control through `AnimatedSprite2DHandle`.
+- **AnimatedSprite2D** – lightweight runtime that consumes the same JSON as the editor/template helpers. Supports autoplay, timeline overrides, flips, per-preview `scale`, and imperative control through `AnimatedSprite2DHandle`.
 - **spriteStorage** – `saveSprite`, `loadSprite`, `listSprites`, `deleteSprite`, and storage configuration helpers so sprites plus metadata persist on device using Expo File System.
 - **Editor APIs** – `useSpriteEditor` (frame CRUD, selection, clipboard, undo/redo, metadata updates), editor-agnostic hooks like `useTimelineEditor` / `useMetadataManager` / `useSpriteStorage`, plus `DefaultSpriteTemplate` helpers (import/export) and `SpriteEditUtils` (grid snapping, rect merging, hit-testing).
 - **Standalone Expo editor** – an example app under `examples/standalone-editor/` that combines every API (canvas editing, real-time playback, storage, templates, metadata) to serve as the canonical feature showcase.
