@@ -7,15 +7,15 @@
 
 ## 🌟 ハイライト
 
-- AnimatedSprite2D に `scale` プロップを追加し、スプライトシートを弄らずにキャンバスとスプライト両方を拡大/縮小できるようにしました。
+- AnimatedSprite2D の `scale` が、選択中アニメに基づいてキャンバスとスプライトのサイズを自動で合わせるようになりました（追加の style 指定なしで拡大/縮小可能）。
 
 ## ✨ 機能追加
 
-- AnimatedSprite2D の描画サイズをまとめてスケールできる `scale` オプションを追加。
+- `scale` を指定するだけで幅/高さを自動適用し、手動で style を渡さなくてもスケール後のサイズで描画されます。
 
 ## 🐞 バグ修正
 
-- `scale` 指定時にキャンバスだけでなくスプライト画像の表示サイズも正しく変わるよう修正。
+- サイズ算出時に選択中アニメーションのフレーム列を優先し、無関係なフレームの最大サイズでプレビューが膨らむ問題を防止。
 
 ## 🔧 リファクタ
 
@@ -23,4 +23,4 @@
 
 ## 📜 変更履歴全文
 
-- https://github.com/batako/react-native-skia-sprite-animator/compare/v0.6.2...v0.6.3
+- https://github.com/batako/react-native-skia-sprite-animator/compare/v0.6.3...v0.6.4
