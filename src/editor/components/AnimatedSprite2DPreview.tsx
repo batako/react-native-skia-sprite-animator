@@ -96,6 +96,8 @@ export const AnimatedSprite2DPreview = ({
 
   const baseWidth = sceneBounds.width || 64;
   const baseHeight = sceneBounds.height || 64;
+  const scaledWidth = baseWidth * zoom;
+  const scaledHeight = baseHeight * zoom;
 
   const clampZoom = useCallback((value: number, maxZoom: number) => {
     const rounded = parseFloat(value.toFixed(2));
@@ -127,14 +129,6 @@ export const AnimatedSprite2DPreview = ({
     }
   }, [baseWidth, previewHeight, viewportWidth]);
   const maxWidth = viewportWidth ? Math.max(200, viewportWidth - 16) : null;
-
-  let targetWidth = baseWidth;
-  let targetHeight = baseHeight;
-  if (maxWidth && targetWidth > maxWidth) {
-    const scale = maxWidth / targetWidth;
-    targetWidth = maxWidth;
-    targetHeight = targetHeight * scale;
-  }
 
   const widthLimit = maxWidth ? maxWidth / (baseWidth || 1) : Number.POSITIVE_INFINITY;
   const heightLimit =
@@ -174,6 +168,14 @@ export const AnimatedSprite2DPreview = ({
   const resetZoom = useCallback(() => {
     setZoom(() => clampZoom(1, maxZoomAllowed));
   }, [clampZoom, maxZoomAllowed]);
+
+  let targetWidth = baseWidth;
+  let targetHeight = baseHeight;
+  if (maxWidth && targetWidth > maxWidth) {
+    const clampScale = maxWidth / targetWidth;
+    targetWidth = maxWidth;
+    targetHeight = targetHeight * clampScale;
+  }
 
   const displayWidth = maxWidth ?? targetWidth;
   const displayHeight = previewHeight;
@@ -260,16 +262,16 @@ export const AnimatedSprite2DPreview = ({
                   height: targetHeight,
                   alignItems: 'center',
                   justifyContent: 'center',
-                  transform: [{ scale: zoom }],
                 }}
               >
                 <AnimatedSprite2D
                   frames={resolvedResource}
                   animation={isSelfDriven ? selfAnimationName : animationName}
                   playing={isSelfDriven ? selfPlaying : false}
-                  frame={isSelfDriven ? undefined : integration.frameCursor}
+                  frame={integration.frameCursor ?? undefined}
                   speedScale={integration.speedScale}
                   centered
+                  scale={zoom}
                 />
               </View>
             </View>

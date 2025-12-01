@@ -48,6 +48,7 @@ const setupControllerMock = () => {
     frameImage: null,
     canvasSize: { width: 128, height: 96 },
     drawOrigin: { x: 4, y: 6 },
+    scale: 1,
   };
   mockController.mockReturnValue(controllerState);
   return controllerState;
@@ -88,6 +89,7 @@ describe('AnimatedSprite2D', () => {
         drawOrigin: state.drawOrigin,
         flipH: true,
         flipV: true,
+        scale: state.scale,
         style: { width: 80 },
       }),
       undefined,

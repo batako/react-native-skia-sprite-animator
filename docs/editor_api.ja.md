@@ -182,6 +182,8 @@ const integration = useEditorIntegration({ editor });
 />;
 ```
 
+スプライトを拡大/縮小したいときは `scale` を渡すだけで、キャンバスサイズやオフセットもスケールに追従します。
+
 戻り値（`EditorIntegration` 型）は、再生ハンドラーや選択管理・速度調整・プレビュー用データ (`runtimeData`) などをすべて含みます。
 
 ---

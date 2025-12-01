@@ -188,6 +188,8 @@ return (
 );
 ```
 
+Use the optional `scale` prop whenever you need to zoom the preview without touching your sprite sheet; canvas bounds and offsets will scale along with the frame.
+
 The returned object (exported as `EditorIntegration`) includes helpers such as `playForward`, `playReverse`, `seekFrame`, `setActiveAnimation`, `setSpeedScale`, `onFrameChange`, `onAnimationEnd`, and the `runtimeData` snapshot consumed by the animator/preview components.
 
 ---

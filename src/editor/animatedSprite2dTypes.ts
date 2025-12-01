@@ -69,6 +69,7 @@ export interface AnimatedSprite2DProps {
   playing?: boolean;
   frame?: number | null;
   speedScale?: number;
+  scale?: number;
   centered?: boolean;
   flipH?: boolean;
   flipV?: boolean;

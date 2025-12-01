@@ -21,6 +21,7 @@ export const AnimatedSprite2D = forwardRef<AnimatedSprite2DHandle, AnimatedSprit
       frameImage,
       canvasSize,
       drawOrigin,
+      scale,
     } = controller;
 
     const clampFrameIndex = useCallback(
@@ -81,6 +82,7 @@ export const AnimatedSprite2D = forwardRef<AnimatedSprite2DHandle, AnimatedSprit
         drawOrigin={drawOrigin}
         flipH={props.flipH}
         flipV={props.flipV}
+        scale={scale}
         style={style}
       />
     );

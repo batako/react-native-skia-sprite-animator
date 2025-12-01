@@ -18,6 +18,7 @@ export interface AnimatedSprite2DViewProps {
   drawOrigin: { x: number; y: number };
   flipH?: boolean;
   flipV?: boolean;
+  scale?: number;
   style?: StyleProp<ViewStyle>;
 }
 
@@ -29,8 +30,11 @@ export const AnimatedSprite2DView = memo(
     drawOrigin,
     flipH = false,
     flipV = false,
+    scale = 1,
     style,
   }: AnimatedSprite2DViewProps) => {
+    const resolvedScale =
+      typeof scale === 'number' && Number.isFinite(scale) && scale > 0 ? scale : 1;
     const transforms = useMemo<Transforms3d | undefined>(() => {
       if (!flipH && !flipV) {
         return undefined;
@@ -49,8 +53,13 @@ export const AnimatedSprite2DView = memo(
       if (!frame) {
         return null;
       }
-      return Skia.XYWHRect(drawOrigin.x, drawOrigin.y, frame.width, frame.height);
-    }, [drawOrigin, frame]);
+      return Skia.XYWHRect(
+        drawOrigin.x,
+        drawOrigin.y,
+        frame.width * resolvedScale,
+        frame.height * resolvedScale,
+      );
+    }, [drawOrigin, frame, resolvedScale]);
 
     const translatedImage = useMemo(() => {
       if (!frame || !frameImage) {
@@ -61,8 +70,8 @@ export const AnimatedSprite2DView = memo(
         return {
           x: drawOrigin.x,
           y: drawOrigin.y,
-          width: frame.width,
-          height: frame.height,
+          width: frame.width * resolvedScale,
+          height: frame.height * resolvedScale,
         };
       }
       const widthGetter = (frameImage as SkImage & { width?: () => number }).width;
@@ -74,12 +83,12 @@ export const AnimatedSprite2DView = memo(
           ? heightGetter.call(frameImage)
           : frame.height + subset.y;
       return {
-        x: drawOrigin.x - subset.x,
-        y: drawOrigin.y - subset.y,
-        width,
-        height,
+        x: drawOrigin.x - subset.x * resolvedScale,
+        y: drawOrigin.y - subset.y * resolvedScale,
+        width: width * resolvedScale,
+        height: height * resolvedScale,
       };
-    }, [drawOrigin, frame, frameImage]);
+    }, [drawOrigin, frame, frameImage, resolvedScale]);
 
     return (
       <Canvas style={[{ width: canvasSize.width, height: canvasSize.height }, style]}>
@@ -91,7 +100,7 @@ export const AnimatedSprite2DView = memo(
               y={translatedImage.y}
               width={translatedImage.width}
               height={translatedImage.height}
-              fit="none"
+              fit="contain"
             />
           </Group>
         ) : null}
