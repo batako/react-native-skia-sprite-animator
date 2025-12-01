@@ -49,7 +49,7 @@ export function HeroPreview() {
 
 `AnimatedSprite2D` consumes the `SpriteFramesResource` shape produced by `cleanSpriteData`, `buildAnimatedSpriteFrames`, and the Animation Studio export. It exposes an imperative handle (`play`, `pause`, `seekFrame`, etc.) while avoiding extra Skia plumbing. Use `scale` to grow or shrink the rendered sprite; canvas bounds, centering, and offsets scale together, and width/height are auto-applied so you don’t need to pass them via `style`.
 
-Pass `scale` to grow or shrink the rendered sprite—canvas bounds, centering, and offsets are scaled together.
+Pass `scale` to grow or shrink the rendered sprite—canvas bounds, centering, and offsets are scaled together. The renderer sizes itself from the active animation sequence first; if no sequence is available it falls back to all frames, so `scale` follows the selection instead of the sheet’s largest frame.
 
 ### Frame events
 
