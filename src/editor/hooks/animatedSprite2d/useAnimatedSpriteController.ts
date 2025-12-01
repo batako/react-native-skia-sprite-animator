@@ -48,19 +48,13 @@ export const useAnimatedSpriteController = (
     const baseWidth =
       centered && bounds.width > 0
         ? bounds.width
-        : animationState.currentFrame?.width ?? bounds.width;
+        : (animationState.currentFrame?.width ?? bounds.width);
     const baseHeight =
       centered && bounds.height > 0
         ? bounds.height
-        : animationState.currentFrame?.height ?? bounds.height;
+        : (animationState.currentFrame?.height ?? bounds.height);
     return { width: baseWidth * scale, height: baseHeight * scale };
-  }, [
-    animationState.currentFrame,
-    bounds.height,
-    bounds.width,
-    centered,
-    scale,
-  ]);
+  }, [animationState.currentFrame, bounds.height, bounds.width, centered, scale]);
   const frameImage = useFrameCache(animationState.currentFrame);
   const drawOrigin = useMemo(
     () => computeDrawOrigin(animationState.currentFrame, canvasSize, centered, offset, scale),

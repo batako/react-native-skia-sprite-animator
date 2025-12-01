@@ -96,8 +96,6 @@ export const AnimatedSprite2DPreview = ({
 
   const baseWidth = sceneBounds.width || 64;
   const baseHeight = sceneBounds.height || 64;
-  const scaledWidth = baseWidth * zoom;
-  const scaledHeight = baseHeight * zoom;
 
   const clampZoom = useCallback((value: number, maxZoom: number) => {
     const rounded = parseFloat(value.toFixed(2));
