@@ -48,6 +48,8 @@ export function HeroPreview() {
 
 `AnimatedSprite2D` は `cleanSpriteData` や `buildAnimatedSpriteFrames`、Animation Studio のエクスポートが生成する `SpriteFramesResource` をそのまま受け取ります。命令的ハンドル（`play` / `pause` / `seekFrame` など）も提供し、追加の Skia 設定なしで扱えます。
 
+描画サイズを変えたい場合は `scale` を渡すだけで、キャンバスの大きさや中心揃え、オフセットもまとめてスケールされます。
+
 ### フレームイベント
 
 プレビューコンポーネントの `onFrameChange` / `onAnimationEnd` で進行をフックできます。ペイロードは `{ animationName, frameIndex, frameCursor }`。

@@ -49,6 +49,8 @@ export function HeroPreview() {
 
 `AnimatedSprite2D` consumes the `SpriteFramesResource` shape produced by `cleanSpriteData`, `buildAnimatedSpriteFrames`, and the Animation Studio export. It exposes an imperative handle (`play`, `pause`, `seekFrame`, etc.) while avoiding extra Skia plumbing.
 
+Pass `scale` to grow or shrink the rendered sprite—canvas bounds, centering, and offsets are scaled together.
+
 ### Frame events
 
 Hook into animation progress by wiring `onFrameChange` and `onAnimationEnd` on your preview component; the payload shape is `{ animationName, frameIndex, frameCursor }`.

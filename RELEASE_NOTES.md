@@ -9,19 +9,19 @@
 
 ## 🌟 Highlights
 
-- _None._
+- Added a `scale` prop to AnimatedSprite2D so previews (canvas and sprite) can be resized without editing sprite sheets.
 
 <!-- Section: Features -->
 
 ## ✨ Features
 
-- _None._
+- AnimatedSprite2D now accepts `scale` to uniformly grow or shrink sprites while keeping canvas sizing in sync.
 
 <!-- Section: Bug Fixes -->
 
 ## 🐞 Bug Fixes
 
-- Improved empty preview readability: placeholder text is now white and wording no longer references “AnimatedSprite2D” ([`bcbd14e`](https://github.com/batako/react-native-skia-sprite-animator/commit/bcbd14e9c83b21bd4dd4e4339ad330f0de433187)).
+- Sprite scaling now respects the provided `scale` for both canvas bounds and the drawn image (no more fixed-size sprites when zooming).
 
 <!-- Section: Refactors -->
 
@@ -33,4 +33,4 @@
 
 ## 📜 Full Changelog
 
-- https://github.com/batako/react-native-skia-sprite-animator/compare/v0.6.1...v0.6.2
+- https://github.com/batako/react-native-skia-sprite-animator/compare/v0.6.2...v0.6.3
