@@ -40,15 +40,14 @@ export function HeroPreview() {
       animation="idle"
       autoplay="idle"
       speedScale={1}
-      scale={1}
       centered
-      style={{ width: 128, height: 128 }}
+      scale={1}
     />
   );
 }
 ```
 
-`AnimatedSprite2D` consumes the `SpriteFramesResource` shape produced by `cleanSpriteData`, `buildAnimatedSpriteFrames`, and the Animation Studio export. It exposes an imperative handle (`play`, `pause`, `seekFrame`, etc.) while avoiding extra Skia plumbing. Use `scale` to grow or shrink the rendered sprite; canvas bounds, centering, and offsets scale together.
+`AnimatedSprite2D` consumes the `SpriteFramesResource` shape produced by `cleanSpriteData`, `buildAnimatedSpriteFrames`, and the Animation Studio export. It exposes an imperative handle (`play`, `pause`, `seekFrame`, etc.) while avoiding extra Skia plumbing. Use `scale` to grow or shrink the rendered sprite; canvas bounds, centering, and offsets scale together, and width/height are auto-applied so you don’t need to pass them via `style`.
 
 Pass `scale` to grow or shrink the rendered sprite—canvas bounds, centering, and offsets are scaled together.
 

@@ -91,7 +91,7 @@ export const AnimatedSprite2DView = memo(
     }, [drawOrigin, frame, frameImage, resolvedScale]);
 
     return (
-      <Canvas style={[{ width: canvasSize.width, height: canvasSize.height }, style]}>
+      <Canvas style={[style, { width: canvasSize.width, height: canvasSize.height }]}>
         {frame && frameImage && translatedImage && clipRect ? (
           <Group transform={transforms} clip={clipRect}>
             <SkiaImage
