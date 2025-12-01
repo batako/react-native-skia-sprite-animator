@@ -43,7 +43,13 @@ export const useAnimatedSpriteController = (
   const scale =
     typeof scaleProp === 'number' && Number.isFinite(scaleProp) && scaleProp > 0 ? scaleProp : 1;
   const animationState = useAnimationState(options);
-  const bounds = useSceneBounds(frames.frames);
+  const sequenceFrames = useMemo(() => {
+    const mapped = animationState.sequence
+      .map((index) => frames.frames[index])
+      .filter((frame): frame is AnimatedSpriteFrame => Boolean(frame));
+    return mapped.length ? mapped : frames.frames;
+  }, [animationState.sequence, frames.frames]);
+  const bounds = useSceneBounds(sequenceFrames);
   const canvasSize = useMemo(() => {
     const baseWidth =
       centered && bounds.width > 0
