@@ -39,6 +39,7 @@ export function HeroPreview() {
       animation="idle"
       autoplay="idle"
       speedScale={1}
+      scale={1}
       centered
       style={{ width: 128, height: 128 }}
     />
@@ -46,7 +47,7 @@ export function HeroPreview() {
 }
 ```
 
-`AnimatedSprite2D` は `cleanSpriteData` や `buildAnimatedSpriteFrames`、Animation Studio のエクスポートが生成する `SpriteFramesResource` をそのまま受け取ります。命令的ハンドル（`play` / `pause` / `seekFrame` など）も提供し、追加の Skia 設定なしで扱えます。
+`AnimatedSprite2D` は `cleanSpriteData` や `buildAnimatedSpriteFrames`、Animation Studio のエクスポートが生成する `SpriteFramesResource` をそのまま受け取ります。命令的ハンドル（`play` / `pause` / `seekFrame` など）も提供し、追加の Skia 設定なしで扱えます。描画を拡大/縮小したい場合は `scale` を指定すれば、キャンバスサイズや中心揃え・オフセットもまとめてスケールされます。
 
 描画サイズを変えたい場合は `scale` を渡すだけで、キャンバスの大きさや中心揃え、オフセットもまとめてスケールされます。
 
