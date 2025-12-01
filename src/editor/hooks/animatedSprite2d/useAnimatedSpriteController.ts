@@ -20,8 +20,8 @@ const computeDrawOrigin = (
   currentFrame: AnimatedSpriteFrame | null,
   canvasSize: { width: number; height: number },
   centered: boolean,
-  offset?: { x: number; y: number } | null,
   scale: number,
+  offset?: { x: number; y: number } | null,
 ) => {
   if (!currentFrame) {
     return { x: 0, y: 0 };
@@ -57,7 +57,7 @@ export const useAnimatedSpriteController = (
   }, [animationState.currentFrame, bounds.height, bounds.width, centered, scale]);
   const frameImage = useFrameCache(animationState.currentFrame);
   const drawOrigin = useMemo(
-    () => computeDrawOrigin(animationState.currentFrame, canvasSize, centered, offset, scale),
+    () => computeDrawOrigin(animationState.currentFrame, canvasSize, centered, scale, offset),
     [animationState.currentFrame, canvasSize, centered, offset, scale],
   );
 
