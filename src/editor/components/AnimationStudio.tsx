@@ -2244,6 +2244,7 @@ const AnimationFpsField = ({
 
 const baseStyles = {
   container: {
+    width: '100%',
     marginTop: 8,
     marginBottom: 8,
     paddingHorizontal: 16,
