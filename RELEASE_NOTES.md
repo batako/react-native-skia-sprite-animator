@@ -9,28 +9,29 @@
 
 ## 🌟 Highlights
 
-- AnimatedSprite2D scale now auto-sizes the canvas and sprite using the active animation, so previews resize without extra style props.
+- AnimationStudio preview now stretches to the full available width when repositioning the layout, keeping the canvas aligned with surrounding controls.
+- Standalone editor example updated to the latest Expo SDK 54 patch set to avoid compatibility warnings.
 
 <!-- Section: Features -->
 
 ## ✨ Features
 
-- `scale` no longer requires manual width/height styling—AnimatedSprite2D applies scaled sizing automatically.
+- _None._
 
 <!-- Section: Bug Fixes -->
 
 ## 🐞 Bug Fixes
 
-- Canvas bounds are computed from the selected animation sequence when available, preventing oversized previews driven by unrelated frames.
+- Fixed AnimationStudio container sizing so the preview no longer stays narrow after adjusting alignment.
 
 <!-- Section: Refactors -->
 
 ## 🔧 Refactors
 
-- _None._
+- Updated standalone editor Expo dependencies to SDK 54 patch versions for better tooling compatibility.
 
 <!-- Section: Full Changelog -->
 
 ## 📜 Full Changelog
 
-- https://github.com/batako/react-native-skia-sprite-animator/compare/v0.6.3...v0.6.4
+- https://github.com/batako/react-native-skia-sprite-animator/compare/v0.6.4...v0.6.5

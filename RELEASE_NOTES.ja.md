@@ -7,20 +7,21 @@
 
 ## 🌟 ハイライト
 
-- AnimatedSprite2D の `scale` が、選択中アニメに基づいてキャンバスとスプライトのサイズを自動で合わせるようになりました（追加の style 指定なしで拡大/縮小可能）。
+- AnimationStudio のプレビューがレイアウト調整後も利用可能な横幅いっぱいまで広がり、周辺 UI と整列するようになりました。
+- standalone editor の依存パッケージを Expo SDK 54 の最新パッチに更新し、互換性警告を解消しました。
 
 ## ✨ 機能追加
 
-- `scale` を指定するだけで幅/高さを自動適用し、手動で style を渡さなくてもスケール後のサイズで描画されます。
+- なし
 
 ## 🐞 バグ修正
 
-- サイズ算出時に選択中アニメーションのフレーム列を優先し、無関係なフレームの最大サイズでプレビューが膨らむ問題を防止。
+- AnimationStudio コンテナの横幅計算を修正し、位置調整後にプレビューが細いままになる不具合を解消。
 
 ## 🔧 リファクタ
 
-- なし
+- standalone editor の Expo 依存関係を SDK 54 のパッチバージョンへ更新。
 
 ## 📜 変更履歴全文
 
-- https://github.com/batako/react-native-skia-sprite-animator/compare/v0.6.3...v0.6.4
+- https://github.com/batako/react-native-skia-sprite-animator/compare/v0.6.4...v0.6.5
